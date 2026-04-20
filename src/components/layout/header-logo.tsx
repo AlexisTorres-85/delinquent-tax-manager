@@ -22,8 +22,8 @@ export function HeaderLogo() {
         <div className="flex items-center justify-center min-w-15">
           <Link to="/" className="">
             <img
-              src={toAbsoluteUrl('/images/dtm-logo.svg')}
-              className="shrink-0 w-24 ml-4"
+              src={toAbsoluteUrl('/images/logo-4.svg')}
+              className="shrink-0 w-22 ml-4"
               alt="image"
             />
           </Link>

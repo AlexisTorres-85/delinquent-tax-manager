@@ -27,7 +27,7 @@ export function SidebarContent() {
 
   return (
 		<ScrollArea className="grow w-full h-[calc(100vh-10rem)] lg:h-[calc(100vh-5.5rem)]">
-			<div className="grow gap-2.5 shrink-0 flex items-center flex-col">
+			<div className="grow gap-2.5 shrink-0 flex items-center flex-col mt-4">
 				{MENU_SIDEBAR_MAIN.map((item, index) => (
 					<Tooltip key={index}>
 						<TooltipTrigger asChild>
@@ -39,7 +39,7 @@ export function SidebarContent() {
 									? { 'data-state': 'open' }
 									: {})}
 								className={cn(
-									'border border-transparent data-[state=open]:border-input shrink-0 rounded-md size-9',
+									'border border-transparent data-[state=open]:border-input shrink-0 text-white rounded-md size-9',
 									'hover:text-primary data-[state=open]:border-input',
 								)}
 							>

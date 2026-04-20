@@ -15,7 +15,7 @@ export function Wrapper() {
         {!isMobile && <Sidebar />}
 
         <div className="flex flex-col grow lg:ps-(--sidebar-width)">
-          <div className="flex flex-grow lg:bg-neutral-100">
+          <div className="flex flex-grow lg:bg-muted">
             {!isMobile && <SidebarMenu />}
 
             <main className="grow lg:ps-[calc(var(--sidebar-menu-width)+10px)]" role="content">
