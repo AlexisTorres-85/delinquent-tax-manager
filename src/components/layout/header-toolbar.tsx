@@ -1,4 +1,4 @@
-import { Mails, Settings, Plus, NotepadText, User, Clock, Shield, Building2, Users, LogOut, Download, ExternalLink, Zap, Target, Search } from "lucide-react";
+import { Mails, Settings, Plus, NotepadText, User, Clock, Shield, Building2, Users, LogOut, Download, ExternalLink, Zap, Target } from "lucide-react";
 import { toAbsoluteUrl } from "@/lib/helpers";
 import { useAuth } from "@/auth";
 import {
@@ -20,21 +20,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Input, InputWrapper } from "@/components/ui/input";
 import { useLayout } from "./context";
 
 export function HeaderToolbar() {
   const { isMobile } = useLayout();
   const { displayName, email, logout } = useAuth();
 
-  const handleInputChange = () => {};
-
   return (
     <nav className="flex items-center gap-2.5">
-      <InputWrapper className="w-full lg:w-55 hidden lg:inline-flex">
-        <Search />
-        <Input type="search" placeholder="Search" onChange={handleInputChange} />
-      </InputWrapper>
       {isMobile ? (
         <Button variant="ghost">
           <Plus />

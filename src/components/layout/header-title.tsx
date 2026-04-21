@@ -1,69 +1,52 @@
 import { Button } from '@/components/ui/button';
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
+	DropdownMenu,
+	DropdownMenuContent,
+	DropdownMenuGroup,
+	DropdownMenuItem,
+	DropdownMenuSeparator,
+	DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import {
-  User,
-  Settings,
-  Building2,
-  ChevronDown,
-  Check,
-  Plus,
-  Crown,
+	User,
+	Settings,
+	ChevronDown,
+	LogOut,
 } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useLayout } from './context';
+import { useAuth } from '@/auth/use-auth';
 
-interface Workspace {
-  id: string;
-  name: string;
-  state: string;
-  isCurrent: boolean;
+function getInitials(name: string): string {
+	const parts = name.trim().split(' ');
+	if (parts.length >= 2) {
+		return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
+	}
+	return name.slice(0, 2).toUpperCase();
 }
-
-const mockWorkspaces: Workspace[] = [
-  {
-    id: '1',
-    name: 'Kenosha County DTM',
-		state: 'bg-emerald-500',
-    isCurrent: true,
-  },
-  {
-    id: '2',
-    name: 'Administration',
-		state: 'bg-indigo-500',
-    isCurrent: false,
-  },
-  {
-    id: '3',
-    name: 'Operations',
-		state: 'bg-pink-500',
-    isCurrent: false,
-  },
-];
 
 export function HeaderTitle() {
 	const { isMobile } = useLayout();
+	const { displayName } = useAuth();
+	const initials = getInitials(displayName || 'Guest User');
 
 	return (
-		<div className="group flex justify-between items-center gap-2.5 shrink-0 ml-4">
+		<div className="group flex justify-between items-center gap-2.5 shrink-0">
 			<div className="flex items-center gap-2">
 				<DropdownMenu>
 					<DropdownMenuTrigger asChild>
-						<Button variant="ghost" className="flex items-center justify-between gap-1 px-1.5 hover:bg-accent -ms-0.5">
-							{!isMobile && <span className="text-foreground text-sm font-medium">Kenosha County DTM</span>}
-							<ChevronDown className="size-4 text-muted-foreground"/>
+						<Button variant="none" className="flex items-center justify-between gap-1 px-1.5 -ms-0.5">
+							{!isMobile && (
+								<span className="text-white text-sm font-medium px-4 py-2 rounded-md bg-white/20 hover:bg-white/40 transition-colors backdrop-blur flex items-center gap-2">
+									<span className="flex items-center justify-center size-7 rounded-full bg-[#004C70] text-white text-xs font-semibold">
+										{initials}
+									</span>
+									{displayName || 'Guest User'}
+									<ChevronDown className="size-4 text-white" />
+								</span>
+							)}
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="w-64" side="bottom" align="start" sideOffset={7} alignOffset={0}>
-						{/* Account Section */}
-						<DropdownMenuLabel>Team</DropdownMenuLabel>
+					<DropdownMenuContent className="w-50 bg-white/95" side="bottom" align="start" sideOffset={10} alignOffset={6}>
 						<DropdownMenuGroup>
 							<DropdownMenuItem>
 								<User className="size-4" />
@@ -73,39 +56,12 @@ export function HeaderTitle() {
 								<Settings className="size-4" />
 								<span>Settings</span>
 							</DropdownMenuItem>
-							<DropdownMenuItem>
-								<Crown className="size-4" />
-								<span>Upgrade</span>
-							</DropdownMenuItem>
-						</DropdownMenuGroup>
-
-						{/* Workspaces Section */}
-						<DropdownMenuSeparator />
-						<DropdownMenuLabel>Workspaces</DropdownMenuLabel>
-						<DropdownMenuGroup>
-							{mockWorkspaces.map((workspace) => (
-								<DropdownMenuItem key={workspace.id} className="flex items-center justify-between">
-									<div className="flex items-center gap-2">
-										<span className={cn("rounded-md text-white text-xs uppercase shrink-0 size-5 flex items-center justify-center", workspace.state)}>{workspace.name[0]}</span>
-										<span className="truncate">{workspace.name}</span>
-									</div>
-									<div className="flex items-center gap-2">
-										{workspace.isCurrent && (
-											<Check className="size-4 text-primary" />
-										)}
-									</div>
-								</DropdownMenuItem>
-							))}
 							<DropdownMenuSeparator />
 							<DropdownMenuItem>
-								<Plus className="size-4" />
-								<span>New Workspace</span>
+								<LogOut className="size-4" />
+								<span>Logout</span>
 							</DropdownMenuItem>
 						</DropdownMenuGroup>
-						<DropdownMenuItem>
-							<Building2 className="size-4" />
-							<span>Workspace Settings</span>
-						</DropdownMenuItem>
 					</DropdownMenuContent>
 				</DropdownMenu>
 			</div>

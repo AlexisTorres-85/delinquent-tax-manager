@@ -1,4 +1,5 @@
 import { Toolbar, ToolbarHeading, ToolbarPageTitle, ToolbarDescription } from '@/components/layout/toolbar';
+import { ParcelsTable } from './parcels-table';
 
 export function ParcelsSearchPage() {
   return (
@@ -9,6 +10,10 @@ export function ParcelsSearchPage() {
           <ToolbarDescription>Search and look up parcels by owner, address, or parcel ID</ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
+
+      <div className="mt-4">
+        <ParcelsTable />
+      </div>
     </div>
   );
 }

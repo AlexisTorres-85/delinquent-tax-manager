@@ -27,7 +27,7 @@ export function SidebarContent() {
 
   return (
 		<ScrollArea className="grow w-full h-[calc(100vh-10rem)] lg:h-[calc(100vh-5.5rem)]">
-			<div className="grow gap-2.5 shrink-0 flex items-center flex-col mt-4">
+			<div className="grow gap-2.5 shrink-0 flex items-center flex-col mt-2">
 				{MENU_SIDEBAR_MAIN.map((item, index) => (
 					<Tooltip key={index}>
 						<TooltipTrigger asChild>

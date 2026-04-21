@@ -5,8 +5,8 @@ export function Layout() {
   return (
     <LayoutProvider
       style={{
-        '--header-height': '60px',
-        '--sidebar-width': '60px',
+        '--header-height': '90px',
+        '--sidebar-width': '70px',
         '--sidebar-menu-width': '300px',
       } as React.CSSProperties}
     >

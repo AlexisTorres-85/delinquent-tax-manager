@@ -1,4 +1,5 @@
 import { Toolbar, ToolbarHeading, ToolbarPageTitle, ToolbarDescription } from '@/components/layout/toolbar';
+import { ParcelsTable } from './parcels-table';
 
 export function ParcelsDelinquentPage() {
   return (
@@ -9,6 +10,10 @@ export function ParcelsDelinquentPage() {
           <ToolbarDescription>Parcels with outstanding delinquent balances</ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
+
+      <div className="mt-4">
+        <ParcelsTable filterStatus="Delinquent" />
+      </div>
     </div>
   );
 }

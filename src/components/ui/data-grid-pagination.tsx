@@ -124,7 +124,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
     <div
       data-slot="data-grid-pagination"
       className={cn(
-        'flex flex-wrap flex-col sm:flex-row justify-between items-center gap-2.5 py-2.5 sm:py-0 grow',
+        'flex flex-wrap flex-col sm:flex-row justify-between items-center gap-2.5 py-2.5 px-4 sm:py-0 grow',
         mergedProps?.className,
       )}
     >

@@ -20,6 +20,9 @@ const buttonVariants = cva(
         ghost:
           'text-accent-foreground hover:bg-accent hover:text-accent-foreground data-[state=open]:bg-accent data-[state=open]:text-accent-foreground',
         dim: 'text-muted-foreground hover:text-foreground data-[state=open]:text-foreground',
+        none:
+          'text-accent-foreground',
+
         foreground: '',
         inverse: '',
       },

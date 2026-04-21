@@ -1,4 +1,5 @@
 import { Toolbar, ToolbarHeading, ToolbarPageTitle, ToolbarDescription } from '@/components/layout/toolbar';
+import { ParcelsTable } from './parcels-table';
 
 export function ParcelsForeclosurePage() {
   return (
@@ -9,6 +10,10 @@ export function ParcelsForeclosurePage() {
           <ToolbarDescription>Parcels currently in the foreclosure process</ToolbarDescription>
         </ToolbarHeading>
       </Toolbar>
+
+      <div className="mt-4">
+        <ParcelsTable filterStatus="Foreclosure" />
+      </div>
     </div>
   );
 }
