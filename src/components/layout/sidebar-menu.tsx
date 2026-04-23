@@ -28,7 +28,7 @@ export function SidebarMenu() {
         <span className="text-sm font-semibold text-black">{activeMenuItem?.title}</span>
       </div>
 
-      <ScrollArea className="grow h-[calc(100vh-6rem)] lg:h-[calc(100vh-4rem)]">
+      <ScrollArea className="grow h-[calc(100vh-6rem)] lg:h-[calc(100vh-4rem)] [&_[data-slot=scroll-area-scrollbar]]:hidden">
         <AccordionMenu
           selectedValue={pathname}
           matchPath={matchPath}

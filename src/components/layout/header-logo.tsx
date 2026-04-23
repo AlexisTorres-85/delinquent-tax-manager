@@ -52,7 +52,7 @@ export function HeaderLogo() {
       )}
       <div className="h-9 w-px bg-white/20 ml-6 mr-5" />
       <HeaderTitle />
-      <InputWrapper className="w-200 hidden lg:inline-flex ml-4 bg-white/20 h-11 border-0 [&_svg]:text-white [&_input]:text-white! [&_input::placeholder]:text-white/80!">
+      <InputWrapper className="w-100 hidden lg:inline-flex ml-4 bg-white/20 h-11 border-0 [&_svg]:text-white [&_input]:text-white! [&_input::placeholder]:text-white/80!">
         <Search className="text-white!" />
         <Input type="search" placeholder="Global Search" className="bg-transparent border-0 text-white! placeholder:text-white/80! focus-visible:ring-0 focus-visible:ring-offset-0" />
       </InputWrapper>

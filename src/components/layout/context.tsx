@@ -83,7 +83,7 @@ export function LayoutProvider({ children, style: customStyle, bodyClassName = '
     >
       <div
         data-slot="layout-wrapper"
-        className="flex grow"
+        className="flex h-full min-h-0 w-full overflow-hidden"
         data-sidebar-open={isSidebarOpen}
         style={style}
       >

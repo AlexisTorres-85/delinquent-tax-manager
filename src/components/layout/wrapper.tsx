@@ -11,15 +11,20 @@ export function Wrapper() {
     <>
       <Header />
 
-      <div className="flex grow pt-[var(--header-height)] bg-[#004B6F]">
+      <div className="fixed inset-x-0 bottom-0 top-[var(--header-height)] flex min-h-0 overflow-hidden bg-[#004B6F]">
         {!isMobile && <Sidebar />}
 
-        <div className="flex flex-col grow lg:ps-[var(--sidebar-width)] ">
-          <div className="flex flex-grow">
-            {!isMobile && <SidebarMenu />}
+        <div className="flex min-h-0 min-w-0 flex-col grow lg:ps-[var(--sidebar-width)] ">
+          <div className="flex min-h-0 flex-grow">
+            {!isMobile ? (
+              <>
+                <div className="hidden shrink-0 lg:block lg:w-(--sidebar-menu-width)" aria-hidden="true" />
+                <SidebarMenu />
+              </>
+            ) : null}
 
-            <main className="grow lg:ps-[calc(var(--sidebar-menu-width)+0px)]" role="content">
-              <div className="bg-white h-full">
+            <main className="min-h-0 min-w-0 grow overflow-hidden" role="content">
+              <div className="h-full min-h-0 overflow-hidden bg-white">
                 <Outlet />
               </div>
             </main>

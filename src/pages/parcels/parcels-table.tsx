@@ -3,7 +3,6 @@ import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getFilteredRowModel,
   getPaginationRowModel,
   ColumnDef,
   SortingState,
@@ -12,9 +11,8 @@ import {
 import { DataGrid, DataGridContainer } from '@/components/ui/data-grid';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
-import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Search, Download, Filter, FileText, Flag, DollarSign } from 'lucide-react';
+import { Download, FileText, FolderOpen } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 
 // Parcel data type
@@ -65,12 +63,12 @@ export function generateDummyParcels(count: number = 50): Parcel[] {
 
 // Status badge component
 function StatusBadge({ status }: { status: Parcel['status'] }) {
-  const variants: Record<Parcel['status'], 'default' | 'destructive' | 'warning' | 'success'> = {
+  const variants: Record<Parcel['status'], 'destructive' | 'warning' | 'success' | 'secondary'> = {
     Delinquent: 'destructive',
     'In Plan': 'warning',
     Foreclosure: 'destructive',
     Flagged: 'warning',
-    Current: 'success',
+    Current: 'secondary',
   };
 
   return <Badge variant={variants[status]}>{status}</Badge>;
@@ -132,94 +130,102 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
 interface ParcelsTableProps {
   data?: Parcel[];
   filterStatus?: Parcel['status'];
+  externalSearch?: string;
+  minAmountDue?: number;
+  onlyNoPayment?: boolean;
+  pageSize?: number;
+  dense?: boolean;
 }
 
-export function ParcelsTable({ data, filterStatus }: ParcelsTableProps) {
+export function ParcelsTable({
+  data,
+  filterStatus,
+  externalSearch,
+  minAmountDue = 0,
+  onlyNoPayment = false,
+  pageSize = 10,
+  dense = false,
+}: ParcelsTableProps) {
   const [parcels] = useState<Parcel[]>(() => data || generateDummyParcels(50));
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-  const [globalFilter, setGlobalFilter] = useState('');
+  const normalizedExternalSearch = (externalSearch ?? '').trim().toLowerCase();
 
-  // Filter data based on status if provided
-  const filteredData = filterStatus
-    ? parcels.filter((parcel) => parcel.status === filterStatus)
-    : parcels;
+  const filteredData = parcels.filter((parcel) => {
+    if (filterStatus && parcel.status !== filterStatus) {
+      return false;
+    }
+
+    if (parcel.amountDue < minAmountDue) {
+      return false;
+    }
+
+    if (onlyNoPayment && parcel.lastPaymentDate !== null) {
+      return false;
+    }
+
+    if (!normalizedExternalSearch) {
+      return true;
+    }
+
+    const searchable = `${parcel.parcelNumber} ${parcel.ownerName} ${parcel.propertyAddress}`.toLowerCase();
+    return searchable.includes(normalizedExternalSearch);
+  });
 
   const table = useReactTable({
     data: filteredData,
     columns: parcelColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getFilteredRowModel: getFilteredRowModel(),
     getPaginationRowModel: getPaginationRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
-    onGlobalFilterChange: setGlobalFilter,
     state: {
       sorting,
       columnFilters,
-      globalFilter,
     },
+    autoResetPageIndex: true,
+    autoResetAll: false,
     initialState: {
       pagination: {
-        pageSize: 10,
+        pageSize,
       },
     },
   });
 
   return (
-    <div className="w-full">
+    <div className="w-full min-w-[980px]">
       {/* Toolbar with search and action buttons */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center justify-between bg-white border-b p-4">
         <div className="flex-1 w-full sm:max-w-md">
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-            <Input
-              placeholder="Search parcels by owner, address, or parcel number..."
-              value={globalFilter ?? ''}
-              onChange={(e) => setGlobalFilter(e.target.value)}
-              className="pl-9"
-            />
+          <div className="flex items-center gap-2">
+            <FolderOpen className="h-5 w-5 text-muted-foreground" />
+            <div className="flex flex-col">
+              <span className="text-base font-semibold text-foreground">All Parcels</span>
+              <span className="text-xs text-muted-foreground -mt-1">Browse and manage all parcels</span>
+            </div>
           </div>
         </div>
         
         <div className="flex flex-wrap gap-2">
-          <Button variant="outline" size="sm">
-            <Filter className="h-4 w-4 mr-2" />
-            Filter
-          </Button>
           <Button variant="outline" size="sm">
             <Download className="h-4 w-4 mr-2" />
             Export
           </Button>
           <Button variant="outline" size="sm">
             <FileText className="h-4 w-4 mr-2" />
-            Report
-          </Button>
-          <Button variant="default" size="sm">
-            <Flag className="h-4 w-4 mr-2" />
-            Flag Selected
-          </Button>
-          <Button variant="default" size="sm">
-            <DollarSign className="h-4 w-4 mr-2" />
-            Create Plan
+            Generate Report
           </Button>
         </div>
       </div>
 
       {/* Data Grid Table */}
       <DataGridContainer>
-        <DataGrid table={table} recordCount={filteredData.length}>
+        <DataGrid key={`parcels-grid-${pageSize}`} table={table} recordCount={filteredData.length} tableLayout={{ dense }}>
           <DataGridTable />
-          <DataGridPagination />
+          <DataGridPagination showRowsPerPage={false} showInfo={false} className="justify-center" />
         </DataGrid>
       </DataGridContainer>
-
-      {/* Results summary */}
-      <div className="text-sm text-muted-foreground px-2">
-        Showing {table.getRowModel().rows.length} of {filteredData.length} parcels
-        {filterStatus && ` with status: ${filterStatus}`}
-      </div>
     </div>
   );
 }
