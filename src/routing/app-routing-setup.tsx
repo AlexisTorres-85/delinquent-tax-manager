@@ -1,4 +1,13 @@
-import { Route, Routes, Navigate } from 'react-router';
+import { Route, Routes, Navigate, useLocation } from 'react-router';
+
+function LowercaseRedirect() {
+  const { pathname, search, hash } = useLocation();
+  const lower = pathname.toLowerCase();
+  if (pathname !== lower) {
+    return <Navigate to={lower + search + hash} replace />;
+  }
+  return null;
+}
 import { Layout } from '@/components/layout';
 import { ProtectedRoute } from '@/auth';
 import { LoginPage } from '@/pages/auth/login';
@@ -10,13 +19,10 @@ import { AlertsPage } from '@/pages/dashboard/alerts';
 import { PerformanceKpisPage } from '@/pages/dashboard/kpis';
 
 // Parcels
-import { ParcelsPage } from '@/pages/parcels/page';
-import { ParcelsSearchPage } from '@/pages/parcels/search';
-import { ParcelsRecentPage } from '@/pages/parcels/recent';
-import { ParcelsDelinquentPage } from '@/pages/parcels/delinquent';
-import { ParcelsInPlanPage } from '@/pages/parcels/in-plan';
-import { ParcelsForeclosurePage } from '@/pages/parcels/foreclosure';
-import { ParcelsFlaggedPage } from '@/pages/parcels/flagged';
+import { ParcelsPage } from '@/pages/property-parcels/property-parcels-lookup/page';
+import { CatalisParcelSearchPage } from '@/pages/property-parcels/catalis-parcel-search/page';
+import { AuditLogsPage } from '@/pages/property-parcels/audit-logs/page';
+import { ParcelDetailPage } from '@/pages/property-parcels/parcel-detail/page';
 
 // Payments
 import { PaymentsPage } from '@/pages/payments/page';
@@ -75,13 +81,10 @@ export function AppRoutingSetup() {
         <Route path="/kpis" element={<PerformanceKpisPage />} />
 
         {/* Parcels */}
-        <Route path="/parcels" element={<ParcelsPage />} />
-        <Route path="/parcels/search" element={<ParcelsSearchPage />} />
-        <Route path="/parcels/recent" element={<ParcelsRecentPage />} />
-        <Route path="/parcels/delinquent" element={<ParcelsDelinquentPage />} />
-        <Route path="/parcels/in-plan" element={<ParcelsInPlanPage />} />
-        <Route path="/parcels/foreclosure" element={<ParcelsForeclosurePage />} />
-        <Route path="/parcels/flagged" element={<ParcelsFlaggedPage />} />
+        <Route path="/property-parcels" element={<ParcelsPage />} />
+        <Route path="/property-parcels/catalis-parcel-search" element={<CatalisParcelSearchPage />} />
+        <Route path="/property-parcels/audit-logs" element={<AuditLogsPage />} />
+        <Route path="/property-parcels/:parcelNumber" element={<ParcelDetailPage />} />
 
         {/* Payments */}
         <Route path="/payments" element={<PaymentsPage />} />
@@ -122,6 +125,7 @@ export function AppRoutingSetup() {
         <Route path="/admin/penalties" element={<PenaltyRulesPage />} />
         <Route path="/admin/settings" element={<SystemSettingsPage />} />
         <Route path="/admin/integrations" element={<IntegrationsPage />} />
+        <Route path="*" element={<LowercaseRedirect />} />
       </Route>
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>

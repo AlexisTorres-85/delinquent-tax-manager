@@ -10,7 +10,7 @@ const labelVariants = cva(
   {
     variants: {
       variant: {
-        primary: 'font-medium',
+        primary: 'font-semibold',
         secondary: 'font-normal',
       },
     },

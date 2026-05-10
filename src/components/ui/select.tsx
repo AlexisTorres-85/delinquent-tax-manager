@@ -6,6 +6,7 @@ import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
 import { Check, ChevronDown, ChevronUp } from 'lucide-react';
 import { Select as SelectPrimitive } from 'radix-ui';
+import { Label } from '@/components/ui/label';
 
 // Create a Context for `indicatorPosition` and `indicator` control
 const SelectContext = React.createContext<{
@@ -219,9 +220,47 @@ function SelectSeparator({ className, ...props }: React.ComponentProps<typeof Se
   );
 }
 
+function SelectField({
+  label,
+  labelVariant,
+  wrapperClassName,
+  id,
+  children,
+  ...props
+}: React.ComponentProps<typeof SelectPrimitive.Root> & {
+  label?: string;
+  labelVariant?: 'primary' | 'secondary';
+  wrapperClassName?: string;
+  id?: string;
+}) {
+  const generatedId = React.useId();
+  const triggerId = id ?? (label ? generatedId : undefined);
+
+  if (label) {
+    return (
+      <div className={cn('flex flex-col gap-1.5', wrapperClassName)}>
+        <Label htmlFor={triggerId} variant={labelVariant}>
+          {label}
+        </Label>
+        <Select {...props}>
+          {React.Children.map(children, (child) => {
+            if (React.isValidElement(child) && (child.type as { displayName?: string; name?: string })?.name === 'SelectTrigger') {
+              return React.cloneElement(child as React.ReactElement<{ id?: string }>, { id: triggerId });
+            }
+            return child;
+          })}
+        </Select>
+      </div>
+    );
+  }
+
+  return <Select {...props}>{children}</Select>;
+}
+
 export {
   Select,
   SelectContent,
+  SelectField,
   SelectGroup,
   SelectIndicator,
   SelectItem,

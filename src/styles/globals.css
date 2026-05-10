@@ -61,6 +61,45 @@
   --radius-md: calc(var(--radius) - 2px);
   --radius-sm: calc(var(--radius) - 4px);
 
+  /** Typography **/
+  --text-base: 14px;
+
+  /** App colors (from general.config.ts) **/
+  --color-divider: #CFD3D1;               /* dividerBorder @ 72% opacity */
+  --color-section-header: #FAF5E7;          /* sectionHeaderBg */
+  
+  --color-table-header: #F0F5F3;            /* tableHeaderBg */
+  --color-table-row: #ffffff;               /* tableRowBg */
+  --color-table-row-hover: #F0F5F2;         /* tableRowHoverBg */
+  --color-table-separator: #D3DAD7B3;         /* tableRowSeparator */
+
+  --color-menu-accent: #E9C554;             /* menuAccent */
+  --color-sidebar-menu-from: #DBE8E6;       /* sidebarMenuBgFrom */
+  --color-sidebar-menu-to: #FFFFFF;         /* sidebarMenuBgTo */
+
+  --color-breadcrumb-inactive: #DBE8E6;     /* breadcrumbInactiveBg */
+  --color-breadcrumb-hover: #D8E2DC;        /* breadcrumbHoverBg */
+  --color-breadcrumb-active: #62938D;       /* breadcrumbActiveBg */
+  --color-breadcrumb-trail: #E9C554;        /* breadcrumbTrailBg */
+
+  --color-app-primary: #2B4441;             /* primary */
+  --color-app-primary-fg: #ffffff;          /* primaryFg */
+  --color-app-primary-from: #3D5C58;        /* primaryFrom */
+  --color-app-primary-to: #1E2F2D;          /* primaryTo */
+  --color-app-primary-border: #162220;      /* primaryBorder */
+
+  --color-app-secondary: #E9C554;           /* secondary */
+  --color-app-secondary-fg: #2B2B2B;        /* secondaryFg */
+  --color-app-secondary-from: #F9DFA8;      /* secondaryFrom */
+  --color-app-secondary-to: #E8B95E;        /* secondaryTo */
+  --color-app-secondary-border: #C9963A;    /* secondaryBorder */
+
+  --color-app-gradient-from: #62938D;       /* appGradientFrom */
+  --color-app-gradient-to: #224B46;         /* appGradientTo */
+  
+  --color-app-primary-toolbar: #62938D;        /* primaryToolbar */
+  --color-app-primary-toolbar-fg: #FFFFFF;     /* primaryToolbarFg */
+
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
@@ -112,9 +151,10 @@
   }
 }
 
-/** Smooth scroll **/
+/** Smooth scroll + base font size **/
 html {
   scroll-behavior: smooth;
+  font-size: var(--text-base);
 }
 
 html,

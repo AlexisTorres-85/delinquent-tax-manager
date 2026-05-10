@@ -5,13 +5,15 @@ import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Tabs as TabsPrimitive } from 'radix-ui';
 
+
 // Variants for TabsList
 const tabsListVariants = cva('flex items-center shrink-0', {
   variants: {
     variant: {
       default: 'bg-accent p-1',
       button: '',
-      line: 'border-b border-border',
+      line: 'border-b border-divider',
+      'app-primary': 'bg-app-primary-toolbar border-b border-app-divider',
     },
     shape: {
       default: '',
@@ -60,6 +62,11 @@ const tabsListVariants = cva('flex items-center shrink-0', {
     { variant: 'line', size: 'sm', className: 'gap-4' },
     { variant: 'line', size: 'xs', className: 'gap-4' },
 
+    { variant: 'app-primary', size: 'lg', className: 'gap-9' },
+    { variant: 'app-primary', size: 'md', className: 'gap-8' },
+    { variant: 'app-primary', size: 'sm', className: 'gap-4' },
+    { variant: 'app-primary', size: 'xs', className: 'gap-4' },
+
     {
       variant: 'default',
       shape: 'pill',
@@ -87,7 +94,8 @@ const tabsTriggerVariants = cva(
           'text-muted-foreground data-[state=active]:bg-background hover:text-foreground data-[state=active]:text-foreground data-[state=active]:shadow-xs data-[state=active]:shadow-black/5',
         button:
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg text-accent-foreground hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-foreground',
-        line: 'border-b-2 text-muted-foreground border-transparent data-[state=active]:border-primary hover:text-primary data-[state=active]:text-primary data-[state=active]:border-primary data-[state=active]:text-primary',
+        line: 'border-b-4 text-muted-foreground border-transparent data-[state=active]:[border-color:var(--tabs-active-color)] hover:[color:var(--tabs-active-color)] data-[state=active]:[color:var(--tabs-active-color)]',
+        'app-primary': "relative border-b-4 border-transparent text-white/80 hover:text-white data-[state=active]:text-white data-[state=active]:[border-color:var(--color-app-secondary)] after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-l-[9px] after:border-l-transparent after:border-r-[9px] after:border-r-transparent after:border-b-[5px] after:border-b-transparent data-[state=active]:after:[border-bottom-color:var(--color-app-secondary)] after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity",
       },
       size: {
         lg: 'gap-2.5 [&_svg]:size-5 text-sm',
@@ -111,6 +119,11 @@ const tabsTriggerVariants = cva(
       { variant: 'line', size: 'md', className: 'py-2.5' },
       { variant: 'line', size: 'sm', className: 'py-2' },
       { variant: 'line', size: 'xs', className: 'py-1.5' },
+
+      { variant: 'app-primary', size: 'lg', className: 'py-3' },
+      { variant: 'app-primary', size: 'md', className: 'py-2.5' },
+      { variant: 'app-primary', size: 'sm', className: 'py-2' },
+      { variant: 'app-primary', size: 'xs', className: 'py-1.5' },
     ],
     defaultVariants: {
       variant: 'default',
@@ -136,7 +149,7 @@ const tabsContentVariants = cva(
 
 // Context
 type TabsContextType = {
-  variant?: 'default' | 'button' | 'line';
+  variant?: 'default' | 'button' | 'line' | 'app-primary';
   size?: 'lg' | 'sm' | 'xs' | 'md';
 };
 const TabsContext = React.createContext<TabsContextType>({
@@ -161,6 +174,7 @@ function TabsList({
       <TabsPrimitive.List
         data-slot="tabs-list"
         className={cn(tabsListVariants({ variant, shape, size }), className)}
+        style={variant === 'line' || variant === 'app-primary' ? { '--tabs-active-color': variant === 'app-primary' ? 'var(--color-app-secondary)' : 'var(--color-app-primary)' } as React.CSSProperties : undefined}
         {...props}
       />
     </TabsContext.Provider>

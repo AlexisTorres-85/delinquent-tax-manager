@@ -16,10 +16,11 @@ export function SidebarContent() {
   const { activeMenuItem, setActiveMenuItem } = useLayout();
 
   useEffect(() => {
+    const lowerPathname = pathname.toLowerCase();
     // Find the best matching item by rootPath prefix, fall back to exact path
     const match = MENU_SIDEBAR_MAIN.find((item) => {
       if (!item.rootPath || item.rootPath === '/') return false;
-      return pathname.startsWith(item.rootPath);
+      return lowerPathname.startsWith(item.rootPath);
     }) ?? MENU_SIDEBAR_MAIN.find((item) => item.path === '/');
 
     if (match) setActiveMenuItem(match);
@@ -46,11 +47,11 @@ export function SidebarContent() {
 								{item.path ? (
 									<Link to={item.path}>
 										{item.icon ? (
-											<item.icon className="size-4.5!" />
+											<item.icon className="size-5!" />
 										) : null}
 									</Link>
 								) : (
-									item.icon ? <item.icon className="size-4.5!" /> : null
+									item.icon ? <item.icon className="size-5!" /> : null
 								)}
 							</Button>
 						</TooltipTrigger>

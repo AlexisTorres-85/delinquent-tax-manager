@@ -7,4 +7,10 @@ const generalSettings = {
   aboutLink: '',
 };
 
+export const layoutDimensions = {
+  headerHeight: '90px',
+  sidebarWidth: '70px',
+  sidebarMenuWidth: '250px',
+};
+
 export { generalSettings };

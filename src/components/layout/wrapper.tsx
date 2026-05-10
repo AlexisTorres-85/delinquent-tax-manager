@@ -3,15 +3,21 @@ import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { useLayout } from './context';
 import { SidebarMenu } from './sidebar-menu';
+import { Footer } from './footer';
+
 
 export function Wrapper() {
   const { isMobile } = useLayout();
 
   return (
     <>
+      <div
+        className="fixed inset-0 -z-10"
+        style={{ background: 'linear-gradient(to top, var(--color-app-gradient-from), var(--color-app-gradient-to))' }}
+      />
       <Header />
 
-      <div className="fixed inset-x-0 bottom-0 top-[var(--header-height)] flex min-h-0 overflow-hidden bg-[#004B6F]">
+      <div className="fixed inset-x-0 bottom-0 top-[var(--header-height)] flex min-h-0 overflow-hidden">
         {!isMobile && <Sidebar />}
 
         <div className="flex min-h-0 min-w-0 flex-col grow lg:ps-[var(--sidebar-width)] ">
@@ -23,10 +29,11 @@ export function Wrapper() {
               </>
             ) : null}
 
-            <main className="min-h-0 min-w-0 grow overflow-hidden" role="content">
-              <div className="h-full min-h-0 overflow-hidden bg-white">
+            <main className="min-h-0 min-w-0 grow overflow-hidden flex flex-col" role="content">
+              <div className="min-h-0 grow overflow-hidden bg-white">
                 <Outlet />
               </div>
+              <Footer />
             </main>
           </div>
         </div>
