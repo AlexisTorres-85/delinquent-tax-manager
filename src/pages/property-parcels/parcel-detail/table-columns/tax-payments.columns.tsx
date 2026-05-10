@@ -100,7 +100,7 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     },
     {
         accessorKey: 'certificationNumber',
-        header: 'Certification #',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Certification #" />,
         size: 170,
         cell: ({ row }) => (
             <span className="font-mono text-xs">{row.original.certificationNumber}</span>
@@ -109,7 +109,7 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     },
     {
         accessorKey: 'receipt',
-        header: 'Receipt',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Receipt" />,
         size: 130,
         cell: ({ row }) => (
             <span className="font-mono text-xs">{row.original.receipt}</span>
@@ -118,7 +118,7 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     },
     {
         accessorKey: 'type',
-        header: 'Type',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Type" />,
         size: 120,
         filterFn: 'equals',
         cell: ({ row }) => (
@@ -130,7 +130,7 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     },
     {
         accessorKey: 'amountPaid',
-        header: 'Amount Paid',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Amount Paid" />,
         size: 140,
         cell: ({ row }) => (
             <span className="font-semibold tabular-nums">{fmt(row.original.amountPaid)}</span>

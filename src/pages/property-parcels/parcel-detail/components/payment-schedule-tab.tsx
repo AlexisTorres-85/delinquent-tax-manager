@@ -16,6 +16,16 @@ import { ScheduleBanner } from './schedule-banner';
 import { TabLayout, type FilterConfig } from './tab-layout';
 import { paymentScheduleColumns } from '../table-columns/payment-schedule.columns';
 
+const EMPTY_SUMMARY: PaymentPlanSummary = {
+    startDate: '',
+    missedPayments: 0,
+    currentAmountDue: 0,
+    monthlyPayment: 0,
+    payoffDate: null,
+    totalPayments: 0,
+    lastPaymentDate: null,
+};
+
 // ─── Inner table component ────────────────────────────────────────────────────
 
 interface PaymentScheduleTableProps {
@@ -100,7 +110,7 @@ function PaymentScheduleTable({ entries, summary, isLoading, lastUpdated, sticky
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
-            banner={<ScheduleBanner summary={summary} isLoading={isLoading} />}
+            banner={<ScheduleBanner summary={summary} isLoading={isLoading} disabled={entries.length === 0 && !isLoading} />}
         />
     );
 }
@@ -127,18 +137,10 @@ export function PaymentScheduleTab({ parcelNumber, stickyTop }: PaymentScheduleT
         );
     }
 
-    if (!plan) {
-        return (
-            <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">
-                No payment schedule on record for this parcel.
-            </div>
-        );
-    }
-
     return (
         <PaymentScheduleTable
-            entries={plan.paymentSchedule}
-            summary={plan.paymentPlanSummary}
+            entries={plan?.paymentSchedule ?? []}
+            summary={plan?.paymentPlanSummary ?? EMPTY_SUMMARY}
             isLoading={isRefreshing}
             lastUpdated={lastUpdated}
             stickyTop={stickyTop}

@@ -2,7 +2,7 @@ import type { ColumnDef } from '@tanstack/react-table';
 import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, Pencil } from 'lucide-react';
 import type { ParcelDocument, DocumentType } from '@/data/documents/types';
 
 export const documentColumns: ColumnDef<ParcelDocument>[] = [
@@ -33,22 +33,47 @@ export const documentColumns: ColumnDef<ParcelDocument>[] = [
             filterValue === 'all' || row.getValue(columnId) === filterValue,
         meta: { skeleton: <Skeleton className="h-4 w-36" /> },
     },
-    {
-        id: 'view',
-        header: () => <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">View</span>,
-        cell: ({ row }) => (
+   {
+    id: 'actions',
+    header: () => (
+        <div className="flex justify-end pr-1">
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
+                
+            </span>
+        </div>
+    ),
+    size: 120,
+    cell: ({ row }) => (
+        <div className="flex items-center justify-end gap-1.5">
             <Button
-                variant="ghost"
+                variant="outline"
                 size="sm"
-                className="h-7 w-7 p-0"
                 title="View document"
                 onClick={() => window.open(row.original.filePath, '_blank')}
             >
-                <Eye className="h-4 w-4" />
+                <Eye />
                 <span className="sr-only">View</span>
             </Button>
+
+            <Button
+                variant="outline"
+                size="sm"
+                title="Edit document"
+            >
+                <Pencil />
+                <span className="sr-only">Edit</span>
+            </Button>
+        </div>
+    ),
+    enableSorting: false,
+    meta: {
+        cellClassName: 'text-right',
+        skeleton: (
+            <div className="flex justify-end gap-1.5">
+                <Skeleton className="h-7 w-7 rounded" />
+                <Skeleton className="h-7 w-7 rounded" />
+            </div>
         ),
-        enableSorting: false,
-        meta: { skeleton: <Skeleton className="h-6 w-6 rounded" /> },
     },
+},
 ];

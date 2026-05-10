@@ -39,12 +39,16 @@ function BannerItem({ label, value, isLoading, skeletonWidth = 'w-24' }: BannerI
 interface ScheduleBannerProps {
     summary: PaymentPlanSummary;
     isLoading?: boolean;
+    disabled?: boolean;
 }
 
-export function ScheduleBanner({ summary, isLoading }: ScheduleBannerProps) {
+export function ScheduleBanner({ summary, isLoading, disabled }: ScheduleBannerProps) {
     return (
-        <Collapsible defaultOpen className='border-t mt-1 border-divider bg-muted'>
-            <CollapsibleTrigger className='flex w-full items-center gap-2 px-6 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:bg-muted/60 transition-colors group'>
+        <Collapsible defaultOpen={!disabled} open={disabled ? false : undefined} className='border-t mt-1 border-divider bg-muted'>
+            <CollapsibleTrigger
+                disabled={disabled}
+                className='flex w-full items-center gap-2 px-6 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:bg-muted/60 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none'
+            >
                 <ChevronDown className='h-4 w-4 transition-transform duration-200 group-data-[state=open]:rotate-180' />
                 <span>Payment Plan Summary</span>
             </CollapsibleTrigger>

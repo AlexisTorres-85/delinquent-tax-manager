@@ -147,13 +147,5 @@ export function TaxPaymentsTab({ parcelNumber, stickyTop }: TaxPaymentsTabProps)
         );
     }
 
-    if (payments.length === 0 && !isRefreshing) {
-        return (
-            <div className="flex items-center justify-center h-48 text-sm text-muted-foreground">
-                No tax payments on record for this parcel.
-            </div>
-        );
-    }
-
     return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} />;
 }

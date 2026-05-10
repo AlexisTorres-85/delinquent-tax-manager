@@ -193,6 +193,8 @@ export function TabLayout<T extends object>({
 }: CatalisTabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
+    const isEmpty = table.getCoreRowModel().rows.length === 0 && !isLoading;
+
     const [maximized, setMaximized] = useState(false);
     const [isRefreshing, setIsRefreshing] = useState(false);
     const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -286,6 +288,7 @@ export function TabLayout<T extends object>({
                         value={globalFilter}
                         onChange={(e) => onGlobalFilterChange(e.target.value)}
                         className='pl-8 h-8 text-sm w-full'
+                        disabled={isEmpty}
                     />
                     {globalFilter && (
                         <button
@@ -300,7 +303,7 @@ export function TabLayout<T extends object>({
 
             {/* Dynamic filter dropdowns — each flex-1 */}
             {filters.map((filter, i) => (
-                <Select key={i} value={filter.value} onValueChange={filter.onChange}>
+                <Select key={i} value={filter.value} onValueChange={filter.onChange} disabled={isEmpty}>
                     <SelectTrigger className='h-8 flex-1 text-sm'>
                         <SelectValue placeholder={filter.placeholder ?? 'All'} />
                     </SelectTrigger>
@@ -330,11 +333,11 @@ export function TabLayout<T extends object>({
 
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
 
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' onClick={() => exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty} onClick={() => exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
                 <Download className='h-3.5 w-3.5' />
                 <span className='text-xs'>Export</span>
             </Button>
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' onClick={() => printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty} onClick={() => printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
                 <Printer className='h-3.5 w-3.5' />
                 <span className='text-xs'>Print</span>
             </Button>
@@ -375,9 +378,11 @@ export function TabLayout<T extends object>({
             <DataGridContainer>
                 <DataGridTable />
             </DataGridContainer>
-            <div className='sticky bottom-0 z-10 border-t border-border bg-background px-4 py-4 [box-shadow:0_1px_0_0_var(--background)]'>
-                <DataGridPagination sizes={paginationSizes} />
-            </div>
+            {!isEmpty && (
+                <div className='sticky bottom-0 z-10 border-t border-border bg-background px-4 py-4 [box-shadow:0_1px_0_0_var(--background)]'>
+                    <DataGridPagination sizes={paginationSizes} />
+                </div>
+            )}
         </DataGrid>
     );
 
