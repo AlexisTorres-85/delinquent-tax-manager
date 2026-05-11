@@ -18,6 +18,7 @@ import { LifecycleHelpDrawer } from './components/lifecycle-help-drawer';
 import { TaxPaymentsTab } from './components/tax-payments-tab';
 import { PaymentScheduleTab } from './components/payment-schedule-tab';
 import { DocumentsTab } from './components/documents-tab';
+import { ContactsTab } from './components/contacts-tab';
 
 const ALL_FLAGS: ParcelFlag[] = ['Foreclosure', 'Deeded', 'Contaminated', 'Bankruptcy', 'Flood Plain', 'In Rem', 'Razing', 'Outlot'];
 
@@ -273,7 +274,11 @@ function ParcelDetailContent({ parcel }: { parcel: Parcel }) {
         <DocumentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
       </TabsContent>
 
-      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents').map((tab) => (
+      <TabsContent value="Contacts" className="mt-0">
+        <ContactsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+      </TabsContent>
+
+      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts').map((tab) => (
         <TabsContent key={tab} value={tab} className="p-6 mt-0">
           <div className="flex items-center justify-center text-sm text-muted-foreground">
             {tab}
