@@ -103,6 +103,9 @@
   --color-app-primary-toolbar-header: #FFFFFF;        /* primaryToolbarHeader */
   --color-app-primary-toolbar-fg: #F4F4F5;     /* primaryToolbarFg */
 
+  --color-active-workflow-highlight: #F0FDF9;  /* active workflow row background */
+  --color-active-workflow-side-line: #10B981;  /* active workflow left border line */
+
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;
   --animate-marquee-vertical: marquee-vertical var(--duration) linear infinite;
@@ -158,6 +161,14 @@
 html {
   scroll-behavior: smooth;
   font-size: var(--text-base);
+}
+
+/** Active Workflow Row **/
+tr.active-workflow-row td {
+  background-color: var(--color-active-workflow-highlight);
+}
+tr.active-workflow-row:hover td {
+  background-color: var(--color-active-workflow-highlight);
 }
 
 html,

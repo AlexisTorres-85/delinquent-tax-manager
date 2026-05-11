@@ -58,6 +58,8 @@ export interface DataGridProps<TData extends object> {
   /** Number of skeleton rows to show while loading. Defaults to the current page size. */
   skeletonRowCount?: number;
   emptyMessage?: ReactNode | string;
+  /** Optional per-row className callback, receives the raw row data. */
+  getRowClassName?: (row: unknown) => string | undefined;
   tableLayout?: {
     dense?: boolean;
     cellBorder?: boolean;

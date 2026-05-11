@@ -285,6 +285,7 @@ function DataGridTableBodyRow<TData>({
         props.tableLayout?.stripped && 'odd:bg-[var(--table-row-bg)] hover:bg-[var(--table-row-hover)] odd:hover:bg-[var(--table-row-hover)]',
         table.options.enableRowSelection && '[&_>:first-child]:relative',
         props.tableClassNames?.bodyRow,
+        props.getRowClassName?.(row.original),
       )}
     >
       {children}

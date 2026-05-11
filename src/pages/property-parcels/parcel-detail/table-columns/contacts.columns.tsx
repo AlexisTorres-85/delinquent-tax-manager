@@ -6,9 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Eye, Pencil } from 'lucide-react';
 import type { ParcelContact, ContactStatus } from '@/data/contacts/types';
 
-const STATUS_VARIANT: Record<ContactStatus, 'default' | 'secondary' | 'destructive' | 'outline'> = {
-    'Current Owner': 'default',
-    'Co-Owner': 'default',
+const STATUS_VARIANT: Record<ContactStatus, 'primary' | 'secondary' | 'destructive' | 'outline'> = {
+    'Current Owner': 'primary',
+    'Co-Owner': 'primary',
     'Former Owner': 'secondary',
     'Attorney': 'outline',
     'Lien Holder': 'destructive',
@@ -60,7 +60,7 @@ export const contactColumns: ColumnDef<ParcelContact>[] = [
     {
         id: 'actions',
         header: () => (
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</span>
+            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"></span>
         ),
         size: 100,
         cell: () => (

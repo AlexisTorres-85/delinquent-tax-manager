@@ -7,15 +7,15 @@ import type { ParcelDocument, DocumentType } from '@/data/documents/types';
 
 export const documentColumns: ColumnDef<ParcelDocument>[] = [
     {
-        accessorKey: 'createdDate',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Created Date" />,
+        accessorKey: 'uploadedAt',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Uploaded At" />,
         cell: ({ getValue }) => <span className="text-sm">{getValue<string>()}</span>,
         sortingFn: (a, b) => {
             const parse = (d: string) => {
                 const [m, day, y] = d.split('/');
                 return new Date(Number(y), Number(m) - 1, Number(day)).getTime();
             };
-            return parse(a.original.createdDate) - parse(b.original.createdDate);
+            return parse(a.original.uploadedAt) - parse(b.original.uploadedAt);
         },
         meta: { skeleton: <Skeleton className="h-4 w-20" /> },
     },
@@ -33,10 +33,31 @@ export const documentColumns: ColumnDef<ParcelDocument>[] = [
             filterValue === 'all' || row.getValue(columnId) === filterValue,
         meta: { skeleton: <Skeleton className="h-4 w-36" /> },
     },
+    {
+        accessorKey: 'workflowHistoryId',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Workflow History ID" />,
+        cell: ({ getValue }) => <span className="text-sm font-mono text-muted-foreground">{getValue<string>()}</span>,
+        meta: { skeleton: <Skeleton className="h-4 w-24" /> },
+    },
+    {
+        accessorKey: 'uploadedBy',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Uploaded By" />,
+        cell: ({ getValue }) => <span className="text-sm">{getValue<string>()}</span>,
+        meta: { skeleton: <Skeleton className="h-4 w-28" /> },
+    },
+    {
+        accessorKey: 'notes',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Notes" />,
+        cell: ({ getValue }) => {
+            const v = getValue<string>();
+            return v ? <span className="text-sm text-muted-foreground">{v}</span> : <span className="text-sm text-muted-foreground/40">—</span>;
+        },
+        meta: { skeleton: <Skeleton className="h-4 w-36" /> },
+    },
    {
     id: 'actions',
     header: () => (
-        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</span>
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide"></span>
     ),
     size: 120,
     cell: ({ row }) => (

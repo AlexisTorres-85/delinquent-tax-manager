@@ -62,6 +62,8 @@ export interface TabLayoutProps<T> {
     extraToolbarButtons?: ReactNode;
     /** Called when the refresh button is clicked. */
     onRefresh?: () => void;
+    /** Optional per-row className callback, receives the raw row data. */
+    getRowClassName?: (row: T) => string | undefined;
 }
 
 // ─── Export / print utilities ─────────────────────────────────────────────────
@@ -199,6 +201,7 @@ export function TabLayout<T extends object>({
     hideSearch = false,
     extraToolbarButtons,
     onRefresh,
+    getRowClassName,
 }: TabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
@@ -382,6 +385,7 @@ export function TabLayout<T extends object>({
             skeletonRowCount={2}
             tableLayout={{ headerSticky: true }}
             tableClassNames={{ headerSticky: 'sticky z-10 [top:var(--thead-top,0px)]' }}
+            getRowClassName={getRowClassName as ((row: unknown) => string | undefined) | undefined}
         >
             <DataGridContainer>
                 <DataGridTable />

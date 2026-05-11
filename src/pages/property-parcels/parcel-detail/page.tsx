@@ -19,6 +19,7 @@ import { TaxPaymentsTab } from './components/tax-payments-tab';
 import { PaymentScheduleTab } from './components/payment-schedule-tab';
 import { DocumentsTab } from './components/documents-tab';
 import { ContactsTab } from './components/contacts-tab';
+import { WorkflowHistoryTab } from './components/workflow-history-tab';
 
 const ALL_FLAGS: ParcelFlag[] = ['Foreclosure', 'Deeded', 'Contaminated', 'Bankruptcy', 'Flood Plain', 'In Rem', 'Razing', 'Outlot'];
 
@@ -278,7 +279,11 @@ function ParcelDetailContent({ parcel }: { parcel: Parcel }) {
         <ContactsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
       </TabsContent>
 
-      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts').map((tab) => (
+      <TabsContent value="Workflow History" className="mt-0">
+        <WorkflowHistoryTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+      </TabsContent>
+
+      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History').map((tab) => (
         <TabsContent key={tab} value={tab} className="p-6 mt-0">
           <div className="flex items-center justify-center text-sm text-muted-foreground">
             {tab}

@@ -12,10 +12,13 @@ export type DocumentType =
 
 export type ParcelDocument = {
   id: string;
-  createdDate: string; // MM/DD/YYYY
+  uploadedAt: string; // MM/DD/YYYY
   documentName: string;
   type: DocumentType;
   filePath: string;
+  workflowHistoryId: string;
+  uploadedBy: string;
+  notes: string;
 };
 
 export type ParcelDocumentPlan = {
