@@ -1,4 +1,5 @@
-﻿import { ChevronDown, ExternalLink } from 'lucide-react';
+﻿import { useState } from 'react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Skeleton } from '@/components/ui/skeleton';
 import type { PaymentPlanSummary } from '@/data/payment-schedule/types';
@@ -29,7 +30,7 @@ function BannerItem({ label, value, isLoading, skeletonWidth = 'w-24' }: BannerI
         <div className='flex flex-col gap-0.5 min-w-0'>
             <span className='text-[11px] uppercase tracking-wide font-medium text-muted-foreground whitespace-nowrap'>{label}</span>
             {isLoading
-                ? <Skeleton className={`h-4 ${skeletonWidth}`} />
+                ? <Skeleton className={`h-4 ${skeletonWidth} bg-muted-foreground/35`} />
                 : <span className='text-sm font-semibold text-foreground'>{value}</span>
             }
         </div>
@@ -43,8 +44,14 @@ interface ScheduleBannerProps {
 }
 
 export function ScheduleBanner({ summary, isLoading, disabled }: ScheduleBannerProps) {
+    const [open, setOpen] = useState(!disabled);
+
     return (
-        <Collapsible defaultOpen={!disabled} open={disabled ? false : undefined} className='border-t mt-1 border-divider bg-muted'>
+        <Collapsible
+            open={disabled ? false : open}
+            onOpenChange={disabled ? undefined : setOpen}
+            className={`border-t border-divider bg-muted z-0 overflow-hidden transition-all duration-200 ${open && !disabled ? 'h-30' : 'h-9'}`}
+        >
             <CollapsibleTrigger
                 disabled={disabled}
                 className='flex w-full items-center gap-2 px-6 py-2.5 text-xs font-medium text-muted-foreground uppercase tracking-wide hover:bg-muted/60 transition-colors group disabled:opacity-50 disabled:cursor-not-allowed disabled:pointer-events-none'

@@ -11,7 +11,7 @@ const headerCellSpacingVariants = cva('', {
   variants: {
     size: {
       dense: 'px-2.5 h-8',
-      default: 'px-4',
+      default: 'px-4 h-12',
     },
   },
   defaultVariants: {
@@ -23,7 +23,7 @@ const bodyCellSpacingVariants = cva('', {
   variants: {
     size: {
       dense: 'px-2.5 py-2',
-      default: 'px-4 py-3',
+      default: 'px-4 h-12',
     },
   },
   defaultVariants: {
@@ -148,7 +148,7 @@ function DataGridTableHeadRowCell<TData>({
       data-pinned={isPinned || undefined}
       data-last-col={isLastLeftPinned ? 'left' : isFirstRightPinned ? 'right' : undefined}
       className={cn(
-        'relative h-10 text-left rtl:text-right align-middle font-normal text-accent-foreground [&:has([role=checkbox])]:pe-0',
+        'relative text-left rtl:text-right align-middle font-normal text-accent-foreground [&:has([role=checkbox])]:pe-0',
         headerCellSpacing,
         props.tableLayout?.cellBorder && 'border-e',
         props.tableLayout?.columnsResizable && column.getCanResize() && 'truncate',
@@ -297,7 +297,7 @@ function DataGridTableBodyRowExpandded<TData>({ row }: { row: Row<TData> }) {
 
   return (
     <tr className={cn(props.tableLayout?.rowBorder && '[&:not(:last-child)>td]:border-b')}>
-      <td colSpan={row.getVisibleCells().length}>
+      <td colSpan={row.getVisibleCells().length} style={{ backgroundColor: 'var(--color-table-expanded-content-bg)', boxShadow: 'inset 0 2px 4px -1px rgb(0 0 0 / 0.1)' }}>
         {table
           .getAllColumns()
           .find((column) => column.columnDef.meta?.expandedContent)
@@ -469,7 +469,7 @@ function DataGridTable<TData>() {
 
       <DataGridTableBody>
         {props.loadingMode === 'skeleton' && isLoading && pagination?.pageSize ? (
-          Array.from({ length: pagination.pageSize }).map((_, rowIndex) => (
+          Array.from({ length: props.skeletonRowCount ?? pagination.pageSize }).map((_, rowIndex) => (
             <DataGridTableBodyRowSkeleton key={rowIndex}>
               {table.getVisibleFlatColumns().map((column, colIndex) => {
                 return (

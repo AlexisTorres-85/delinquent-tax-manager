@@ -68,10 +68,12 @@
   --color-divider: #CFD3D1;               /* dividerBorder @ 72% opacity */
   --color-section-header: #FAF5E7;          /* sectionHeaderBg */
   
-  --color-table-header: #F0F5F3;            /* tableHeaderBg */
+  --color-table-header: #EEF5F4;            /* tableHeaderBg */
   --color-table-row: #ffffff;               /* tableRowBg */
-  --color-table-row-hover: #F0F5F2;         /* tableRowHoverBg */
-  --color-table-separator: #D3DAD7B3;         /* tableRowSeparator */
+  --color-table-row-hover: #F4FDFC;         /* tableRowHoverBg */
+  --color-table-separator: #E2E2E2;         /* tableRowSeparator */
+  --color-table-footer: #F4F4F5; 
+  --color-table-expanded-content-bg: #F4F4F5;   
 
   --color-menu-accent: #E9C554;             /* menuAccent */
   --color-sidebar-menu-from: #DBE8E6;       /* sidebarMenuBgFrom */
@@ -96,9 +98,10 @@
 
   --color-app-gradient-from: #62938D;       /* appGradientFrom */
   --color-app-gradient-to: #224B46;         /* appGradientTo */
-  
+
   --color-app-primary-toolbar: #62938D;        /* primaryToolbar */
-  --color-app-primary-toolbar-fg: #FFFFFF;     /* primaryToolbarFg */
+  --color-app-primary-toolbar-header: #FFFFFF;        /* primaryToolbarHeader */
+  --color-app-primary-toolbar-fg: #F4F4F5;     /* primaryToolbarFg */
 
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;

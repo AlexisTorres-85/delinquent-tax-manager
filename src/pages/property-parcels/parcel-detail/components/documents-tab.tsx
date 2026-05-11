@@ -8,7 +8,6 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Button } from '@/components/ui/button';
 import { FilePlus, ScanLine, FileText } from 'lucide-react';
 import { useDocuments } from '@/data/documents/hooks/use-documents';
@@ -100,11 +99,11 @@ function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNu
     const extraToolbarButtons = (
         <>
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0'>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isLoading}>
                 <FilePlus className='h-3.5 w-3.5' />
                 <span className='text-xs'>Add Document</span>
             </Button>
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0'>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isLoading}>
                 <ScanLine className='h-3.5 w-3.5' />
                 <span className='text-xs'>View Incoming Scans</span>
             </Button>
@@ -143,18 +142,6 @@ interface DocumentsTabProps {
 
 export function DocumentsTab({ parcelNumber, stickyTop }: DocumentsTabProps) {
     const { documents, isLoading, isRefreshing, lastUpdated, refetch } = useDocuments(parcelNumber);
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col gap-3 p-6">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-2/3" />
-            </div>
-        );
-    }
 
     return (
         <DocumentsTable

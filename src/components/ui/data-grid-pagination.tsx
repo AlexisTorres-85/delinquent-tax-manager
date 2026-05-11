@@ -1,4 +1,4 @@
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { useDataGrid } from '@/components/ui/data-grid';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 
 interface DataGridPaginationProps {
   sizes?: number[];
+  showAll?: boolean;
   sizesInfo?: string;
   sizesLabel?: string;
   sizesDescription?: string;
@@ -38,6 +39,12 @@ function DataGridPagination(props: DataGridPaginationProps) {
   const mergedProps: DataGridPaginationProps = { ...defaultProps, ...props };
   const showRowsPerPage = mergedProps.showRowsPerPage ?? true;
   const showInfo = mergedProps.showInfo ?? true;
+  const showAll = props.showAll ?? false;
+  const allSizes = mergedProps.sizes ?? [];
+  const currentPageSize = table.getState().pagination.pageSize;
+  const [selectedValue, setSelectedValue] = useState(() =>
+    allSizes.includes(currentPageSize) ? `${currentPageSize}` : 'all'
+  );
 
   const btnBaseClasses = 'size-7 p-0 text-sm';
   const btnArrowClasses = btnBaseClasses + ' rtl:transform rtl:rotate-180';
@@ -128,7 +135,7 @@ function DataGridPagination(props: DataGridPaginationProps) {
     <div
       data-slot="data-grid-pagination"
       className={cn(
-        'flex flex-wrap flex-col sm:flex-row items-center gap-2.5 py-2.5 px-4 sm:py-0 grow',
+        'flex flex-wrap flex-col sm:flex-row items-center py-3 px-6 sm:py-0 grow',
         showRowsPerPage || showInfo ? 'justify-between' : 'justify-center',
         mergedProps?.className,
       )}
@@ -141,11 +148,12 @@ function DataGridPagination(props: DataGridPaginationProps) {
             <>
               <div className="text-sm text-muted-foreground">Rows per page</div>
               <Select
-                value={`${pageSize}`}
+                value={selectedValue}
                 indicatorPosition="right"
                 onValueChange={(value) => {
-                  const newPageSize = Number(value);
+                  const newPageSize = value === 'all' ? recordCount : Number(value);
                   table.setPageSize(newPageSize);
+                  setSelectedValue(value);
                 }}
               >
                 <SelectTrigger className="w-fit" size="sm">
@@ -157,6 +165,9 @@ function DataGridPagination(props: DataGridPaginationProps) {
                       {size}
                     </SelectItem>
                   ))}
+                  {showAll && (
+                    <SelectItem value="all">All</SelectItem>
+                  )}
                 </SelectContent>
               </Select>
             </>

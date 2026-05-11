@@ -38,7 +38,7 @@ function TaxPaymentDetail({ row }: { row: TaxPayment }) {
     ];
 
     return (
-        <div className="px-16 py-6 bg-muted/30 border-t border-border">
+        <div className="px-16 py-6 border-t border-border">
             <div className="grid grid-cols-5 gap-x-6 gap-y-3">
                 {fields.map(({ label, value }) => (
                     <div key={label} className="flex flex-col gap-0.5">

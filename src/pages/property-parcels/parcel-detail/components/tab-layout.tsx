@@ -23,7 +23,7 @@ export interface FilterConfig {
     placeholder?: string;
 }
 
-export interface CatalisTabLayoutProps<T> {
+export interface TabLayoutProps<T> {
     /** Height of sticky elements above this component (e.g. tabs bar). */
     stickyTop?: number;
     /** Optional icon rendered to the left of the title/description. */
@@ -168,6 +168,15 @@ function useElapsedLabel(lastUpdated: Date | null | undefined): string {
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
+/**
+ * Ready-to-use tab layout with a sticky catalis header, toolbar (search, filters,
+ * export, print, refresh, maximize), optional banner, data grid with skeleton
+ * loading, and a sticky pagination footer.
+ *
+ * Usage:
+ *   <TabLayout title="My Tab" icon={<Icon />} table={table} recordCount={n}
+ *     isLoading={isLoading} onRefresh={refetch} globalFilter={...} ... />
+ */
 export function TabLayout<T extends object>({
     stickyTop = 0,
     title,
@@ -185,32 +194,24 @@ export function TabLayout<T extends object>({
     table,
     recordCount,
     isLoading = false,
-    paginationSizes = [10, 25, 50],
+    paginationSizes = [10, 25, 50, 100],
     banner,
     hideSearch = false,
     extraToolbarButtons,
     onRefresh,
-}: CatalisTabLayoutProps<T>) {
+}: TabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
     const isEmpty = table.getCoreRowModel().rows.length === 0 && !isLoading;
 
     const [maximized, setMaximized] = useState(false);
-    const [isRefreshing, setIsRefreshing] = useState(false);
-    const refreshTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
     function handleRefresh() {
-        if (isRefreshing) return;
-        setIsRefreshing(true);
+        if (isLoading) return;
         onRefresh?.();
-        refreshTimerRef.current = setTimeout(() => setIsRefreshing(false), 900);
     }
 
-    useEffect(() => {
-        return () => { if (refreshTimerRef.current) clearTimeout(refreshTimerRef.current); };
-    }, []);
-
-    // Close on Escape
+    // Close maximized view on Escape
     useEffect(() => {
         if (!maximized) return;
         const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setMaximized(false); };
@@ -247,17 +248,21 @@ export function TabLayout<T extends object>({
     const catalisHeader = (
         <div
             ref={catalisHeaderRef}
-            className='bg-app-primary-toolbar-fg pl-6 pr-6 pt-4 pb-4 flex items-center justify-between z-10'
+            className='bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex items-center justify-between z-10'
             style={maximized ? undefined : { position: 'sticky', top: stickyTop }}
         >
             <div className='flex items-center gap-2'>
                 {icon && (
                     <div className='shrink-0 text-muted-foreground'>
-                        {icon}
+                        {isLoading
+                            ? <img src='/images/loading.gif' className='h-8 w-8 object-contain' alt='Loading' />
+                            : icon}
                     </div>
                 )}
                 <div className='flex flex-col'>
-                    <h2 className='text-lg font-semibold text-neutral-900'>{title}</h2>
+                    <h2 className='text-lg font-semibold text-neutral-900'>
+                        {isLoading ? `Loading ${title}...` : title}
+                    </h2>
                     <p className='text-sm -mt-1 text-muted-foreground max-w-2xl'>{description}</p>
                 </div>
             </div>
@@ -277,7 +282,7 @@ export function TabLayout<T extends object>({
     const toolbar = (
         <div
             ref={toolbarRef}
-            className='flex items-center gap-2 px-6 py-4 border-b border-t border-divider bg-app-primary-toolbar-fg z-20'
+            className='flex items-center gap-2 px-6 py-4 h-14 border-b border-t border-divider bg-app-primary-toolbar-fg z-20'
             style={maximized ? undefined : { position: 'sticky', top: stickyTop + catalisHeaderHeight }}
         >
             {!hideSearch && (
@@ -288,13 +293,13 @@ export function TabLayout<T extends object>({
                         value={globalFilter}
                         onChange={(e) => onGlobalFilterChange(e.target.value)}
                         className='pl-8 h-8 text-sm w-full'
-                        disabled={isEmpty}
+                        disabled={isEmpty || isLoading}
                     />
                     {globalFilter && (
                         <button
                             onClick={() => onGlobalFilterChange('')}
-                            className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground'
-                        >
+                            disabled={isLoading}
+                            className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50'>
                             <X className='h-3.5 w-3.5' />
                         </button>
                     )}
@@ -303,7 +308,7 @@ export function TabLayout<T extends object>({
 
             {/* Dynamic filter dropdowns — each flex-1 */}
             {filters.map((filter, i) => (
-                <Select key={i} value={filter.value} onValueChange={filter.onChange} disabled={isEmpty}>
+                <Select key={i} value={filter.value} onValueChange={filter.onChange} disabled={isEmpty || isLoading}>
                     <SelectTrigger className='h-8 flex-1 text-sm'>
                         <SelectValue placeholder={filter.placeholder ?? 'All'} />
                     </SelectTrigger>
@@ -322,6 +327,7 @@ export function TabLayout<T extends object>({
                     variant='ghost'
                     size='sm'
                     onClick={onClearFilters}
+                    disabled={isLoading}
                     className='h-8 px-2 text-muted-foreground gap-1 shrink-0'
                 >
                     <X className='h-3.5 w-3.5' />
@@ -333,11 +339,11 @@ export function TabLayout<T extends object>({
 
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
 
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty} onClick={() => exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
                 <Download className='h-3.5 w-3.5' />
                 <span className='text-xs'>Export</span>
             </Button>
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty} onClick={() => printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
                 <Printer className='h-3.5 w-3.5' />
                 <span className='text-xs'>Print</span>
             </Button>
@@ -349,15 +355,16 @@ export function TabLayout<T extends object>({
                 <button
                     className='h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50'
                     title='Refresh'
-                    disabled={isRefreshing}
+                    disabled={isLoading}
                     onClick={handleRefresh}
                 >
-                    <RefreshCw className={`h-3.5 w-3.5 transition-transform ${isRefreshing ? 'animate-spin' : ''}`} />
+                    <RefreshCw className={`h-3.5 w-3.5 transition-transform ${isLoading ? 'animate-spin' : ''}`} />
                 </button>
                 <div className='w-px self-stretch bg-input' />
                 <button
-                    className='h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors'
+                    className='h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50'
                     title={maximized ? 'Minimize' : 'Maximize'}
+                    disabled={isLoading}
                     onClick={() => setMaximized((v) => !v)}
                 >
                     {maximized ? <Minimize2 className='h-3.5 w-3.5' /> : <Maximize2 className='h-3.5 w-3.5' />}
@@ -372,15 +379,16 @@ export function TabLayout<T extends object>({
             recordCount={recordCount}
             isLoading={isLoading}
             loadingMode='skeleton'
+            skeletonRowCount={2}
             tableLayout={{ headerSticky: true }}
             tableClassNames={{ headerSticky: 'sticky z-10 [top:var(--thead-top,0px)]' }}
         >
             <DataGridContainer>
                 <DataGridTable />
             </DataGridContainer>
-            {!isEmpty && (
-                <div className='sticky bottom-0 z-10 border-t border-border bg-background px-4 py-4 [box-shadow:0_1px_0_0_var(--background)]'>
-                    <DataGridPagination sizes={paginationSizes} />
+            {!isEmpty && recordCount > paginationSizes[0] && (
+                <div className='sticky bottom-0 z-10 border-t border-divider bg-table-footer py-2 [box-shadow:0_1px_0_0_var(--background)]'>
+                    <DataGridPagination sizes={paginationSizes} showAll />
                 </div>
             )}
         </DataGrid>

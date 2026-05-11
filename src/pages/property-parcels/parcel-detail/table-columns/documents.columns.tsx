@@ -36,11 +36,7 @@ export const documentColumns: ColumnDef<ParcelDocument>[] = [
    {
     id: 'actions',
     header: () => (
-        <div className="flex justify-end pr-1">
-            <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">
-                
-            </span>
-        </div>
+        <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wide">Actions</span>
     ),
     size: 120,
     cell: ({ row }) => (

@@ -118,112 +118,109 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
 
   return (
     <div className="px-6 py-6 border-b border-divider">
-  {/* Owner row */}
-  <div className="flex items-start justify-between gap-4 mb-4">
-    <div>
-      <h2 className="text-lg font-semibold leading-tight">
-        {parcel.ownerName}
-      </h2>
+      <div className="flex items-start justify-between gap-4 mb-4">
+        <div>
+          <h2 className="text-lg font-semibold leading-tight">
+            {parcel.ownerName}
+          </h2>
 
-      <p className="text-sm text-muted-foreground mt-0.5">
-        {parcel.propertyAddress}
-      </p>
-    </div>
-    <div className="flex flex-col items-end gap-2 shrink-0">
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold">Status:</span>
-        <StatusBadge status={parcel.status} />
+          <p className="text-sm text-muted-foreground mt-0.5">
+            {parcel.propertyAddress}
+          </p>
+        </div>
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold">Status:</span>
+            <StatusBadge status={parcel.status} />
+          </div>
+          <div className="flex items-center gap-2">
+            <span className="text-sm font-semibold">Stage:</span>
+            <StageBadge stage={parcel.stage} />
+          </div>
+        </div>
       </div>
-      <div className="flex items-center gap-2">
-        <span className="text-sm font-semibold">Stage:</span>
-        <StageBadge stage={parcel.stage} />
-      </div>
-    </div>
-  </div>
 
-  {/* Summary row */}
-  <div className="flex items-stretch gap-6 py-5 border-t border-divider overflow-x-auto">
-    <InfoCard label="Municipality" value={parcel.municipality} />
+      <div className="flex items-stretch gap-6 py-5 border-t border-divider overflow-x-auto">
+        <InfoCard label="Municipality" value={parcel.municipality} />
 
-    <VDivider />
+        <VDivider />
 
-    <InfoCard
-      label="Total Due"
-      value={
-        <span className="text-destructive font-semibold">
-          ${parcel.amountDue.toLocaleString('en-US', {
-            minimumFractionDigits: 2,
-          })}
-        </span>
-      }
-    />
-
-    <VDivider />
-
-    <InfoCard
-      label="Assessed Value"
-      value={`$${parcel.assessedValue.toLocaleString()}`}
-    />
-
-    <VDivider />
-
-    <InfoCard
-      label="Years Delinquent"
-      value={
-        yearsDelinquent > 0
-          ? `${yearsDelinquent} yr${yearsDelinquent !== 1 ? 's' : ''}`
-          : '—'
-      }
-    />
-
-    <VDivider />
-
-    <InfoCard
-      label="Delinquent Years"
-      value={parcel.taxYears.join(', ')}
-    />
-
-    <VDivider />
-
-    <InfoCard label="Lot Size" value={parcel.lotSize} />
-
-    <VDivider />
-
-    <InfoCard
-      label="Payment Plan"
-      value={
-         <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-            Active
-          </Badge>
-      }
-    />
-  </div>
-
-  {/* Flags row */}
-  <div className="flex flex-wrap items-center gap-2 pt-6 border-t border-divider">
-    <span className="font-semibold text-sm shrink-0 mr-1">
-      Flags:
-    </span>
-
-    {ALL_FLAGS.map((flag) => {
-      const active = parcel.flags.includes(flag);
-
-      return (
-        <Badge
-          key={flag}
-          variant={active ? 'destructive' : 'secondary'}
-          className={
-            active
-              ? 'px-2 py-1 font-medium'
-              : 'px-2 py-1 font-medium bg-muted text-muted-foreground'
+        <InfoCard
+          label="Total Due"
+          value={
+            <span className="text-destructive font-semibold">
+              ${parcel.amountDue.toLocaleString('en-US', {
+                minimumFractionDigits: 2,
+              })}
+            </span>
           }
-        >
-          {flag}
-        </Badge>
-      );
-    })}
-  </div>
-</div>
+        />
+
+        <VDivider />
+
+        <InfoCard
+          label="Assessed Value"
+          value={`$${parcel.assessedValue.toLocaleString()}`}
+        />
+
+        <VDivider />
+
+        <InfoCard
+          label="Years Delinquent"
+          value={
+            yearsDelinquent > 0
+              ? `${yearsDelinquent} yr${yearsDelinquent !== 1 ? 's' : ''}`
+              : '—'
+          }
+        />
+
+        <VDivider />
+
+        <InfoCard
+          label="Delinquent Years"
+          value={parcel.taxYears.join(', ')}
+        />
+
+        <VDivider />
+
+        <InfoCard label="Lot Size" value={parcel.lotSize} />
+
+        <VDivider />
+
+        <InfoCard
+          label="Payment Plan"
+          value={
+            <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
+              Active
+            </Badge>
+          }
+        />
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2 pt-6 border-t border-divider">
+        <span className="font-semibold text-sm shrink-0 mr-1">
+          Flags:
+        </span>
+
+        {ALL_FLAGS.map((flag) => {
+          const active = parcel.flags.includes(flag);
+
+          return (
+            <Badge
+              key={flag}
+              variant={active ? 'destructive' : 'secondary'}
+              className={
+                active
+                  ? 'px-2 py-1 font-medium'
+                  : 'px-2 py-1 font-medium bg-muted text-muted-foreground'
+              }
+            >
+              {flag}
+            </Badge>
+          );
+        })}
+      </div>
+    </div>
   );
 }
 

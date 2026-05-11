@@ -55,6 +55,8 @@ export interface DataGridProps<TData extends object> {
   isLoading?: boolean;
   loadingMode?: 'skeleton' | 'spinner';
   loadingMessage?: ReactNode | string;
+  /** Number of skeleton rows to show while loading. Defaults to the current page size. */
+  skeletonRowCount?: number;
   emptyMessage?: ReactNode | string;
   tableLayout?: {
     dense?: boolean;

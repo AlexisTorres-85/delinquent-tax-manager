@@ -9,7 +9,6 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { Skeleton } from '@/components/ui/skeleton';
 import { useTaxPayments } from '@/data/tax-payments/hooks/use-tax-payments';
 import type { TaxPayment } from '@/data/tax-payments/types';
 import { Receipt } from 'lucide-react';
@@ -133,19 +132,7 @@ interface TaxPaymentsTabProps {
 }
 
 export function TaxPaymentsTab({ parcelNumber, stickyTop }: TaxPaymentsTabProps) {
-    const { payments, isLoading, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber);
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col gap-3 p-6">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-            </div>
-        );
-    }
+    const { payments, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber);
 
     return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} />;
 }

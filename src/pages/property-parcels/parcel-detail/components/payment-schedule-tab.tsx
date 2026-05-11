@@ -8,7 +8,6 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { Skeleton } from '@/components/ui/skeleton';
 import { usePaymentSchedule } from '@/data/payment-schedule/hooks/use-payment-schedule';
 import type { PaymentScheduleEntry, PaymentPlanSummary } from '@/data/payment-schedule/types';
 import { CalendarDays } from 'lucide-react';
@@ -123,19 +122,7 @@ interface PaymentScheduleTabProps {
 }
 
 export function PaymentScheduleTab({ parcelNumber, stickyTop }: PaymentScheduleTabProps) {
-    const { plan, isLoading, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber);
-
-    if (isLoading) {
-        return (
-            <div className="flex flex-col gap-3 p-6">
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-                <Skeleton className="h-10 w-full" />
-            </div>
-        );
-    }
+    const { plan, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber);
 
     return (
         <PaymentScheduleTable
