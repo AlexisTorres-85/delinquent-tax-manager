@@ -14,6 +14,8 @@ const STATUS_COLORS: Record<ParcelStatus, ColorStyle> = {
   'Post-Deed Processing':    { bg: '#0d9488', text: '#fff' }, // teal-600
   'Financial Processing':    { bg: '#16a34a', text: '#fff' }, // green-600
   'On Hold':                 { bg: '#6b7280', text: '#fff' }, // gray-500
+  'Review':                  { bg: '#0891b2', text: '#fff' }, // cyan-600
+  'Legal':                   { bg: '#1d4ed8', text: '#fff' }, // blue-700
   'Complete':                { bg: '#15803d', text: '#fff' }, // green-700
 };
 
@@ -36,7 +38,6 @@ const STAGE_COLORS: Record<ParcelStage, ColorStyle> = {
   'Title Search':               { bg: '#ffedd5', text: '#9a3412' }, // orange-100 / orange-800
   'Notice of Tax Deed App':     { bg: '#fed7aa', text: '#9a3412' }, // orange-200 / orange-800
   'Letter of Affidavit':        { bg: '#fdba74', text: '#7c2d12' }, // orange-300 / orange-900
-  'Legal Description Review':   { bg: '#fb923c', text: '#fff' },    // orange-400 / white
   'Owner/Occupant Notification':{ bg: '#f97316', text: '#fff' },    // orange-500 / white
   'Utility Notification':       { bg: '#ea580c', text: '#fff' },    // orange-600 / white
 
@@ -70,6 +71,14 @@ const STAGE_COLORS: Record<ParcelStage, ColorStyle> = {
   'Proceeds Notice':             { bg: '#bbf7d0', text: '#14532d' }, // green-200 / green-900
   'Proceeds Affidavit Returned': { bg: '#86efac', text: '#14532d' }, // green-300 / green-900
   'Proceeds Check Issued':       { bg: '#4ade80', text: '#14532d' }, // green-400 / green-900
+
+  // Review → cyan tones
+  'Legal Description Review':     { bg: '#cffafe', text: '#155e75' }, // cyan-100 / cyan-800
+  'Legal Description Correction': { bg: '#a5f3fc', text: '#164e63' }, // cyan-200 / cyan-900
+  'Awaiting Legal Description':   { bg: '#67e8f9', text: '#164e63' }, // cyan-300 / cyan-900
+
+  // Legal → blue tones
+  'Legal Description Verification': { bg: '#dbeafe', text: '#1e3a8a' }, // blue-100 / blue-900
 
   // On Hold → gray tones
   'Bankruptcy':              { bg: '#f3f4f6', text: '#374151' }, // gray-100 / gray-700

@@ -52,9 +52,8 @@ export const WORKFLOW_DUMMY_DATA: WorkflowStatusRecord[] = [
       { id: 'stage-03-01', name: 'Title Search',                sortOrder: 1 },
       { id: 'stage-03-02', name: 'Notice of Tax Deed App',      sortOrder: 2 },
       { id: 'stage-03-03', name: 'Letter of Affidavit',         sortOrder: 3 },
-      { id: 'stage-03-04', name: 'Legal Description Review',    sortOrder: 4 },
-      { id: 'stage-03-05', name: 'Owner/Occupant Notification', sortOrder: 5 },
-      { id: 'stage-03-06', name: 'Utility Notification',        sortOrder: 6 },
+      { id: 'stage-03-04', name: 'Owner/Occupant Notification', sortOrder: 4 },
+      { id: 'stage-03-05', name: 'Utility Notification',        sortOrder: 5 },
     ],
   },
   {
@@ -133,6 +132,24 @@ export const WORKFLOW_DUMMY_DATA: WorkflowStatusRecord[] = [
     stages: [
       { id: 'stage-10-01', name: 'Paid in Full',                  sortOrder: 1 },
       { id: 'stage-10-02', name: 'Move to Treasurer',             sortOrder: 2 },
+    ],
+  },
+  {
+    id: 'status-11',
+    name: 'Review',
+    sortOrder: 11,
+    stages: [
+      { id: 'stage-11-01', name: 'Legal Description Review',      sortOrder: 1 },
+      { id: 'stage-11-02', name: 'Legal Description Correction',  sortOrder: 2 },
+      { id: 'stage-11-03', name: 'Awaiting Legal Description',    sortOrder: 3 },
+    ],
+  },
+  {
+    id: 'status-12',
+    name: 'Legal',
+    sortOrder: 12,
+    stages: [
+      { id: 'stage-12-01', name: 'Legal Description Verification', sortOrder: 1 },
     ],
   },
 ];

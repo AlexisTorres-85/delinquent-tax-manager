@@ -8,6 +8,8 @@ export type ParcelStatus =
   | 'Post-Deed Processing'
   | 'Financial Processing'
   | 'On Hold'
+  | 'Review'
+  | 'Legal'
   | 'Complete';
 
 export type ParcelStage =
@@ -26,7 +28,6 @@ export type ParcelStage =
   | 'Title Search'
   | 'Notice of Tax Deed App'
   | 'Letter of Affidavit'
-  | 'Legal Description Review'
   | 'Owner/Occupant Notification'
   | 'Utility Notification'
   // Tax Deed Preparation
@@ -55,6 +56,12 @@ export type ParcelStage =
   | 'Proceeds Notice'
   | 'Proceeds Affidavit Returned'
   | 'Proceeds Check Issued'
+  // Review
+  | 'Legal Description Review'
+  | 'Legal Description Correction'
+  | 'Awaiting Legal Description'
+  // Legal
+  | 'Legal Description Verification'
   // Exceptions / Holds
   | 'Bankruptcy'
   | 'Litigation / Legal Hold'
@@ -69,13 +76,15 @@ export type ParcelStage =
 export const STAGES_BY_STATUS: Record<ParcelStatus, ParcelStage[]> = {
   'Delinquent': ['Initial Delinquency', 'Early Notice Issued', 'Final Notice Issued', 'Letter Rpt Expiration', '90-Day Expiration Window', 'Pre-Enforcement Review', 'Escalation Ready'],
   'Payment Plan': ['In Payment Plan', 'Payment Plan Letter Sent'],
-  'Early Enforcement': ['Title Search', 'Notice of Tax Deed App', 'Letter of Affidavit', 'Legal Description Review', 'Owner/Occupant Notification', 'Utility Notification'],
+  'Early Enforcement': ['Title Search', 'Notice of Tax Deed App', 'Letter of Affidavit', 'Owner/Occupant Notification', 'Utility Notification'],
   'Tax Deed Preparation': ['Prepare Tax Deed', 'Create Tax Deed Verify & Taxes Form', 'Finalize Tax Deed Verify & Taxes Form', 'Create County Clerk Memo', 'Submit to County Clerk', 'Submit to P&D', 'Treasurer Review', 'Finance Committee Review'],
   'Advertisement / Waiting': ['Advertise Tax Deed', 'Post Advertisement Wait Period'],
   'Auction / Sale': ['Send to Auction', 'Finalize Sale', 'Over the Counter Sales'],
   'Post-Deed Processing': ['Complete Tax Deed', 'County Tax Deed', 'Eviction Proceedings', 'Quit Claim'],
   'Financial Processing': ['Finance Journal Entry', 'Proceeds Notice', 'Proceeds Affidavit Returned', 'Proceeds Check Issued'],
   'On Hold': ['Bankruptcy', 'Litigation / Legal Hold', 'Appeal Pending', 'Estate / Probate', 'Administrative Review', 'Hardship Review'],
+  'Review': ['Legal Description Review', 'Legal Description Correction', 'Awaiting Legal Description'],
+  'Legal': ['Legal Description Verification'],
   'Complete': ['Paid in Full', 'Move to Treasurer'],
 };
 

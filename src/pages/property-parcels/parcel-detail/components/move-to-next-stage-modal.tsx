@@ -34,6 +34,8 @@ const ALL_STATUSES: ParcelStatus[] = [
     'Post-Deed Processing',
     'Financial Processing',
     'On Hold',
+    'Review',
+    'Legal',
     'Complete',
 ];
 

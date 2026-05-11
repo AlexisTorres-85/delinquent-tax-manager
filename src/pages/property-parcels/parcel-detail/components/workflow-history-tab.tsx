@@ -45,6 +45,8 @@ const WORKFLOW_STATUSES: WorkflowStatus[] = [
     'Post-Deed Processing',
     'Financial Processing',
     'On Hold',
+    'Review',
+    'Legal',
     'Complete',
 ];
 
