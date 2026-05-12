@@ -126,6 +126,19 @@
       transform: translateY(calc(-100% - var(--gap)));
     }
   }
+  @keyframes progress-indeterminate {
+    0% {
+      transform: translateX(-100%);
+      width: 40%;
+    }
+    50% {
+      width: 60%;
+    }
+    100% {
+      transform: translateX(300%);
+      width: 40%;
+    }
+  }
 }
 
 /** Global Styles **/

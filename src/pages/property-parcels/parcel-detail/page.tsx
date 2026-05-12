@@ -21,6 +21,9 @@ import { PaymentScheduleTab } from './components/payment-schedule-tab';
 import { DocumentsTab } from './components/documents-tab';
 import { ContactsTab } from './components/contacts-tab';
 import { WorkflowHistoryTab } from './components/workflow-history-tab';
+import { NotesTab } from './components/notes-tab';
+import { ExpensesTab } from './components/expenses-tab';
+import { LegalDescriptionTab } from './components/legal-description-tab';
 
 const ALL_FLAGS: { key: keyof ParcelFlags; label: string; description: string }[] = [
   {
@@ -381,7 +384,19 @@ function ParcelDetailContent({ parcel }: { parcel: Parcel }) {
         <WorkflowHistoryTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
       </TabsContent>
 
-      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History').map((tab) => (
+      <TabsContent value="Notes" className="mt-0">
+        <NotesTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+      </TabsContent>
+
+      <TabsContent value="Expenses" className="mt-0">
+        <ExpensesTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+      </TabsContent>
+
+      <TabsContent value="Legal Description" className="mt-0">
+        <LegalDescriptionTab parcel={parcel} parcelNumber={parcel.parcelNumber} isLoading={false} stickyTop={stickyTop} />
+      </TabsContent>
+
+      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History' && tab !== 'Notes' && tab !== 'Expenses' && tab !== 'Legal Description').map((tab) => (
         <TabsContent key={tab} value={tab} className="p-6 mt-0">
           <div className="flex items-center justify-center text-sm text-muted-foreground">
             {tab}

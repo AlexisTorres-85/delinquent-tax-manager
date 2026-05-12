@@ -9,6 +9,7 @@ import {
     type ColumnFiltersState,
 } from '@tanstack/react-table';
 import { History, ChevronDown } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkflowHistory } from '@/data/workflow/workflow-history/hooks/use-workflow-history';
 import type { ParcelWorkflowEntry, WorkflowStatus } from '@/data/workflow/workflow-history/types';
 import { WORKFLOWS_DUMMY_DATA } from '@/data/workflow/workflow-history/data/workflows-dummy-data';
@@ -169,7 +170,7 @@ interface WorkflowHistoryTabProps {
 }
 
 export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHistoryTabProps) {
-    const { entries, isRefreshing, lastUpdated, refetch } = useWorkflowHistory(parcelNumber);
+    const { entries, isLoading, isRefreshing, lastUpdated, refetch } = useWorkflowHistory(parcelNumber);
 
     const sharedHeaderRef = useRef<HTMLDivElement>(null);
     const [sharedHeaderHeight, setSharedHeaderHeight] = useState(0);
@@ -223,14 +224,42 @@ export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHist
             {/* Section header shared by all workflows */}
             <div ref={sharedHeaderRef} className="bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex border-b border-divider items-center gap-2 sticky z-10" style={{ top: stickyTop }}>
                 <div className="shrink-0 text-muted-foreground">
-                    <History className="h-8 w-8" />
+                    {isRefreshing
+                        ? <img src='/images/loading.gif' className='h-8 w-8 object-contain' alt='Loading' />
+                        : <History className="h-8 w-8" />}
                 </div>
                 <div className="flex flex-col">
-                    <h2 className="text-lg font-semibold text-neutral-900">Workflow History</h2>
+                    <h2 className="text-lg font-semibold text-neutral-900">
+                        {isRefreshing ? 'Loading Workflow History...' : 'Workflow History'}
+                    </h2>
                     <p className="text-sm -mt-1 text-muted-foreground">Full audit trail of status changes, stage transitions, and actions taken on this parcel.</p>
                 </div>
             </div>
 
+            {isLoading ? (
+                // Skeleton accordion items shown during initial load
+                <div>
+                    {workflows.length > 0 ? workflows.map((workflow) => (
+                        <div key={workflow.workflowId} className="border-b border-border">
+                            <div className="flex items-center gap-3 px-6 py-4">
+                                <Skeleton className="h-4 w-4 rounded" />
+                                <Skeleton className="h-4 w-36" />
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-5 w-14 rounded-md" />
+                            </div>
+                        </div>
+                    )) : Array.from({ length: 2 }).map((_, i) => (
+                        <div key={i} className="border-b border-border">
+                            <div className="flex items-center gap-3 px-6 py-4">
+                                <Skeleton className="h-4 w-4 rounded" />
+                                <Skeleton className="h-4 w-36" />
+                                <Skeleton className="h-4 w-24" />
+                                <Skeleton className="h-5 w-14 rounded-md" />
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            ) : (
             <Accordion type="single" collapsible defaultValue={defaultOpen} indicator="none">
                 {workflows.map((workflow) => {
                     const workflowEntries = entriesByWorkflowId[workflow.workflowId] ?? [];
@@ -263,6 +292,7 @@ export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHist
                     );
                 })}
             </Accordion>
+            )}
         </div>
     );
 }

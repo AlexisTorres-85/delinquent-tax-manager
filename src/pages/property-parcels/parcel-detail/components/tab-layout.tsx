@@ -37,8 +37,8 @@ export interface TabLayoutProps<T> {
     /** Search input placeholder. */
     searchPlaceholder?: string;
     /** Controlled global filter value. */
-    globalFilter: string;
-    onGlobalFilterChange: (v: string) => void;
+    globalFilter?: string;
+    onGlobalFilterChange?: (v: string) => void;
     /** Dynamic filter dropdowns rendered after the search. Each gets flex-1. */
     filters?: FilterConfig[];
     /** Shows a "Clear" button when true. */
@@ -48,10 +48,10 @@ export interface TabLayoutProps<T> {
     isCatalisData?: boolean;
     /** Timestamp of when the data was last fetched from the API. */
     lastUpdated?: Date | null;
-    /** react-table instance. */
-    table: Table<T>;
+    /** react-table instance. Pass undefined to render children instead of a data grid. */
+    table?: Table<T>;
     /** Row count to display in pagination (typically filtered row count). */
-    recordCount: number;
+    recordCount?: number;
     isLoading?: boolean;
     paginationSizes?: number[];
     /** Optional banner rendered between the toolbar and the data grid. */
@@ -66,6 +66,12 @@ export interface TabLayoutProps<T> {
     getRowClassName?: (row: T) => string | undefined;
     /** When true, suppresses the catalis header (title/description/icon) section. */
     hideHeader?: boolean;
+    /** Extra className applied to the title+description div inside the catalis header. */
+    headerClassName?: string;
+    /** Action buttons rendered on the right side of the catalis header. */
+    headerActions?: ReactNode;
+    /** Custom content rendered below the header when no table is provided. */
+    children?: ReactNode;
 }
 
 // ─── Export / print utilities ─────────────────────────────────────────────────
@@ -187,7 +193,7 @@ export function TabLayout<T extends object>({
     parcelNumber,
     description,
     searchPlaceholder = 'Search...',
-    globalFilter,
+    globalFilter = '',
     onGlobalFilterChange,
     filters = [],
     hasActiveFilters = false,
@@ -196,7 +202,7 @@ export function TabLayout<T extends object>({
     lastUpdated,
     icon,
     table,
-    recordCount,
+    recordCount = 0,
     isLoading = false,
     paginationSizes = [10, 25, 50, 100],
     banner,
@@ -205,10 +211,13 @@ export function TabLayout<T extends object>({
     onRefresh,
     getRowClassName,
     hideHeader = false,
+    children,
+    headerClassName,
+    headerActions,
 }: TabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
-    const isEmpty = table.getCoreRowModel().rows.length === 0 && !isLoading;
+    const isEmpty = !table || (table.getCoreRowModel().rows.length === 0 && !isLoading);
 
     const [maximized, setMaximized] = useState(false);
 
@@ -227,6 +236,8 @@ export function TabLayout<T extends object>({
 
     const catalisHeaderRef = useRef<HTMLDivElement>(null);
     const [catalisHeaderHeight, setCatalisHeaderHeight] = useState(0);
+    const bannerRef = useRef<HTMLDivElement>(null);
+    const [bannerHeight, setBannerHeight] = useState(0);
     const toolbarRef = useRef<HTMLDivElement>(null);
     const [toolbarHeight, setToolbarHeight] = useState(0);
 
@@ -240,6 +251,15 @@ export function TabLayout<T extends object>({
     }, [maximized]);
 
     useEffect(() => {
+        const el = bannerRef.current;
+        if (!el) return;
+        setBannerHeight(el.offsetHeight);
+        const obs = new ResizeObserver(() => setBannerHeight(el.offsetHeight));
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, [maximized, banner]);
+
+    useEffect(() => {
         const el = toolbarRef.current;
         if (!el) return;
         setToolbarHeight(el.offsetHeight);
@@ -249,12 +269,12 @@ export function TabLayout<T extends object>({
     }, [maximized]);
 
     // Normal-mode thead top (in maximized mode --thead-top is 0 on the scroll wrapper).
-    const theadTop = stickyTop + (hideHeader ? 0 : catalisHeaderHeight) + toolbarHeight;
+    const theadTop = stickyTop + (hideHeader ? 0 : catalisHeaderHeight) + bannerHeight + toolbarHeight;
 
     const catalisHeader = (
         <div
             ref={catalisHeaderRef}
-            className='bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex items-center justify-between z-10'
+            className={`bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex items-center justify-between z-10${headerClassName ? ` ${headerClassName}` : ''}`}
             style={maximized ? undefined : { position: 'sticky', top: stickyTop }}
         >
             <div className='flex items-center gap-2'>
@@ -282,6 +302,11 @@ export function TabLayout<T extends object>({
                     </div>
                 </div>
             )}
+            {headerActions && (
+                <div className='flex items-center gap-2 ml-auto'>
+                    {headerActions}
+                </div>
+            )}
         </div>
     );
 
@@ -297,13 +322,13 @@ export function TabLayout<T extends object>({
                     <Input
                         placeholder={searchPlaceholder}
                         value={globalFilter}
-                        onChange={(e) => onGlobalFilterChange(e.target.value)}
+                        onChange={(e) => onGlobalFilterChange?.(e.target.value)}
                         className='pl-8 h-8 text-sm w-full'
                         disabled={isEmpty || isLoading}
                     />
                     {globalFilter && (
                         <button
-                            onClick={() => onGlobalFilterChange('')}
+                            onClick={() => onGlobalFilterChange?.('')}
                             disabled={isLoading}
                             className='absolute right-2 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground disabled:opacity-50'>
                             <X className='h-3.5 w-3.5' />
@@ -345,11 +370,11 @@ export function TabLayout<T extends object>({
 
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
 
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => table && exportToCsv(table, parcelNumber ? `${title} - ${parcelNumber}` : title)}>
                 <Download className='h-3.5 w-3.5' />
                 <span className='text-xs'>Export</span>
             </Button>
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isEmpty || isLoading} onClick={() => table && printTable(table, parcelNumber ? `${title} — ${parcelNumber}` : title)}>
                 <Printer className='h-3.5 w-3.5' />
                 <span className='text-xs'>Print</span>
             </Button>
@@ -379,7 +404,7 @@ export function TabLayout<T extends object>({
         </div>
     );
 
-    const dataGrid = (
+    const dataGrid = table ? (
         <DataGrid
             table={table}
             recordCount={recordCount}
@@ -399,7 +424,7 @@ export function TabLayout<T extends object>({
                 </div>
             )}
         </DataGrid>
-    );
+    ) : null;
 
     if (maximized) {
         // Flex-column layout: header/banner/toolbar are pinned at top (no sticky needed),
@@ -408,9 +433,10 @@ export function TabLayout<T extends object>({
             <div className='fixed inset-0 z-50 bg-background flex flex-col'>
                 {catalisHeader}
                 {banner}
-                {toolbar}
+                {table && toolbar}
                 <div className='flex-1 min-h-0 overflow-y-auto' style={{ '--thead-top': '0px' } as CSSProperties}>
                     {dataGrid}
+                    {!table && children}
                 </div>
             </div>,
             document.body,
@@ -420,9 +446,18 @@ export function TabLayout<T extends object>({
     return (
         <div style={{ '--thead-top': `${theadTop}px` } as CSSProperties}>
             {!hideHeader && catalisHeader}
-            {banner}
-            {toolbar}
+            {banner && (
+                <div
+                    ref={bannerRef}
+                    className='sticky z-10'
+                    style={{ top: stickyTop + (hideHeader ? 0 : catalisHeaderHeight) }}
+                >
+                    {banner}
+                </div>
+            )}
+            {table && toolbar}
             {dataGrid}
+            {!table && children}
         </div>
     );
 }

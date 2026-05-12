@@ -40,6 +40,14 @@ export type Parcel = {
   lotSize: string;
   assessedValue: number;
   paymentHistory: PaymentRecord[];
+  /** Legal description fields */
+  townRange?: string;
+  lot?: string;
+  section?: string;
+  block?: string;
+  gcsLegal?: string;
+  researchLegal?: string;
+  approvedLegal?: string;
 };
 
 /**
