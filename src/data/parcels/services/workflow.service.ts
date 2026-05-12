@@ -6,8 +6,8 @@
  * the hooks and components above this layer need no changes.
  */
 
-import { WORKFLOW_DUMMY_DATA } from '../data/workflow-dummy-data';
-import type { WorkflowStatusRecord } from '../data/workflow-dummy-data';
+import { WORKFLOW_STATUS_DEFINITIONS } from '@/data/workflow/workflow-status-definitions';
+import type { WorkflowStatusRecord } from '@/data/workflow/workflow-status-definitions';
 
 export const workflowService = {
   /**
@@ -15,6 +15,6 @@ export const workflowService = {
    * TODO: replace with → return fetch('/api/workflow/statuses').then(r => r.json())
    */
   async getStatuses(): Promise<WorkflowStatusRecord[]> {
-    return Promise.resolve(WORKFLOW_DUMMY_DATA);
+    return Promise.resolve([...WORKFLOW_STATUS_DEFINITIONS] as WorkflowStatusRecord[]);
   },
 };

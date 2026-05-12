@@ -22,7 +22,7 @@ import {
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
 import { STAGES_BY_STATUS } from '@/data/parcels/types';
 import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
-import type { ParcelWorkflowEntry } from '@/data/workflow-history/types';
+import type { ParcelWorkflowEntry } from '@/data/workflow/workflow-history/types';
 
 const ALL_STATUSES: ParcelStatus[] = [
     'Delinquent',

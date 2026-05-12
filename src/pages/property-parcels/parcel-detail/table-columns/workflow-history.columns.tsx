@@ -21,7 +21,7 @@ import {
   Ban,
 } from 'lucide-react';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
-import type { ParcelWorkflowEntry, WorkflowActionTaken } from '@/data/workflow-history/types';
+import type { ParcelWorkflowEntry, WorkflowActionTaken } from '@/data/workflow/workflow-history/types';
 
 export function createWorkflowHistoryColumns(
     onMoveToNextStage: (entry: ParcelWorkflowEntry) => void,

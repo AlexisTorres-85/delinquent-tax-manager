@@ -130,15 +130,21 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
     ),
   },
   {
-    accessorKey: 'status',
+    accessorKey: 'activeWorkflow',
     header: 'Status / Stage',
     size: 260,
-    cell: ({ row }) => (
-      <div className="flex items-center gap-2 flex-wrap">
-        <StatusBadge status={row.original.status} />
-        <StageBadge stage={row.original.stage} />
-      </div>
-    ),
+    cell: ({ row }) => {
+      const wf = row.original.activeWorkflow;
+      if (!wf) {
+        return <span className="text-xs text-muted-foreground italic">No Workflow detected</span>;
+      }
+      return (
+        <div className="flex items-center gap-2 flex-wrap">
+          <StatusBadge status={wf.status} />
+          <StageBadge stage={wf.stage} />
+        </div>
+      );
+    },
   },
   {
     accessorKey: 'lastPaymentDate',
@@ -189,7 +195,7 @@ export function ParcelsTable({ data, pageSize = 10, columnVisibility, onColumnVi
     <div className="w-full min-w-[980px]">
       <ScopeSnapshot
         scopedCount={data.length}
-        delinquentCount={data.filter((p) => p.status === 'Delinquent').length}
+        delinquentCount={data.filter((p) => p.activeWorkflow?.status === 'Delinquent').length}
         noPaymentCount={data.filter((p) => p.lastPaymentDate === null).length}
         totalDue={data.reduce((sum, p) => sum + p.amountDue, 0)}
       />

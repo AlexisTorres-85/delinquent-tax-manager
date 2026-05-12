@@ -1,94 +1,18 @@
-export type ParcelStatus =
-  | 'Delinquent'
-  | 'Payment Plan'
-  | 'Early Enforcement'
-  | 'Tax Deed Preparation'
-  | 'Advertisement / Waiting'
-  | 'Auction / Sale'
-  | 'Post-Deed Processing'
-  | 'Financial Processing'
-  | 'On Hold'
-  | 'Review'
-  | 'Legal'
-  | 'Complete';
+import type { ParcelStatus, ParcelStage } from '@/data/workflow/workflow-status-definitions';
+export { STAGES_BY_STATUS, type ParcelStatus, type ParcelStage } from '@/data/workflow/workflow-status-definitions';
+export type { ParcelWorkflowEntry as ParcelActiveWorkflow } from '@/data/workflow/workflow-history/types';
 
-export type ParcelStage =
-  // Delinquent
-  | 'Initial Delinquency'
-  | 'Early Notice Issued'
-  | 'Final Notice Issued'
-  | 'Letter Rpt Expiration'
-  | '90-Day Expiration Window'
-  | 'Pre-Enforcement Review'
-  | 'Escalation Ready'
-  // Payment Plan
-  | 'In Payment Plan'
-  | 'Payment Plan Letter Sent'
-  // Early Enforcement
-  | 'Title Search'
-  | 'Notice of Tax Deed App'
-  | 'Letter of Affidavit'
-  | 'Owner/Occupant Notification'
-  | 'Utility Notification'
-  // Tax Deed Preparation
-  | 'Prepare Tax Deed'
-  | 'Create Tax Deed Verify & Taxes Form'
-  | 'Finalize Tax Deed Verify & Taxes Form'
-  | 'Create County Clerk Memo'
-  | 'Submit to County Clerk'
-  | 'Submit to P&D'
-  | 'Treasurer Review'
-  | 'Finance Committee Review'
-  // Advertisement / Waiting
-  | 'Advertise Tax Deed'
-  | 'Post Advertisement Wait Period'
-  // Auction / Sale
-  | 'Send to Auction'
-  | 'Finalize Sale'
-  | 'Over the Counter Sales'
-  // Post-Deed Processing
-  | 'Complete Tax Deed'
-  | 'County Tax Deed'
-  | 'Eviction Proceedings'
-  | 'Quit Claim'
-  // Financial Processing
-  | 'Finance Journal Entry'
-  | 'Proceeds Notice'
-  | 'Proceeds Affidavit Returned'
-  | 'Proceeds Check Issued'
-  // Review
-  | 'Legal Description Review'
-  | 'Legal Description Correction'
-  | 'Awaiting Legal Description'
-  // Legal
-  | 'Legal Description Verification'
-  // Exceptions / Holds
-  | 'Bankruptcy'
-  | 'Litigation / Legal Hold'
-  | 'Appeal Pending'
-  | 'Estate / Probate'
-  | 'Administrative Review'
-  | 'Hardship Review'
-  // Complete
-  | 'Paid in Full'
-  | 'Move to Treasurer';
-
-export const STAGES_BY_STATUS: Record<ParcelStatus, ParcelStage[]> = {
-  'Delinquent': ['Initial Delinquency', 'Early Notice Issued', 'Final Notice Issued', 'Letter Rpt Expiration', '90-Day Expiration Window', 'Pre-Enforcement Review', 'Escalation Ready'],
-  'Payment Plan': ['In Payment Plan', 'Payment Plan Letter Sent'],
-  'Early Enforcement': ['Title Search', 'Notice of Tax Deed App', 'Letter of Affidavit', 'Owner/Occupant Notification', 'Utility Notification'],
-  'Tax Deed Preparation': ['Prepare Tax Deed', 'Create Tax Deed Verify & Taxes Form', 'Finalize Tax Deed Verify & Taxes Form', 'Create County Clerk Memo', 'Submit to County Clerk', 'Submit to P&D', 'Treasurer Review', 'Finance Committee Review'],
-  'Advertisement / Waiting': ['Advertise Tax Deed', 'Post Advertisement Wait Period'],
-  'Auction / Sale': ['Send to Auction', 'Finalize Sale', 'Over the Counter Sales'],
-  'Post-Deed Processing': ['Complete Tax Deed', 'County Tax Deed', 'Eviction Proceedings', 'Quit Claim'],
-  'Financial Processing': ['Finance Journal Entry', 'Proceeds Notice', 'Proceeds Affidavit Returned', 'Proceeds Check Issued'],
-  'On Hold': ['Bankruptcy', 'Litigation / Legal Hold', 'Appeal Pending', 'Estate / Probate', 'Administrative Review', 'Hardship Review'],
-  'Review': ['Legal Description Review', 'Legal Description Correction', 'Awaiting Legal Description'],
-  'Legal': ['Legal Description Verification'],
-  'Complete': ['Paid in Full', 'Move to Treasurer'],
+export type ParcelFlags = {
+  isBankruptcy: boolean;
+  isFloodPlain: boolean;
+  isInRem: boolean;
+  isOutlot: boolean;
+  isContaminated: boolean;
+  hasHistoricalContamination: boolean;
+  isDeeded: boolean;
+  isEnvironmentalIssue: boolean;
+  isRazingOrder: boolean;
 };
-
-export type ParcelFlag = 'Foreclosure' | 'Deeded' | 'Contaminated' | 'Bankruptcy' | 'Flood Plain' | 'In Rem' | 'Razing' | 'Outlot';
 
 export type PaymentRecord = {
   date: string;
@@ -97,17 +21,18 @@ export type PaymentRecord = {
   receiptNo: string;
 };
 
+import type { ParcelWorkflowEntry } from '@/data/workflow/workflow-history/types';
 export type Parcel = {
   id: string;
   parcelNumber: string;
   ownerName: string;
   propertyAddress: string;
-  taxYears: number[];
   municipality: string;
   amountDue: number;
-  status: ParcelStatus;
-  stage: ParcelStage;
-  flags: ParcelFlag[];
+  /** The active workflow entry, or null if this parcel has no active workflow. */
+  activeWorkflow: ParcelWorkflowEntry | null;
+  /** Structured flags from the database — each boolean field maps to a DB column. */
+  flags: ParcelFlags;
   lastPaymentDate: string | null;
   phoneNumber: string;
   email: string;
@@ -115,6 +40,19 @@ export type Parcel = {
   lotSize: string;
   assessedValue: number;
   paymentHistory: PaymentRecord[];
+};
+
+/**
+ * Raw parcel data as stored in the data layer.
+ * `activeWorkflow` is embedded directly in each parcel record.
+ * Legacy parcels without a workflow have `activeWorkflow: null` (or omitted).
+ */
+export type RawParcelData = Omit<Parcel, 'activeWorkflow'> & {
+  activeWorkflow?: ParcelWorkflowEntry | null;
+  /** Legacy field — kept for parcels that pre-date the workflow system. */
+  status?: ParcelStatus;
+  /** Legacy field — kept for parcels that pre-date the workflow system. */
+  stage?: ParcelStage;
 };
 
 export type ParcelFilters = {
@@ -135,13 +73,14 @@ export const PARCEL_STATUS_OPTIONS = [
   { value: 'Post-Deed Processing', label: 'Post-Deed Processing' },
   { value: 'Financial Processing', label: 'Financial Processing' },
   { value: 'On Hold', label: 'On Hold' },
+  { value: 'Review', label: 'Review' },
+  { value: 'Legal', label: 'Legal' },
 ] as const;
 
 export const PARCEL_COLUMN_LABELS: Record<string, string> = {
   parcelNumber: 'Parcel #',
   ownerName: 'Owner Name',
   propertyAddress: 'Property Address',
-  taxYears: 'Tax Years',
   amountDue: 'Amount Due',
   status: 'Status / Stage',
   lastPaymentDate: 'Last Payment',
@@ -151,7 +90,6 @@ export const DEFAULT_COLUMN_VISIBILITY = {
   parcelNumber: true,
   ownerName: true,
   propertyAddress: true,
-  taxYears: false,
   amountDue: false,
   status: true,
   lastPaymentDate: false,

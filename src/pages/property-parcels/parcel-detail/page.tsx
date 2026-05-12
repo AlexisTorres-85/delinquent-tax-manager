@@ -12,7 +12,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { useParcel } from '@/data/parcels/hooks/use-parcel';
 import { useWorkflow } from '@/data/parcels/hooks/use-workflow';
 import { ArrowLeft, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
-import type { Parcel, ParcelFlag, ParcelStatus } from '@/data/parcels/types';
+import type { Parcel, ParcelFlags, ParcelStatus } from '@/data/parcels/types';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody } from '@/components/ui/dialog';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
 import { LifecycleHelpDrawer } from './components/lifecycle-help-drawer';
 import { TaxPaymentsTab } from './components/tax-payments-tab';
@@ -21,12 +22,81 @@ import { DocumentsTab } from './components/documents-tab';
 import { ContactsTab } from './components/contacts-tab';
 import { WorkflowHistoryTab } from './components/workflow-history-tab';
 
-const ALL_FLAGS: ParcelFlag[] = ['Foreclosure', 'Deeded', 'Contaminated', 'Bankruptcy', 'Flood Plain', 'In Rem', 'Razing', 'Outlot'];
+const ALL_FLAGS: { key: keyof ParcelFlags; label: string; description: string }[] = [
+  {
+    key: 'isBankruptcy',
+    label: 'Bankruptcy',
+    description: 'The property owner has an active or pending bankruptcy filing, which may impose an automatic stay on collection actions and require court approval before proceeding.',
+  },
+  {
+    key: 'isFloodPlain',
+    label: 'Flood Plain',
+    description: 'The parcel is located within a FEMA-designated flood plain zone. Special flood insurance requirements and development restrictions may apply.',
+  },
+  {
+    key: 'isInRem',
+    label: 'In Rem',
+    description: 'An in rem tax foreclosure action has been initiated against this property. The proceeding is directed at the property itself rather than a specific individual.',
+  },
+  {
+    key: 'isOutlot',
+    label: 'Outlot',
+    description: 'The parcel is classified as an outlot — a reserved or residual land parcel that is not part of a standard lot subdivision, often used for common areas or future development.',
+  },
+  {
+    key: 'isContaminated',
+    label: 'Contaminated',
+    description: 'The property has confirmed environmental contamination such as hazardous materials, chemicals, or pollutants on-site. Remediation may be required before transfer or redevelopment.',
+  },
+  {
+    key: 'hasHistoricalContamination',
+    label: 'Historical Contamination',
+    description: 'There is a documented history of environmental contamination on this property. The site may have been remediated, but historical records indicate prior pollution events.',
+  },
+  {
+    key: 'isDeeded',
+    label: 'Deeded',
+    description: 'The property has been formally transferred via deed through the tax foreclosure process. Ownership has been conveyed to the acquiring entity.',
+  },
+  {
+    key: 'isEnvironmentalIssue',
+    label: 'Environmental Issue',
+    description: 'An active environmental concern or regulatory issue has been flagged for this property. This may include open violations, ongoing investigations, or pending remediation orders.',
+  },
+  {
+    key: 'isRazingOrder',
+    label: 'Razing Order',
+    description: 'A municipal or court-issued order requires the demolition of structures on this property due to safety hazards, code violations, or structural instability.',
+  },
+];
+
+function FlagsInfoModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-4xl">
+        <DialogHeader>
+          <DialogTitle>Parcel Flag Definitions</DialogTitle>
+        </DialogHeader>
+        <DialogBody>
+          <div className="divide-y divide-divider">
+            {ALL_FLAGS.map(({ key, label, description }) => (
+              <div key={key} className="py-3 first:pt-0 last:pb-0">
+                <p className="text-sm font-semibold mb-0.5">{label}</p>
+                <p className="text-sm text-muted-foreground">{description}</p>
+              </div>
+            ))}
+          </div>
+        </DialogBody>
+      </DialogContent>
+    </Dialog>
+  );
+}
 
 function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
+  const isNewWorkflow = !parcel.activeWorkflow;
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<ParcelStatus>(parcel.status);
-  const [stage, setStage] = useState<string>(parcel.stage);
+  const [status, setStatus] = useState<ParcelStatus | ''>(parcel.activeWorkflow?.status ?? '');
+  const [stage, setStage] = useState<string>(parcel.activeWorkflow?.stage ?? '');
   const [note, setNote] = useState('');
   const { statuses, isLoading: workflowLoading } = useWorkflow();
 
@@ -37,8 +107,10 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   }
 
   function handleSave() {
-    // TODO: wire to API � parcelService.updateStatus(parcel.id, { status, stage, note })
-    console.log('Update case status:', { status, stage, note });
+    const finalStatus = isNewWorkflow ? 'Delinquent' : status;
+    const finalStage = isNewWorkflow ? 'Initial Delinquency' : stage;
+    // TODO: wire to API - parcelService.updateStatus(parcel.id, { status: finalStatus, stage: finalStage, note })
+    console.log('Update case status:', { status: finalStatus, stage: finalStage, note });
     setNote('');
     setOpen(false);
   }
@@ -48,53 +120,80 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   return (
     <Popover open={open} onOpenChange={setOpen}>
       <PopoverTrigger asChild>
-        <Button variant="outline" size="sm">
-          <RefreshCw className="h-4 w-4" />
-          Update Case Status
-        </Button>
+        {isNewWorkflow ? (
+          <Button variant="primary" size="sm">
+            <RefreshCw className="h-4 w-4" />
+            Mark as Delinquent
+          </Button>
+        ) : (
+          <Button variant="outline" size="sm">
+            <RefreshCw className="h-4 w-4" />
+            Update Case Status
+          </Button>
+        )}
       </PopoverTrigger>
       <PopoverContent className="w-80 p-4" align="end">
-        <p className="text-sm font-semibold mb-4">Update Case Status</p>
+        <p className="text-sm font-semibold mb-1">
+          {isNewWorkflow ? 'Mark as Delinquent' : 'Update Case Status'}
+        </p>
+        {isNewWorkflow && (
+          <p className="text-xs text-muted-foreground mb-4">
+            This will open a new workflow at the initial delinquency stage.
+          </p>
+        )}
+        {!isNewWorkflow && <div className="mb-4" />}
         <div className="flex flex-col gap-4">
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">Status</Label>
-            <Select value={status} onValueChange={(v) => handleStatusChange(v as ParcelStatus)} disabled={workflowLoading}>
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {statuses.map((s) => (
-                  <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isNewWorkflow ? (
+              <div className="h-8 flex items-center px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
+                Delinquent
+              </div>
+            ) : (
+              <Select value={status} onValueChange={(v) => handleStatusChange(v as ParcelStatus)} disabled={workflowLoading}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {statuses.map((s) => (
+                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">Stage</Label>
-            <Select value={stage} onValueChange={setStage} disabled={workflowLoading}>
-              <SelectTrigger className="h-8 text-sm">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {availableStages.map((s) => (
-                  <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {isNewWorkflow ? (
+              <div className="h-8 flex items-center px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
+                Initial Delinquency
+              </div>
+            ) : (
+              <Select value={stage} onValueChange={setStage} disabled={workflowLoading}>
+                <SelectTrigger className="h-8 text-sm">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableStages.map((s) => (
+                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
           <div className="flex flex-col gap-1.5">
             <Label className="text-xs">Note <span className="text-muted-foreground font-normal">(optional)</span></Label>
             <Textarea
               className="text-sm resize-none"
               rows={2}
-              placeholder="Reason for change�"
+              placeholder="Reason for change..."
               value={note}
               onChange={(e) => setNote(e.target.value)}
             />
           </div>
           <div className="flex justify-end gap-2 pt-1">
             <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleSave}>Save</Button>
+            <Button size="sm" onClick={handleSave}>{isNewWorkflow ? 'Confirm' : 'Save'}</Button>
           </div>
         </div>
       </PopoverContent>
@@ -116,7 +215,7 @@ function VDivider() {
 }
 
 function ParcelHeader({ parcel }: { parcel: Parcel }) {
-  const yearsDelinquent = parcel.taxYears.length;
+  const [flagsInfoOpen, setFlagsInfoOpen] = useState(false);
 
   return (
     <div className="px-6 py-6 border-b border-divider">
@@ -133,11 +232,15 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
         <div className="flex flex-col items-end gap-2 shrink-0">
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold">Status:</span>
-            <StatusBadge status={parcel.status} />
+            {parcel.activeWorkflow
+              ? <StatusBadge status={parcel.activeWorkflow.status} />
+              : <span className="text-xs text-muted-foreground italic">No Workflow detected</span>}
           </div>
           <div className="flex items-center gap-2">
             <span className="text-sm font-semibold">Stage:</span>
-            <StageBadge stage={parcel.stage} />
+            {parcel.activeWorkflow
+              ? <StageBadge stage={parcel.activeWorkflow.stage} />
+              : <span className="text-xs text-muted-foreground italic">No Workflow detected</span>}
           </div>
         </div>
       </div>
@@ -167,24 +270,6 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
 
         <VDivider />
 
-        <InfoCard
-          label="Years Delinquent"
-          value={
-            yearsDelinquent > 0
-              ? `${yearsDelinquent} yr${yearsDelinquent !== 1 ? 's' : ''}`
-              : '—'
-          }
-        />
-
-        <VDivider />
-
-        <InfoCard
-          label="Delinquent Years"
-          value={parcel.taxYears.join(', ')}
-        />
-
-        <VDivider />
-
         <InfoCard label="Lot Size" value={parcel.lotSize} />
 
         <VDivider />
@@ -204,12 +289,12 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
           Flags:
         </span>
 
-        {ALL_FLAGS.map((flag) => {
-          const active = parcel.flags.includes(flag);
+        {ALL_FLAGS.map(({ key, label }) => {
+          const active = parcel.flags[key];
 
           return (
             <Badge
-              key={flag}
+              key={key}
               variant={active ? 'destructive' : 'secondary'}
               className={
                 active
@@ -217,10 +302,23 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
                   : 'px-2 py-1 font-medium bg-muted text-muted-foreground'
               }
             >
-              {flag}
+              {label}
             </Badge>
           );
         })}
+
+        <div className="self-stretch w-px shrink-0 bg-divider mx-1" />
+
+        <button
+          type="button"
+          onClick={() => setFlagsInfoOpen(true)}
+          className="flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          aria-label="Flag definitions"
+        >
+          <Info className="size-4" />
+        </button>
+
+        <FlagsInfoModal open={flagsInfoOpen} onOpenChange={setFlagsInfoOpen} />
       </div>
     </div>
   );

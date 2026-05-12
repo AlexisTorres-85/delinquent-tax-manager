@@ -64,6 +64,8 @@ export interface TabLayoutProps<T> {
     onRefresh?: () => void;
     /** Optional per-row className callback, receives the raw row data. */
     getRowClassName?: (row: T) => string | undefined;
+    /** When true, suppresses the catalis header (title/description/icon) section. */
+    hideHeader?: boolean;
 }
 
 // ─── Export / print utilities ─────────────────────────────────────────────────
@@ -202,6 +204,7 @@ export function TabLayout<T extends object>({
     extraToolbarButtons,
     onRefresh,
     getRowClassName,
+    hideHeader = false,
 }: TabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
@@ -246,7 +249,7 @@ export function TabLayout<T extends object>({
     }, [maximized]);
 
     // Normal-mode thead top (in maximized mode --thead-top is 0 on the scroll wrapper).
-    const theadTop = stickyTop + catalisHeaderHeight + toolbarHeight;
+    const theadTop = stickyTop + (hideHeader ? 0 : catalisHeaderHeight) + toolbarHeight;
 
     const catalisHeader = (
         <div
@@ -416,7 +419,7 @@ export function TabLayout<T extends object>({
 
     return (
         <div style={{ '--thead-top': `${theadTop}px` } as CSSProperties}>
-            {catalisHeader}
+            {!hideHeader && catalisHeader}
             {banner}
             {toolbar}
             {dataGrid}

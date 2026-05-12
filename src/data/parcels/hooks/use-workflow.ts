@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react';
 import { workflowService } from '../services/workflow.service';
-import type { WorkflowStatusRecord } from '../data/workflow-dummy-data';
+import type { WorkflowStatusRecord } from '@/data/workflow/workflow-status-definitions';
 
 type UseWorkflowResult = {
   statuses: WorkflowStatusRecord[];

@@ -1,4 +1,4 @@
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useRef, useEffect } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -8,12 +8,15 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { History } from 'lucide-react';
-import { useWorkflowHistory } from '@/data/workflow-history/hooks/use-workflow-history';
-import type { ParcelWorkflowEntry, WorkflowStatus } from '@/data/workflow-history/types';
+import { History, ChevronDown } from 'lucide-react';
+import { useWorkflowHistory } from '@/data/workflow/workflow-history/hooks/use-workflow-history';
+import type { ParcelWorkflowEntry, WorkflowStatus } from '@/data/workflow/workflow-history/types';
+import { WORKFLOWS_DUMMY_DATA } from '@/data/workflow/workflow-history/data/workflows-dummy-data';
 import { TabLayout, type FilterConfig } from './tab-layout';
 import { createWorkflowHistoryColumns } from '../table-columns/workflow-history.columns';
 import { MoveToNextStageModal } from './move-to-next-stage-modal';
+import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
+import { Badge } from '@/components/ui/badge';
 
 // ─── Active-first sort comparator ─────────────────────────────────────────────
 //
@@ -53,15 +56,16 @@ const WORKFLOW_STATUSES: WorkflowStatus[] = [
 // ─── Inner table component ────────────────────────────────────────────────────
 
 interface WorkflowHistoryTableProps {
-    entries: import('@/data/workflow-history/types').ParcelWorkflowEntry[];
+    entries: import('@/data/workflow/workflow-history/types').ParcelWorkflowEntry[];
     isLoading: boolean;
     lastUpdated: Date | null;
     onRefresh?: () => void;
     parcelNumber: string;
     stickyTop?: number;
+    hideHeader?: boolean;
 }
 
-function WorkflowHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0 }: WorkflowHistoryTableProps) {
+function WorkflowHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0, hideHeader = false }: WorkflowHistoryTableProps) {
     // Default sort: active stage first, then most-recent date
     const [sorting, setSorting] = useState<SortingState>([{ id: 'dateTime', desc: true }]);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -143,6 +147,7 @@ function WorkflowHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parc
                 recordCount={table.getFilteredRowModel().rows.length}
                 isLoading={isLoading}
                 getRowClassName={getWorkflowRowClassName}
+                hideHeader={hideHeader}
             />
             {modalEntry && (
                 <MoveToNextStageModal
@@ -163,17 +168,101 @@ interface WorkflowHistoryTabProps {
     stickyTop?: number;
 }
 
-export function WorkflowHistoryTab({ parcelNumber, stickyTop }: WorkflowHistoryTabProps) {
+export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHistoryTabProps) {
     const { entries, isRefreshing, lastUpdated, refetch } = useWorkflowHistory(parcelNumber);
 
+    const sharedHeaderRef = useRef<HTMLDivElement>(null);
+    const [sharedHeaderHeight, setSharedHeaderHeight] = useState(0);
+
+    useEffect(() => {
+        const el = sharedHeaderRef.current;
+        if (!el) return;
+        setSharedHeaderHeight(el.offsetHeight);
+        const obs = new ResizeObserver(() => setSharedHeaderHeight(el.offsetHeight));
+        obs.observe(el);
+        return () => obs.disconnect();
+    }, []);
+
+    // Workflows for this parcel (synchronous — constant data)
+    const workflows = useMemo(
+        () => WORKFLOWS_DUMMY_DATA.filter((w) => w.parcelNumber === parcelNumber),
+        [parcelNumber],
+    );
+
+    // Default open: the active workflow; fall back to the first one
+    const defaultOpen = useMemo(
+        () => (workflows.find((w) => w.isActive) ?? workflows[0])?.workflowId ?? '',
+        [workflows],
+    );
+
+    // Group history entries by workflowId
+    const entriesByWorkflowId = useMemo(() => {
+        const map: Record<string, ParcelWorkflowEntry[]> = {};
+        for (const entry of entries) {
+            (map[entry.workflowId] ??= []).push(entry);
+        }
+        return map;
+    }, [entries]);
+
+    // No workflows — fall back to full table (shows empty state)
+    if (workflows.length === 0) {
+        return (
+            <WorkflowHistoryTable
+                entries={entries}
+                isLoading={isRefreshing}
+                lastUpdated={lastUpdated}
+                onRefresh={refetch}
+                parcelNumber={parcelNumber}
+                stickyTop={stickyTop}
+            />
+        );
+    }
+
     return (
-        <WorkflowHistoryTable
-            entries={entries}
-            isLoading={isRefreshing}
-            lastUpdated={lastUpdated}
-            onRefresh={refetch}
-            parcelNumber={parcelNumber}
-            stickyTop={stickyTop}
-        />
+        <div>
+            {/* Section header shared by all workflows */}
+            <div ref={sharedHeaderRef} className="bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex border-b border-divider items-center gap-2 sticky z-10" style={{ top: stickyTop }}>
+                <div className="shrink-0 text-muted-foreground">
+                    <History className="h-8 w-8" />
+                </div>
+                <div className="flex flex-col">
+                    <h2 className="text-lg font-semibold text-neutral-900">Workflow History</h2>
+                    <p className="text-sm -mt-1 text-muted-foreground">Full audit trail of status changes, stage transitions, and actions taken on this parcel.</p>
+                </div>
+            </div>
+
+            <Accordion type="single" collapsible defaultValue={defaultOpen} indicator="none">
+                {workflows.map((workflow) => {
+                    const workflowEntries = entriesByWorkflowId[workflow.workflowId] ?? [];
+                    const yearsLabel = workflow.taxYears.length === 1
+                        ? `Tax Year ${workflow.taxYears[0]}`
+                        : `Tax Years ${workflow.taxYears.join(', ')}`;
+
+                    return (
+                        <AccordionItem key={workflow.workflowId} value={workflow.workflowId}>
+                            <AccordionTrigger className="px-6 justify-start gap-3">
+                                <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
+                                <span className="font-semibold">{yearsLabel}</span>
+                                <span className="text-xs text-muted-foreground font-mono">{workflow.workflowId}</span>
+                                <Badge variant={workflow.isActive ? 'success' : 'secondary'} className="text-xs">
+                                    {workflow.isActive ? 'Active' : 'Closed'}
+                                </Badge>
+                            </AccordionTrigger>
+                            <AccordionContent className="p-0">
+                                <WorkflowHistoryTable
+                                    entries={workflowEntries}
+                                    isLoading={isRefreshing}
+                                    lastUpdated={lastUpdated}
+                                    onRefresh={refetch}
+                                    parcelNumber={parcelNumber}
+                                    stickyTop={stickyTop + sharedHeaderHeight}
+                                    hideHeader
+                                />
+                            </AccordionContent>
+                        </AccordionItem>
+                    );
+                })}
+            </Accordion>
+        </div>
     );
 }

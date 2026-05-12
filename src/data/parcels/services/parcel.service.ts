@@ -6,7 +6,7 @@
  * the hooks and components above this layer need no changes.
  */
 
-import type { Parcel, ParcelFilters } from '../types';
+import type { Parcel, RawParcelData, ParcelFilters } from '../types';
 import { PARCELS_DUMMY_DATA } from '../data/parcels-dummy-data';
 
 // ---------------------------------------------------------------------------
@@ -14,7 +14,13 @@ import { PARCELS_DUMMY_DATA } from '../data/parcels-dummy-data';
 // Replace these with real fetch/axios calls when the API is ready.
 // ---------------------------------------------------------------------------
 
-const DUMMY_PARCELS: Parcel[] = PARCELS_DUMMY_DATA;
+/** Enrich a raw parcel record — reads activeWorkflow directly from the data. */
+function enrichParcel(raw: RawParcelData): Parcel {
+  const { status: _status, stage: _stage, activeWorkflow, ...rest } = raw as RawParcelData & { status?: unknown; stage?: unknown };
+  return { ...rest, activeWorkflow: activeWorkflow ?? null };
+}
+
+const DUMMY_PARCELS: Parcel[] = PARCELS_DUMMY_DATA.map(enrichParcel);
 
 export const parcelService = {
   /**
@@ -49,7 +55,7 @@ export const parcelService = {
   filterLocally(parcels: Parcel[], filters: ParcelFilters): Parcel[] {
     const search = filters.search.trim().toLowerCase();
     return parcels.filter((p) => {
-      if (filters.status !== 'all' && p.status !== filters.status) return false;
+      if (filters.status !== 'all' && p.activeWorkflow?.status !== filters.status) return false;
       if (p.amountDue < filters.minAmountDue) return false;
       if (filters.onlyNoPayment && p.lastPaymentDate !== null) return false;
       if (search) {

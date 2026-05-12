@@ -56,7 +56,7 @@ const accordionTriggerVariants = cva(
 );
 
 const accordionContentVariants = cva(
-  'overflow-hidden text-sm text-accent-foreground transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
+  'overflow-clip text-sm text-accent-foreground transition-all data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down',
   {
     variants: {
       variant: {
@@ -86,7 +86,7 @@ const AccordionContext = React.createContext<AccordionContextType>({
 function Accordion(
   props: React.ComponentProps<typeof AccordionPrimitive.Root> &
     VariantProps<typeof accordionRootVariants> & {
-      indicator?: 'arrow' | 'plus';
+      indicator?: 'arrow' | 'plus' | 'none';
     },
 ) {
   const { className, variant = 'default', indicator = 'arrow', children, ...rest } = props;
