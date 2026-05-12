@@ -314,7 +314,7 @@ export function TabLayout<T extends object>({
         <div
             ref={toolbarRef}
             className='flex items-center gap-2 px-6 py-4 h-14 border-b border-t border-divider bg-app-primary-toolbar-fg z-20'
-            style={maximized ? undefined : { position: 'sticky', top: stickyTop + catalisHeaderHeight }}
+            style={maximized ? undefined : { position: 'sticky', top: stickyTop + catalisHeaderHeight + bannerHeight }}
         >
             {!hideSearch && (
                 <div className='relative w-1/2 shrink-0'>
