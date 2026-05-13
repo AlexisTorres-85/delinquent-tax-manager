@@ -98,137 +98,120 @@ export function MoveToNextStageModal({ open, onOpenChange, entry, parcelNumber }
 
     return (
         <Dialog open={open} onOpenChange={onOpenChange}>
-            <DialogContent className="max-w-4xl">
-                <DialogHeader>
-                    <DialogTitle className="flex items-center gap-2">
-                        <ArrowRightCircle className="h-5 w-5 text-[var(--color-active-workflow-side-line)]" />
-                        Move to Next Stage
-                        <span className="ml-1 text-base font-normal text-muted-foreground">— Parcel {parcelNumber}</span>
-                    </DialogTitle>
+            <DialogContent className="max-w-2xl">
+                <DialogHeader
+                    icon={<ArrowRightCircle />}
+                    subtitle={`Advance the workflow for parcel ${parcelNumber} to a new status and stage.`}
+                >
+                    <DialogTitle>Move to Next Stage</DialogTitle>
                 </DialogHeader>
 
-                <DialogBody className="space-y-5">
-                    {/* Current state info + new fields in a two-column grid */}
-                    <div className="grid grid-cols-2 gap-x-6 gap-y-4">
+                <DialogBody className="flex flex-col gap-5 p-0">
 
-                        {/* ── Left column ──────────────────────────────── */}
-                        <div className="space-y-4">
-                            {/* Current Status / Stage read-only */}
-                            <div className="grid grid-cols-2 gap-x-4 gap-y-1.5">
-                                <div>
-                                    <span className="text-xs font-medium text-muted-foreground">Current Status</span>
-                                    <div className="mt-1">
-                                        <StatusBadge status={entry.status} />
-                                    </div>
-                                </div>
-                                <div>
-                                    <span className="text-xs font-medium text-muted-foreground">Current Stage</span>
-                                    <div className="mt-1">
-                                        <StageBadge stage={entry.stage} />
-                                    </div>
-                                </div>
-                            </div>
-
-                            {/* New Status */}
-                            <div className="space-y-1.5">
-                                <Label>
-                                    New Status <span className="text-destructive">*</span>
-                                </Label>
-                                <Select value={newStatus} onValueChange={handleStatusChange}>
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select status" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {ALL_STATUSES.map((s) => (
-                                            <SelectItem key={s} value={s}>
-                                                {s}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-                            {/* New Stage */}
-                            <div className="space-y-1.5">
-                                <Label>
-                                    New Stage <span className="text-destructive">*</span>
-                                </Label>
-                                <Select
-                                    value={newStage}
-                                    onValueChange={(v) => setNewStage(v as ParcelStage)}
-                                    disabled={!newStatus}
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select next stage" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {stageOptions.map((s) => (
-                                            <SelectItem key={s} value={s}>
-                                                {s}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
+                    {/* ── Current status & stage ───────────────────────────── */}
+                    <div className="flex items-center gap-4 border-b border-divider px-6 py-3">
+                        <div className="flex flex-col gap-1 min-w-0">
+                            <span className="font-semibold text-sm uppercase text-muted-foreground">Current Status</span>
+                            <StatusBadge status={entry.status} />
                         </div>
+                        <div className="self-stretch w-px shrink-0 bg-divider" />
+                        <div className="flex flex-col gap-1 min-w-0">
+                            <span className="font-semibold text-sm uppercase text-muted-foreground">Current Stage</span>
+                            <StageBadge stage={entry.stage} />
+                        </div>
+                    </div>
 
-                        {/* ── Right column ─────────────────────────────── */}
-                        <div className="space-y-4">
-                            {/* Action Taken */}
-                            <div className="space-y-1.5">
-                                <Label>
-                                    Action Taken <span className="text-destructive">*</span>
-                                </Label>
-                                <Input
-                                    value={actionTaken}
-                                    onChange={(e) => setActionTaken(e.target.value)}
-                                    placeholder="e.g. Notice mailed to owner"
-                                />
-                            </div>
+                    <div className='flex flex-col gap-2 px-6 pb-8'>
 
-                            {/* Notes */}
-                            <div className="space-y-1.5">
-                                <Label>Notes</Label>
-                                <Textarea
-                                    value={notes}
-                                    onChange={(e) => setNotes(e.target.value)}
-                                    placeholder="Add optional notes..."
-                                    className="resize-none h-[4.5rem]"
-                                />
-                            </div>
-
-                            {/* Attach Documents */}
-                            <div
-                                role="button"
-                                tabIndex={0}
-                                onClick={() => fileInputRef.current?.click()}
-                                onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
-                                onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
-                                onDragLeave={() => setIsDragging(false)}
-                                onDrop={handleDrop}
-                                className={`flex cursor-pointer items-start gap-3 rounded-md border-2 border-dashed px-4 py-3 text-sm transition-colors
-                                    ${isDragging
-                                        ? 'border-[var(--color-active-workflow-side-line)] bg-emerald-50/50'
-                                        : 'border-border hover:border-[var(--color-active-workflow-side-line)] hover:bg-muted/40'
-                                    }`}
+                    {/* ── New Status (left) + New Stage (right) ────────────── */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div className="space-y-1.5">
+                            <Label>
+                                New Status <span className="text-destructive">*</span>
+                            </Label>
+                            <Select value={newStatus} onValueChange={handleStatusChange}>
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {ALL_STATUSES.map((s) => (
+                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
+                        </div>
+                        <div className="space-y-1.5">
+                            <Label>
+                                New Stage <span className="text-destructive">*</span>
+                            </Label>
+                            <Select
+                                value={newStage}
+                                onValueChange={(v) => setNewStage(v as ParcelStage)}
+                                disabled={!newStatus}
                             >
-                                <Paperclip className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
-                                <div>
-                                    <p className="font-medium">Attach Documents <span className="font-normal text-muted-foreground">(optional)</span></p>
-                                    {files.length === 0
-                                        ? <p className="text-muted-foreground text-xs">Drag &amp; drop files or click to browse</p>
-                                        : <p className="text-muted-foreground text-xs">{files.length} file{files.length !== 1 ? 's' : ''} selected</p>
-                                    }
-                                </div>
-                            </div>
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                multiple
-                                className="hidden"
-                                onChange={handleFileChange}
-                            />
+                                <SelectTrigger>
+                                    <SelectValue placeholder="Select next stage" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    {stageOptions.map((s) => (
+                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                    ))}
+                                </SelectContent>
+                            </Select>
                         </div>
+                    </div>
+
+                    {/* ── Action Taken ─────────────────────────────────────── */}
+                    <Input
+                        label="Action Taken"
+                        required
+                        value={actionTaken}
+                        onChange={(e) => setActionTaken(e.target.value)}
+                        placeholder="e.g. Notice mailed to owner"
+                    />
+
+                    {/* ── Notes ────────────────────────────────────────────── */}
+                    <div className="space-y-1.5">
+                        <Label>Notes <span className="text-muted-foreground font-normal">(optional)</span></Label>
+                        <Textarea
+                            value={notes}
+                            onChange={(e) => setNotes(e.target.value)}
+                            placeholder="Add any relevant notes..."
+                            className="resize-none h-[4.5rem]"
+                        />
+                    </div>
+
+                    {/* ── Upload Documents ─────────────────────────────────── */}
+                    <div
+                        role="button"
+                        tabIndex={0}
+                        onClick={() => fileInputRef.current?.click()}
+                        onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
+                        onDragOver={(e) => { e.preventDefault(); setIsDragging(true); }}
+                        onDragLeave={() => setIsDragging(false)}
+                        onDrop={handleDrop}
+                        className={`flex cursor-pointer items-start gap-3 rounded-md border-2 border-dashed px-4 py-3 text-sm transition-colors
+                            ${isDragging
+                                ? 'border-[var(--color-active-workflow-side-line)] bg-emerald-50/50'
+                                : 'border-divider hover:border-[var(--color-active-workflow-side-line)] hover:bg-muted/40'
+                            }`}
+                    >
+                        <Paperclip className="mt-0.5 h-4 w-4 shrink-0 text-muted-foreground" />
+                        <div>
+                            <p className="font-medium">Upload Documents <span className="font-normal text-muted-foreground">(optional)</span></p>
+                            {files.length === 0
+                                ? <p className="text-muted-foreground text-xs">Drag &amp; drop files or click to browse</p>
+                                : <p className="text-muted-foreground text-xs">{files.length} file{files.length !== 1 ? 's' : ''} selected</p>
+                            }
+                        </div>
+                    </div>
+                    <input
+                        ref={fileInputRef}
+                        type="file"
+                        multiple
+                        className="hidden"
+                        onChange={handleFileChange}
+                    />
                     </div>
                 </DialogBody>
 

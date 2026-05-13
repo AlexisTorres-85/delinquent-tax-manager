@@ -37,6 +37,7 @@ function Input({
       <div className={cn("flex flex-col gap-1.5", wrapperClassName)}>
         <Label htmlFor={inputId} variant={labelVariant}>
           {label}
+          {props.required && <span className="text-destructive"> *</span>}
         </Label>
         {input}
       </div>

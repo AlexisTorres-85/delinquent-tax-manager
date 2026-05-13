@@ -26,8 +26,8 @@ export function ParcelsPage() {
     <ContentWrapper
       crumbs={[
         { label: 'Home', href: '/' },
-        { label: 'Property Parcels', href: '/property-parcels' },
-        { label: 'Parcel Lookup' },
+        { label: 'Property Parcels', href: '/property-parcels/delinquent-parcel-cases' },
+        { label: 'Cases' },
       ]}
       actions={
         <>
@@ -43,7 +43,7 @@ export function ParcelsPage() {
       }
       mainHeader={{
         icon: <LandPlotIcon className="h-6 w-6" />,
-        title: 'Property Parcel Lookup',
+        title: 'Delinquent Parcel Cases',
         subtitle: 'Access parcel records and account details',
       }}
       leftHeader={{

@@ -7,8 +7,8 @@ export function AuditLogsPage() {
     <ContentWrapper
       crumbs={[
         { label: 'Home', href: '/' },
-        { label: 'Property Parcels', href: '/property-parcels' },
-        { label: 'Audit Log', href: '/property-parcels/audit-logs' },
+        { label: 'Property Parcels', href: '/property-parcels/delinquent-parcel-cases' },
+        { label: 'Audit Log', href: '/property-parcels/delinquent-parcel-cases/audit-logs' },
       ]}
       mainHeader={{
         icon: <Activity className="h-6 w-6" />,

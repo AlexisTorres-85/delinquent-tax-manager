@@ -8,7 +8,17 @@ import {
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { useLayout } from "./context";
 
-const KNOWN_PARCEL_SUBPATHS = new Set(['catalis-parcel-search', 'recently-viewed', 'audit-logs']);
+const KNOWN_PARCEL_SUBPATHS = new Set([
+  'audit-logs',
+  'tax-payments',
+  'payment-schedule',
+  'documents',
+  'contacts',
+  'workflow-history',
+  'notes',
+  'expenses',
+  'legal-description',
+]);
 
 
 export function SidebarMenu() {
@@ -22,7 +32,7 @@ export function SidebarMenu() {
 
   const menuGroups = activeMenuItem?.children ?? [];
 
-  const parcelDetailMatch = pathname.toLowerCase().match(/^\/property-parcels\/([^/]+)$/);
+  const parcelDetailMatch = pathname.toLowerCase().match(/^\/property-parcels\/delinquent-parcel-cases\/([^/]+)(?:\/([^/]+))?$/);
   const parcelNumber = parcelDetailMatch && !KNOWN_PARCEL_SUBPATHS.has(parcelDetailMatch[1])
     ? parcelDetailMatch[1].toUpperCase()
     : null;
@@ -61,7 +71,7 @@ export function SidebarMenu() {
                       <span>{child.title}</span>
                     </Link>
                   </AccordionMenuItem>
-                  {parcelNumber && child.path === '/property-parcels' && (
+                  {parcelNumber && child.path === '/property-parcels/delinquent-parcel-cases' && (
                     <div className="ml-[16px] pl-4 border-l border-black/30">
                       <Link
                         to={pathname.toLowerCase()}

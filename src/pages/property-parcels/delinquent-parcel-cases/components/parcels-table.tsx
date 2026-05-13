@@ -104,7 +104,7 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
     size: 150,
     cell: ({ row }) => (
       <Link
-        to={`/property-parcels/${encodeURIComponent(row.original.parcelNumber)}`}
+        to={`/property-parcels/delinquent-parcel-cases/${encodeURIComponent(row.original.parcelNumber)}`}
         className="font-medium text-primary hover:underline"
       >
         {row.original.parcelNumber}
@@ -132,15 +132,16 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
   {
     accessorKey: 'activeWorkflow',
     header: 'Status / Stage',
-    size: 260,
+    size: 320,
     cell: ({ row }) => {
       const wf = row.original.activeWorkflow;
       if (!wf) {
         return <span className="text-xs text-muted-foreground italic">No Workflow detected</span>;
       }
       return (
-        <div className="flex items-center gap-2 flex-wrap">
+        <div className="flex items-center gap-2">
           <StatusBadge status={wf.status} />
+          <div className="self-stretch w-px shrink-0 bg-border" />
           <StageBadge stage={wf.stage} />
         </div>
       );

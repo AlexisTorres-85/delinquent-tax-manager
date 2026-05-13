@@ -19,7 +19,7 @@ import { AlertsPage } from '@/pages/dashboard/alerts';
 import { PerformanceKpisPage } from '@/pages/dashboard/kpis';
 
 // Parcels
-import { ParcelsPage } from '@/pages/property-parcels/property-parcels-lookup/page';
+import { ParcelsPage } from '@/pages/property-parcels/delinquent-parcel-cases/page';
 import { CatalisParcelSearchPage } from '@/pages/property-parcels/catalis-parcel-search/page';
 import { AuditLogsPage } from '@/pages/property-parcels/audit-logs/page';
 import { ParcelDetailPage } from '@/pages/property-parcels/parcel-detail/page';
@@ -81,10 +81,11 @@ export function AppRoutingSetup() {
         <Route path="/kpis" element={<PerformanceKpisPage />} />
 
         {/* Parcels */}
-        <Route path="/property-parcels" element={<ParcelsPage />} />
+        <Route path="/property-parcels/delinquent-parcel-cases" element={<ParcelsPage />} />
         <Route path="/property-parcels/catalis-parcel-search" element={<CatalisParcelSearchPage />} />
-        <Route path="/property-parcels/audit-logs" element={<AuditLogsPage />} />
-        <Route path="/property-parcels/:parcelNumber" element={<ParcelDetailPage />} />
+        <Route path="/property-parcels/delinquent-parcel-cases/audit-logs" element={<AuditLogsPage />} />
+        <Route path="/property-parcels/delinquent-parcel-cases/:parcelNumber" element={<Navigate to="tax-payments" replace />} />
+        <Route path="/property-parcels/delinquent-parcel-cases/:parcelNumber/:tab" element={<ParcelDetailPage />} />
 
         {/* Payments */}
         <Route path="/payments" element={<PaymentsPage />} />

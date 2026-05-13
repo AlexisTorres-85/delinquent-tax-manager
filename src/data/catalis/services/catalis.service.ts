@@ -45,17 +45,12 @@ async function search(params: CatalisSearchParams): Promise<CatalisParcel[]> {
   results = results.filter((p) => matchesQuery(p, params.query, params.searchField));
 
   // Quick filters
-  if (params.county && params.county !== 'all') {
-    results = results.filter((p) => normalize(p.county) === normalize(params.county!));
+  if (params.municipality && params.municipality !== 'any') {
+    results = results.filter((p) => p.municipalityCode === params.municipality);
   }
-  if (params.status && params.status !== 'all') {
-    results = results.filter((p) => normalize(p.status) === normalize(params.status!));
-  }
-  if (params.propertyType && params.propertyType !== 'all') {
-    results = results.filter((p) => normalize(p.propertyType) === normalize(params.propertyType!));
-  }
-  if (params.taxYear && params.taxYear !== 'all') {
-    results = results.filter((p) => p.taxYear === Number(params.taxYear));
+  if (params.taxYear && params.taxYear.length > 0 && !params.taxYear.includes('all')) {
+    const years = params.taxYear.map(Number);
+    results = results.filter((p) => years.includes(p.taxYear));
   }
 
   // Advanced filters

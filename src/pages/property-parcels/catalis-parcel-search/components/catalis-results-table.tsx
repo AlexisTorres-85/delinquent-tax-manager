@@ -3,18 +3,14 @@ import { createPortal } from 'react-dom';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
-import { ArrowDownToLine, ExternalLink, Eye, Maximize2, Minimize2, Search } from 'lucide-react';
+import { ArrowDownToLine, Maximize2, Minimize2, PlusCircle, Search } from 'lucide-react';
 import type { CatalisParcel } from '@/data/catalis/types';
+import { PARCELS_DUMMY_DATA } from '@/data/parcels/data/parcels-dummy-data';
+
+const DTM_PARCEL_NUMBERS = new Set(PARCELS_DUMMY_DATA.map((p) => p.parcelNumber));
 
 function StatusBadge({ status }: { status: string }) {
-  const variantMap: Record<string, 'destructive' | 'warning' | 'success' | 'secondary' | 'outline'> = {
-    delinquent: 'destructive',
-    foreclosure: 'destructive',
-    active: 'success',
-    exempt: 'outline',
-    inactive: 'secondary',
-  };
-  const variant = variantMap[status.toLowerCase()] ?? 'secondary';
+  const variant = status.toLowerCase() === 'delinquent' ? 'destructive' : 'success';
   return <Badge variant={variant}>{status}</Badge>;
 }
 
@@ -28,9 +24,9 @@ interface CatalisResultsTableProps {
 }
 
 function exportToCsv(results: CatalisParcel[]) {
-  const headers = ['Parcel #', 'Owner', 'Address', 'City', 'ZIP', 'County', 'Status', 'Property Type', 'Tax Year', 'Tax Due'];
+  const headers = ['Parcel #', 'Owner', 'Address', 'City', 'ZIP', 'Municipality', 'Delinquency Status', 'Property Type', 'Tax Year', 'Taxes Owed'];
   const rows = results.map((r) => [
-    r.parcelNumber, r.owner, r.address, r.city, r.zip, r.county, r.status, r.propertyType, r.taxYear,
+    r.parcelNumber, r.owner, r.address, r.city, r.zip, r.municipalityDescription, r.delinquencyStatus, r.propertyType, r.taxYear,
     r.taxDue.toFixed(2),
   ]);
   const csv = [headers, ...rows].map((r) => r.map((v) => `"${String(v).replace(/"/g, '""')}"`).join(',')).join('\n');
@@ -77,39 +73,45 @@ function ResultsTable({ results }: { results: CatalisParcel[] }) {
             <th className={thBase}>Owner</th>
             <th className={thBase}>Address</th>
             <th className={thBase}>Status</th>
-            <th className={thBase}>Tax Due</th>
-            <th className={`${thBase} pr-6 text-right`}>Actions</th>
+            <th className={thBase}>Taxes Owed</th>
+            <th className={`${thBase} pr-6 text-right`}></th>
           </tr>
         </thead>
         <tbody>
-          {results.map((row) => (
-            <tr
-              key={row.parcelNumber}
-              style={{ borderBottom: '1px solid var(--color-table-separator)' }}
-              className="transition-colors"
-              onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-table-row-hover)')}
-              onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
-            >
-              <td className={`${tdBase} pl-6 font-medium`}>{row.parcelNumber}</td>
-              <td className={`${tdBase} text-muted-foreground`}>{row.owner}</td>
-              <td className={`${tdBase} text-muted-foreground`}>{row.address}, {row.city} {row.zip}</td>
-              <td className={tdBase}><StatusBadge status={row.status} /></td>
-              <td className={`${tdBase} font-semibold text-destructive`}>
-                {row.taxDue === 0 ? (
-                  <span className="text-muted-foreground font-normal">—</span>
-                ) : (
-                  `$${row.taxDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
-                )}
-              </td>
-              <td className={`${tdBase} pr-6`}>
-                <div className="flex items-center gap-1 justify-end">
-                  <Button variant="ghost" size="sm" title="View details"><Eye className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" title="Import into system"><ArrowDownToLine className="h-4 w-4" /></Button>
-                  <Button variant="ghost" size="sm" title="Open in Catalis"><ExternalLink className="h-4 w-4" /></Button>
-                </div>
-              </td>
-            </tr>
-          ))}
+          {results.map((row) => {
+            const inDtm = DTM_PARCEL_NUMBERS.has(row.parcelNumber);
+            return (
+              <tr
+                key={row.parcelNumber}
+                style={{ borderBottom: '1px solid var(--color-table-separator)' }}
+                className="transition-colors"
+                onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = 'var(--color-table-row-hover)')}
+                onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = '')}
+              >
+                <td className={`${tdBase} pl-6 font-medium`}>{row.parcelNumber}</td>
+                <td className={`${tdBase} text-muted-foreground`}>{row.owner}</td>
+                <td className={`${tdBase} text-muted-foreground`}>{row.address}, {row.city} {row.zip}</td>
+                <td className={tdBase}><StatusBadge status={row.delinquencyStatus} /></td>
+                <td className={`${tdBase} font-semibold text-destructive`}>
+                  {row.taxDue === 0 ? (
+                    <span className="text-muted-foreground font-normal">—</span>
+                  ) : (
+                    `$${row.taxDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}`
+                  )}
+                </td>
+                <td className={`${tdBase} pr-6`}>
+                  <div className="flex items-center gap-1 justify-end">
+                    {!inDtm && (
+                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-primary border-primary/40 hover:bg-primary/5" title="Add this parcel to DTM">
+                        <PlusCircle className="h-3.5 w-3.5" />
+                        Add to DTM
+                      </Button>
+                    )}
+                  </div>
+                </td>
+              </tr>
+            );
+          })}
         </tbody>
       </table>
     </div>
@@ -131,7 +133,7 @@ export function CatalisResultsTable({ results, hasSearched, isLoading }: Catalis
               <th className={thBase}>Owner</th>
               <th className={thBase}>Address</th>
               <th className={thBase}>Status</th>
-              <th className={thBase}>Tax Due</th>
+              <th className={thBase}>Taxes Owed</th>
               <th className={`${thBase} pr-6 text-right`}>Actions</th>
             </tr>
           </thead>

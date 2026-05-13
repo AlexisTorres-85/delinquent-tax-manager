@@ -7,7 +7,7 @@ import { X } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
 
 const dialogContentVariants = cva(
-  'flex flex-col fixed outline-0 z-50 border border-border bg-background p-6 shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg',
+  'flex flex-col fixed outline-0 z-50 border border-border bg-background shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg max-h-[90dvh] overflow-hidden',
   {
     variants: {
       variant: {
@@ -73,7 +73,7 @@ function DialogContent({
         {children}
         {showCloseButton && (
           <DialogClose className="cursor-pointer outline-0 absolute end-5 top-5 rounded-sm opacity-60 ring-offset-background transition-opacity hover:opacity-100 focus:outline-hidden disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
-            <X className="size-4" />
+            <X className="size-6" />
             <span className="sr-only">Close</span>
           </DialogClose>
         )}
@@ -84,18 +84,49 @@ function DialogContent({
 
 export default DialogContent;
 
-const DialogHeader = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div
-    data-slot="dialog-header"
-    className={cn('flex flex-col space-y-1 text-center sm:text-start mb-5', className)}
-    {...props}
-  />
-);
+const DialogHeader = ({
+  className,
+  icon,
+  subtitle,
+  children,
+  ...props
+}: React.HTMLAttributes<HTMLDivElement> & {
+  icon?: React.ReactNode;
+  subtitle?: string;
+}) => {
+  if (icon !== undefined || subtitle !== undefined) {
+    return (
+      <div
+        data-slot="dialog-header"
+        className={cn('flex items-center gap-3 border-b bg-muted text-app-primary border-divider px-6 py-4', className)}
+        {...props}
+      >
+        <div className="flex items-center justify-center size-11 shrink-0 rounded-xl bg-app-primary/20 text-app-primary [&>svg]:size-6">
+          {icon}
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {children}
+          {subtitle && (
+            <p className="text-sm text-muted-foreground">{subtitle}</p>
+          )}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div
+      data-slot="dialog-header"
+      className={cn('flex flex-col space-y-1 text-center sm:text-start mb-5', className)}
+      {...props}
+    />
+  );
+};
 
 const DialogFooter = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
   <div
     data-slot="dialog-footer"
-    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end pt-5 sm:space-x-2.5', className)}
+    className={cn('flex flex-col-reverse sm:flex-row bg-muted sm:justify-end gap-2 px-6 py-4 border-t border-divider shrink-0', className)}
     {...props}
   />
 );
@@ -111,7 +142,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
 }
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div data-slot="dialog-body" className={cn('grow', className)} {...props} />
+  <div data-slot="dialog-body" className={cn('overflow-y-auto p-6 bg-white', className)} {...props} />
 );
 
 function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {

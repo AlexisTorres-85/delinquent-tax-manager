@@ -96,6 +96,18 @@
   --color-app-secondary-to: #E8B95E;        /* secondaryTo */
   --color-app-secondary-border: #C9963A;    /* secondaryBorder */
 
+  /** Button theme vars — defined here so portals (dialogs, dropdowns) inherit them **/
+  --btn-primary: var(--color-app-primary);
+  --btn-primary-fg: var(--color-app-primary-fg);
+  --btn-primary-from: var(--color-app-primary-from);
+  --btn-primary-to: var(--color-app-primary-to);
+  --btn-primary-border: var(--color-app-primary-border);
+  --btn-secondary: var(--color-app-secondary);
+  --btn-secondary-fg: var(--color-app-secondary-fg);
+  --btn-secondary-from: var(--color-app-secondary-from);
+  --btn-secondary-to: var(--color-app-secondary-to);
+  --btn-secondary-border: var(--color-app-secondary-border);
+
   --color-app-gradient-from: #62938D;       /* appGradientFrom */
   --color-app-gradient-to: #224B46;         /* appGradientTo */
 
@@ -105,6 +117,7 @@
 
   --color-active-workflow-highlight: #F0FDF9;  /* active workflow row background */
   --color-active-workflow-side-line: #10B981;  /* active workflow left border line */
+  --color-modal-header-banner: #EFF7F2;         /* modal info banner background */
 
   /** Animations **/
   --animate-marquee: marquee var(--duration) infinite linear;

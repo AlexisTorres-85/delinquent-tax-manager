@@ -6,14 +6,12 @@ import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Label } from '@/components/ui/label';
-import { Textarea } from '@/components/ui/textarea';
 import { useParcel } from '@/data/parcels/hooks/use-parcel';
 import { useWorkflow } from '@/data/parcels/hooks/use-workflow';
-import { ArrowLeft, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
+import { ArrowLeft, Flag, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
 import type { Parcel, ParcelFlags, ParcelStatus } from '@/data/parcels/types';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody } from '@/components/ui/dialog';
+import { UpdateStatusForm, CURRENT_YEAR } from './components/update-status-form';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from '@/components/ui/dialog';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
 import { LifecycleHelpDrawer } from './components/lifecycle-help-drawer';
 import { TaxPaymentsTab } from './components/tax-payments-tab';
@@ -76,11 +74,14 @@ const ALL_FLAGS: { key: keyof ParcelFlags; label: string; description: string }[
 function FlagsInfoModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl">
-        <DialogHeader>
+      <DialogContent className="max-w-7xl">
+        <DialogHeader
+          icon={<Flag />}
+          subtitle="Reference guide for all parcel condition flags used in the system."
+        >
           <DialogTitle>Parcel Flag Definitions</DialogTitle>
         </DialogHeader>
-        <DialogBody>
+        <DialogBody className='p-6'>
           <div className="divide-y divide-divider">
             {ALL_FLAGS.map(({ key, label, description }) => (
               <div key={key} className="py-3 first:pt-0 last:pb-0">
@@ -88,8 +89,37 @@ function FlagsInfoModal({ open, onOpenChange }: { open: boolean; onOpenChange: (
                 <p className="text-sm text-muted-foreground">{description}</p>
               </div>
             ))}
+            <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  <br />
+            <p className="text-xs text-muted-foreground italic">
+              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
+            </p>  
           </div>
         </DialogBody>
+        <DialogFooter>
+          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
+          <Button size="sm">Download PDF</Button>
+        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
@@ -101,7 +131,22 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   const [status, setStatus] = useState<ParcelStatus | ''>(parcel.activeWorkflow?.status ?? '');
   const [stage, setStage] = useState<string>(parcel.activeWorkflow?.stage ?? '');
   const [note, setNote] = useState('');
+  const [selectedYears, setSelectedYears] = useState<number[]>([CURRENT_YEAR - 1]);
   const { statuses, isLoading: workflowLoading } = useWorkflow();
+
+  function handleOpenChange(newOpen: boolean) {
+    if (!newOpen) {
+      setNote('');
+      if (isNewWorkflow) setSelectedYears([CURRENT_YEAR - 1]);
+    }
+    setOpen(newOpen);
+  }
+
+  function handleYearToggle(year: number, checked: boolean) {
+    setSelectedYears((prev) =>
+      checked ? [...prev, year].sort((a, b) => a - b) : prev.filter((y) => y !== year)
+    );
+  }
 
   function handleStatusChange(newStatus: ParcelStatus) {
     setStatus(newStatus);
@@ -112,21 +157,22 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   function handleSave() {
     const finalStatus = isNewWorkflow ? 'Delinquent' : status;
     const finalStage = isNewWorkflow ? 'Initial Delinquency' : stage;
-    // TODO: wire to API - parcelService.updateStatus(parcel.id, { status: finalStatus, stage: finalStage, note })
-    console.log('Update case status:', { status: finalStatus, stage: finalStage, note });
+    // TODO: wire to API - parcelService.updateStatus(parcel.id, { status: finalStatus, stage: finalStage, note, taxYears: selectedYears })
+    console.log('Update case status:', { status: finalStatus, stage: finalStage, note, taxYears: isNewWorkflow ? selectedYears : undefined });
     setNote('');
+    if (isNewWorkflow) setSelectedYears([CURRENT_YEAR - 1]);
     setOpen(false);
   }
 
   const availableStages = statuses.find((s) => s.name === status)?.stages ?? [];
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         {isNewWorkflow ? (
           <Button variant="primary" size="sm">
             <RefreshCw className="h-4 w-4" />
-            Mark as Delinquent
+            Start Delinquent Process
           </Button>
         ) : (
           <Button variant="outline" size="sm">
@@ -135,70 +181,23 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-80 p-4" align="end">
-        <p className="text-sm font-semibold mb-1">
-          {isNewWorkflow ? 'Mark as Delinquent' : 'Update Case Status'}
-        </p>
-        {isNewWorkflow && (
-          <p className="text-xs text-muted-foreground mb-4">
-            This will open a new workflow at the initial delinquency stage.
-          </p>
-        )}
-        {!isNewWorkflow && <div className="mb-4" />}
-        <div className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-xs">Status</Label>
-            {isNewWorkflow ? (
-              <div className="h-8 flex items-center px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
-                Delinquent
-              </div>
-            ) : (
-              <Select value={status} onValueChange={(v) => handleStatusChange(v as ParcelStatus)} disabled={workflowLoading}>
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statuses.map((s) => (
-                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-xs">Stage</Label>
-            {isNewWorkflow ? (
-              <div className="h-8 flex items-center px-3 rounded-md border border-input bg-muted text-sm text-muted-foreground select-none">
-                Initial Delinquency
-              </div>
-            ) : (
-              <Select value={stage} onValueChange={setStage} disabled={workflowLoading}>
-                <SelectTrigger className="h-8 text-sm">
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableStages.map((s) => (
-                    <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            )}
-          </div>
-          <div className="flex flex-col gap-1.5">
-            <Label className="text-xs">Note <span className="text-muted-foreground font-normal">(optional)</span></Label>
-            <Textarea
-              className="text-sm resize-none"
-              rows={2}
-              placeholder="Reason for change..."
-              value={note}
-              onChange={(e) => setNote(e.target.value)}
-            />
-          </div>
-          <div className="flex justify-end gap-2 pt-1">
-            <Button variant="ghost" size="sm" onClick={() => setOpen(false)}>Cancel</Button>
-            <Button size="sm" onClick={handleSave}>{isNewWorkflow ? 'Confirm' : 'Save'}</Button>
-          </div>
-        </div>
+      <PopoverContent className="w-100 p-0 rounded-xl border-r-4 border-r-app-secondary/50 overflow-hidden shadow-xl shadow-black/15" align="end">
+        <UpdateStatusForm
+          isNewWorkflow={isNewWorkflow}
+          status={status}
+          stage={stage}
+          note={note}
+          selectedYears={selectedYears}
+          availableStages={availableStages}
+          workflowLoading={workflowLoading}
+          statuses={statuses}
+          onStatusChange={handleStatusChange}
+          onStageChange={setStage}
+          onNoteChange={setNote}
+          onYearToggle={handleYearToggle}
+          onCancel={() => handleOpenChange(false)}
+          onSave={handleSave}
+        />
       </PopoverContent>
     </Popover>
   );
@@ -338,7 +337,24 @@ const TABS = [
   'Legal Description',
 ] as const;
 
-function ParcelDetailContent({ parcel }: { parcel: Parcel }) {
+type Tab = typeof TABS[number];
+
+const TAB_TO_SLUG: Record<Tab, string> = {
+  'Tax Payments': 'tax-payments',
+  'Payment Schedule': 'payment-schedule',
+  'Documents': 'documents',
+  'Contacts': 'contacts',
+  'Workflow History': 'workflow-history',
+  'Notes': 'notes',
+  'Expenses': 'expenses',
+  'Legal Description': 'legal-description',
+};
+
+const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
+  Object.entries(TAB_TO_SLUG).map(([tab, slug]) => [slug, tab as Tab]),
+);
+
+function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parcel; activeTab: Tab; onTabChange: (tab: Tab) => void }) {
   const tabsBarRef = useRef<HTMLDivElement>(null);
   const [stickyTop, setStickyTop] = useState(0);
 
@@ -352,7 +368,7 @@ function ParcelDetailContent({ parcel }: { parcel: Parcel }) {
   }, []);
 
   return (
-    <Tabs defaultValue="Tax Payments" className="flex flex-col">
+    <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as Tab)} className="flex flex-col">
       <ParcelHeader parcel={parcel} />
       <div ref={tabsBarRef} className="sticky top-0 z-10 shrink-0">
         <TabsList variant="app-primary" className="px-6 w-full justify-start">
@@ -430,16 +446,25 @@ function LoadingSkeleton() {
 }
 
 export function ParcelDetailPage() {
-  const { parcelNumber } = useParams<{ parcelNumber: string }>();
+  const { parcelNumber, tab } = useParams<{ parcelNumber: string; tab: string }>();
   const navigate = useNavigate();
   const { parcel, isLoading, notFound } = useParcel(parcelNumber ?? '');
   const [helpOpen, setHelpOpen] = useState(false);
+
+  const activeTab: Tab = (tab && SLUG_TO_TAB[tab]) ? SLUG_TO_TAB[tab] : 'Tax Payments';
+
+  function handleTabChange(newTab: Tab) {
+    navigate(
+      `/property-parcels/delinquent-parcel-cases/${parcelNumber}/${TAB_TO_SLUG[newTab]}`,
+      { replace: true },
+    );
+  }
 
   return (
     <ContentWrapper
       crumbs={[
         { label: 'Home', href: '/' },
-        { label: 'Property Parcel Lookup', href: '/property-parcels' },
+        { label: 'Property Parcels', href: '/property-parcels/delinquent-parcel-cases' },
         { label: parcelNumber ?? 'Detail' },
       ]}
       actions={
@@ -488,7 +513,7 @@ export function ParcelDetailPage() {
             <p className="text-xs">No record exists for &quot;{parcelNumber}&quot;.</p>
           </div>
         ) : (
-          <ParcelDetailContent parcel={parcel!} />
+          <ParcelDetailContent parcel={parcel!} activeTab={activeTab} onTabChange={handleTabChange} />
         )
       }
     />

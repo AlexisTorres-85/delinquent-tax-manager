@@ -6,7 +6,8 @@ export type CatalisParcel = {
   address: string;
   city: string;
   zip: string;
-  county: string;
+  municipalityCode: string;
+  municipalityDescription: string;
   propertyType: 'Residential' | 'Commercial' | 'Industrial' | 'Agricultural' | 'Vacant';
   taxYear: number;
   status: CatalisParcelStatus;
@@ -17,10 +18,11 @@ export type CatalisParcel = {
 export type CatalisSearchParams = {
   query: string;
   searchField: 'all' | 'parcelNumber' | 'ownerName' | 'address';
+  municipality?: string;
   county?: string;
   status?: string;
   propertyType?: string;
-  taxYear?: string;
+  taxYear?: string[];
   // advanced
   parcelNumber?: string;
   ownerFirstName?: string;

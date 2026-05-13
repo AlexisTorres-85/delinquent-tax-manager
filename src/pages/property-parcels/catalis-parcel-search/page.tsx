@@ -7,7 +7,7 @@ export function CatalisParcelSearchPage() {
     <ContentWrapper
       crumbs={[
         { label: 'Home', href: '/' },
-        { label: 'Property Parcels', href: '/property-parcels' },
+        { label: 'Property Parcels', href: '/property-parcels/delinquent-parcel-cases' },
         { label: 'Catalis Parcel Search' },
       ]}
       mainHeader={{

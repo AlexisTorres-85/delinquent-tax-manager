@@ -1,12 +1,13 @@
 import { FileText, History, Map, ScrollText, BookOpen, CheckCircle, MapPin, Info, ExternalLink, Scale, MapIcon, FileSearch, LandmarkIcon, GitCompare, Printer, FileDown, Copy, StickyNote, MessageSquare, RefreshCw, AlertTriangle, ChevronDown } from 'lucide-react';
+import { useState } from 'react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { TabLayout } from './tab-layout';
 import { useLegalReview } from '@/data/legal-review/hooks/use-legal-review';
+import { ChangeLegalDescriptionDialog } from './change-legal-description-dialog';
 import type { Parcel } from '@/data/parcels/types';
-import type { LegalReviewStatus, LegalReviewPriority } from '@/data/legal-review/types';
 
 // ─── Field display helpers ────────────────────────────────────────────────────
 
@@ -54,21 +55,9 @@ interface LegalDescriptionTabProps {
     stickyTop?: number;
 }
 
-const STATUS_VARIANT: Record<LegalReviewStatus, 'warning' | 'destructive' | 'success'> = {
-    'In Review': 'warning',
-    'Correction Requested': 'destructive',
-    'Approved': 'success',
-};
-
-const PRIORITY_VARIANT: Record<LegalReviewPriority, 'secondary' | 'warning' | 'destructive' | 'destructive'> = {
-    'Low': 'secondary',
-    'Medium': 'warning',
-    'High': 'destructive',
-    'Critical': 'destructive',
-};
-
 export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop = 0 }: LegalDescriptionTabProps) {
     const { reviews, isLoading: isReviewLoading } = useLegalReview(parcelNumber);
+    const [reviewDialogOpen, setReviewDialogOpen] = useState(false);
     // Show the most recent non-approved review, or the latest overall
     const activeReview = reviews.find((r) => r.reviewStatus !== 'Approved') ?? null;
     // Most recent approved review (only relevant when no active review)
@@ -86,7 +75,7 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                     <div className="h-5 w-px bg-divider shrink-0 mr-4" />
                 </div>
             ) : (
-                <Button size="sm" variant="outline" className="gap-1.5">
+                <Button size="sm" variant="outline" className="gap-1.5" onClick={() => setReviewDialogOpen(true)}>
                     <Scale className="h-3.5 w-3.5" />
                     Review Legal
                 </Button>
@@ -240,6 +229,7 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
     );
 
     return (
+        <>
         <TabLayout
             stickyTop={stickyTop}
             title="Legal Description"
@@ -390,5 +380,14 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                 </div>
             </div>
         </TabLayout>
+
+        {parcel && (
+            <ChangeLegalDescriptionDialog
+                open={reviewDialogOpen}
+                onOpenChange={setReviewDialogOpen}
+                parcel={parcel}
+            />
+        )}
+        </>
     );
 }
