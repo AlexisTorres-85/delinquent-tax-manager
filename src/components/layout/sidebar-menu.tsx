@@ -57,7 +57,7 @@ export function SidebarMenu() {
           classNames={{
             separator: '-mx-2 mb-2.5',
             label: 'text-xs font-normal text-muted-foreground',
-            item: 'h-9 my-0.5 rounded-md px-2.5 text-sm font-normal text-black hover:bg-[var(--menu-accent)]/25 hover:text-primary data-[selected=true]:bg-[var(--menu-accent)]/50 data-[selected=true]:border-r-4 data-[selected=true]:border-r-[var(--menu-accent)] data-[selected=true]:font-medium data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100',
+            item: 'h-10 my-0.5 rounded-md px-2.5 text-sm font-normal text-black hover:bg-[var(--menu-accent)]/25 hover:text-primary data-[selected=true]:bg-[var(--menu-accent)]/50 data-[selected=true]:border-r-4 data-[selected=true]:border-r-[var(--menu-accent)] data-[selected=true]:font-medium data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100',
             group: '',
           }}
         >

@@ -1,11 +1,8 @@
 import { MenuConfig } from "@/config/types";
 import {
-  Activity,
   BarChart2,
-  Bell,
   BookOpen,
   Building2,
-  CheckCircle,
   ClipboardCheck,
   ClipboardList,
   Clock,
@@ -15,23 +12,19 @@ import {
   FileSearch,
   FileSignature,
   FileText,
-  FolderOpen,
   HardHat,
   History,
   LandPlot,
   Landmark,
   LayoutDashboard,
-  List,
   Lock,
   MapPin,
-  PlusCircle,
   ScrollText,
   Scale,
   Search,
   Settings,
   TrendingUp,
   Users,
-  Wallet,
   XCircle,
 } from 'lucide-react';
 
@@ -45,9 +38,7 @@ export const MENU_SIDEBAR_MAIN: MenuConfig = [
       {
         title: 'Dashboard',
         children: [
-          { title: 'Overview', path: '/', icon: LayoutDashboard },
-          { title: 'Today Activity', path: '/today', icon: Activity },
-          { title: 'Alerts', path: '/alerts', icon: Bell },
+
           { title: 'Performance KPIs', path: '/kpis', icon: TrendingUp },
         ],
       },

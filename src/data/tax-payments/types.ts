@@ -1,5 +1,23 @@
 export type TaxPaymentType = 'Tax' | 'Redemption';
 
+export type TaxYearBalance = {
+  id: string;
+  parcelNumber: string;
+  taxYear: number;
+  isDelinquent: boolean;
+  baseTax: number;
+  interest: number;
+  penalty: number;
+  otherCharges: number;
+  specialAssessments: number;
+  totalDue: number;
+  totalPaid: number;
+  currentDue: number;
+  lastPaymentAmount: number | null;
+  lastPaymentDate: string | null; // ISO date e.g. '2025-03-15'
+  assessedValue: number;
+};
+
 export type TaxPayment = {
   id: string;
   parcelNumber: string;

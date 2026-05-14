@@ -22,6 +22,9 @@ import { WorkflowHistoryTab } from './components/workflow-history-tab';
 import { NotesTab } from './components/notes-tab';
 import { ExpensesTab } from './components/expenses-tab';
 import { LegalDescriptionTab } from './components/legal-description-tab';
+import { TaxYearBreakdown } from './components/tax-year-breakdown';
+import { PageSection } from '@/components/layout/page-section';
+import { useTaxYearBalances } from '@/data/tax-payments/hooks/use-tax-year-balances';
 
 const ALL_FLAGS: { key: keyof ParcelFlags; label: string; description: string }[] = [
   {
@@ -205,23 +208,25 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
 
 function InfoCard({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="flex flex-col gap-1 min-w-[100px]">
-      <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">{label}</span>
+    <div className="flex flex-col">
+      <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">{label}</span>
       <span className="text-sm font-semibold leading-tight">{value}</span>
     </div>
   );
 }
 
 function VDivider() {
-  return <div className="self-stretch w-px shrink-0 bg-divider" />;
+  return <div className="self-stretch w-px mx-4 shrink-0 bg-divider" />;
 }
 
-function ParcelHeader({ parcel }: { parcel: Parcel }) {
+function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (tab: Tab) => void }) {
   const [flagsInfoOpen, setFlagsInfoOpen] = useState(false);
+  const { balances } = useTaxYearBalances(parcel.parcelNumber);
+  const taxYears = balances.map((b) => b.taxYear).sort((a, b) => a - b).join(', ');
 
   return (
-    <div className="px-6 py-6 border-b border-divider">
-      <div className="flex items-start justify-between gap-4 mb-4">
+    <div className="px-6 py-6">
+      <div className="flex items-start justify-between gap-4 mb-6">
         <div>
           <h2 className="text-lg font-semibold leading-tight">
             {parcel.ownerName}
@@ -231,24 +236,27 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
             {parcel.propertyAddress}
           </p>
         </div>
-        <div className="flex flex-col items-end gap-2 shrink-0">
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">Status:</span>
-            {parcel.activeWorkflow
-              ? <StatusBadge status={parcel.activeWorkflow.status} />
-              : <span className="text-xs text-muted-foreground italic">No Workflow detected</span>}
-          </div>
-          <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">Stage:</span>
-            {parcel.activeWorkflow
-              ? <StageBadge stage={parcel.activeWorkflow.stage} />
-              : <span className="text-xs text-muted-foreground italic">No Workflow detected</span>}
-          </div>
+        <div className="flex items-center gap-2 shrink-0">
+          {parcel.activeWorkflow ? (
+            <>
+              <span className="text-sm font-semibold">Status:</span>
+              <StatusBadge status={parcel.activeWorkflow.status} />
+              <div className="w-px h-4 shrink-0 bg-divider" />
+              <span className="text-sm font-semibold">Stage:</span>
+              <StageBadge stage={parcel.activeWorkflow.stage} />
+            </>
+          ) : (
+            <span className="text-xs text-muted-foreground italic">No Workflow detected</span>
+          )}
         </div>
       </div>
 
-      <div className="flex items-stretch gap-6 py-5 border-t border-divider overflow-x-auto">
+      <div className="flex items-stretch pb-6 overflow-x-auto">
         <InfoCard label="Municipality" value={parcel.municipality} />
+
+        <VDivider />
+
+        <InfoCard label="Current Workflow Tax Years" value={taxYears || '—'} />
 
         <VDivider />
 
@@ -266,61 +274,101 @@ function ParcelHeader({ parcel }: { parcel: Parcel }) {
         <VDivider />
 
         <InfoCard
-          label="Assessed Value"
+          label="Current Assessed Value"
           value={`$${parcel.assessedValue.toLocaleString()}`}
         />
 
         <VDivider />
 
-        <InfoCard label="Lot Size" value={parcel.lotSize} />
-
-        <VDivider />
-
         <InfoCard
-          label="Payment Plan"
+          label="Current Payment Plan"
           value={
-            <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100">
-              Active
-            </Badge>
+            <button
+              type="button"
+              onClick={() => onTabChange('Payment Schedule')}
+              className="text-sm font-semibold text-primary hover:underline underline-offset-2 text-left leading-tight"
+            >
+              PP-2024-001
+            </button>
           }
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2 pt-6 border-t border-divider">
-        <span className="font-semibold text-sm shrink-0 mr-1">
-          Flags:
-        </span>
+      <div className="flex items-stretch gap-0 border-t border-divider pt-6">
+        {/* Left: Flags */}
+        <div className="flex flex-col gap-2 flex-1 min-w-0">
+          <PageSection
+            icon={<Flag className="size-5 text-muted-foreground" />}
+            title="Flags"
+            subtitle="parcel conditions and review indicators"
+            onHelperClick={() => setFlagsInfoOpen(true)}
+            action={
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
+                Edit Flags
+              </Button>
+            }
+          >
+            <div className="grid grid-cols-4 gap-x-3 gap-y-2.5">
+              {ALL_FLAGS.map(({ key, label }) => {
+                const active = parcel.flags[key];
 
-        {ALL_FLAGS.map(({ key, label }) => {
-          const active = parcel.flags[key];
+                return (
+                  <div key={key} className="flex items-center gap-2">
+                    <div
+                      className={`flex items-center justify-center rounded-full px-2.5 h-6 text-[10px] font-bold shrink-0 min-w-[34px] transition-colors ${
+                        active
+                          ? 'bg-[var(--color-warning-accent,var(--color-yellow-500))] text-white'
+                          : 'bg-muted text-muted-foreground'
+                      }`}
+                    >
+                      {active ? 'On' : 'Off'}
+                    </div>
+                    <span className="text-xs font-medium text-foreground truncate leading-tight">{label}</span>
+                  </div>
+                );
+              })}
+            </div>
+          </PageSection>
 
-          return (
-            <Badge
-              key={key}
-              variant={active ? 'destructive' : 'secondary'}
-              className={
-                active
-                  ? 'px-2 py-1 font-medium'
-                  : 'px-2 py-1 font-medium bg-muted text-muted-foreground'
-              }
-            >
-              {label}
-            </Badge>
-          );
-        })}
+          <FlagsInfoModal open={flagsInfoOpen} onOpenChange={setFlagsInfoOpen} />
 
-        <div className="self-stretch w-px shrink-0 bg-divider mx-1" />
+          <div className="border-t border-divider mt-4 mb-2" />
 
-        <button
-          type="button"
-          onClick={() => setFlagsInfoOpen(true)}
-          className="flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
-          aria-label="Flag definitions"
-        >
-          <Info className="size-4" />
-        </button>
+          <PageSection
+            icon={<LandPlotIcon className="size-5 text-muted-foreground" />}
+            title="Property Details"
+            subtitle="physical and plat information"
+            className=""
+            action={
+              <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
+                View Property Details
+              </Button>
+            }
+          >
+            <div className="flex flex-col">
+              <div className="flex pb-2">
+                <div className="flex flex-col gap-0.5 flex-1 border-b border-r border-divider pb-2 pr-4">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Block</span>
+                  <span className="text-sm font-medium">{parcel.block ?? '—'}</span>
+                </div>
+                <div className="flex flex-col gap-0.5 flex-1 border-b border-divider pb-2 pl-4">
+                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Lot</span>
+                  <span className="text-sm font-medium">{parcel.lot ?? '—'}</span>
+                </div>
+              </div>
+              <div className="flex flex-col gap-0.5 pt-2">
+                <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Plat Description</span>
+                <span className="text-sm font-medium">{parcel.platDescription ?? '—'}</span>
+              </div>
+            </div>
+          </PageSection>
+        </div>
 
-        <FlagsInfoModal open={flagsInfoOpen} onOpenChange={setFlagsInfoOpen} />
+        <div className="mx-4" />
+
+        <div className="flex-1 min-w-0 flex flex-col">
+          <TaxYearBreakdown parcelNumber={parcel.parcelNumber} className="flex-1" />
+        </div>
       </div>
     </div>
   );
@@ -369,7 +417,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
 
   return (
     <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as Tab)} className="flex flex-col">
-      <ParcelHeader parcel={parcel} />
+      <ParcelHeader parcel={parcel} onTabChange={onTabChange} />
       <div ref={tabsBarRef} className="sticky top-0 z-10 shrink-0">
         <TabsList variant="app-primary" className="px-6 w-full justify-start">
           {TABS.map((tab) => (
@@ -449,7 +497,12 @@ export function ParcelDetailPage() {
   const { parcelNumber, tab } = useParams<{ parcelNumber: string; tab: string }>();
   const navigate = useNavigate();
   const { parcel, isLoading, notFound } = useParcel(parcelNumber ?? '');
+  const { balances } = useTaxYearBalances(parcelNumber ?? '');
   const [helpOpen, setHelpOpen] = useState(false);
+
+  const taxYearsSubtitle = balances.length > 0
+    ? `Current Workflow Tax Years: ${balances.map((b) => b.taxYear).sort((a, b) => a - b).join(', ')}`
+    : undefined;
 
   const activeTab: Tab = (tab && SLUG_TO_TAB[tab]) ? SLUG_TO_TAB[tab] : 'Tax Payments';
 
@@ -476,6 +529,7 @@ export function ParcelDetailPage() {
       mainHeader={{
         icon: <LandPlotIcon />,
         title: parcelNumber ?? 'Parcel Detail',
+        subtitle: taxYearsSubtitle,
         actions: (
           <>
             {parcel && (

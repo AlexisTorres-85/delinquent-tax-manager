@@ -48,6 +48,15 @@ export type Parcel = {
   gcsLegal?: string;
   researchLegal?: string;
   approvedLegal?: string;
+  /** Property physical details */
+  platType?: string;
+  platCode?: string;
+  platDescription?: string;
+  lotType?: string;
+  acres?: number;
+  frontageFeet?: number;
+  depthFeet?: number;
+  areaSquareFeet?: number;
 };
 
 /**

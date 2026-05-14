@@ -1,4 +1,4 @@
-import { Outlet } from 'react-router-dom';
+import { Outlet, useLocation } from 'react-router-dom';
 import { Sidebar } from './sidebar';
 import { Header } from './header';
 import { useLayout } from './context';
@@ -8,6 +8,8 @@ import { Footer } from './footer';
 
 export function Wrapper() {
   const { isMobile } = useLayout();
+  const { pathname } = useLocation();
+  const isDashboard = pathname === '/' || pathname === '/kpis';
 
   return (
     <>
@@ -22,7 +24,7 @@ export function Wrapper() {
 
         <div className="flex min-h-0 min-w-0 flex-col grow lg:ps-[var(--sidebar-width)] ">
           <div className="flex min-h-0 flex-grow">
-            {!isMobile ? (
+            {!isMobile && !isDashboard ? (
               <>
                 <div className="hidden shrink-0 lg:block lg:w-(--sidebar-menu-width)" aria-hidden="true" />
                 <SidebarMenu />
@@ -30,7 +32,7 @@ export function Wrapper() {
             ) : null}
 
             <main className="min-h-0 min-w-0 grow overflow-hidden flex flex-col" role="content">
-              <div className="min-h-0 grow overflow-hidden bg-white">
+              <div className={`min-h-0 grow overflow-hidden ${isDashboard ? '' : 'bg-white'}`}>
                 <Outlet />
               </div>
               <Footer />
