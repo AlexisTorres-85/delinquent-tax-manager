@@ -6,58 +6,25 @@
  * the hooks and components above this layer need no changes.
  */
 
-import type { Parcel, RawParcelData, ParcelFilters } from '../types';
-import { PARCELS_DUMMY_DATA } from '../data/parcels-dummy-data';
-
-// ---------------------------------------------------------------------------
-// Service methods
-// Replace these with real fetch/axios calls when the API is ready.
-// ---------------------------------------------------------------------------
-
-/** Enrich a raw parcel record — reads activeWorkflow directly from the data. */
-function enrichParcel(raw: RawParcelData): Parcel {
-  const { status: _status, stage: _stage, activeWorkflow, ...rest } = raw as RawParcelData & { status?: unknown; stage?: unknown };
-  return { ...rest, activeWorkflow: activeWorkflow ?? null };
-}
-
-const DUMMY_PARCELS: Parcel[] = PARCELS_DUMMY_DATA.map(enrichParcel);
+import type { Parcel, ParcelFilters } from '../types';
 
 export const parcelService = {
-  /**
-   * Fetch all parcels.
-   * TODO: replace with → return fetch('/api/parcels').then(r => r.json())
-   */
   async getAll(): Promise<Parcel[]> {
-    return Promise.resolve(DUMMY_PARCELS);
+    return [];
   },
 
-  /**
-   * Fetch a single parcel by id.
-   * TODO: replace with → return fetch(`/api/parcels/${id}`).then(r => r.json())
-   */
-  async getById(id: string): Promise<Parcel | undefined> {
-    const all = await parcelService.getAll();
-    return all.find((p) => p.id === id);
+  async getById(_id: string): Promise<Parcel | undefined> {
+    return undefined;
   },
 
-  /**
-   * Fetch a single parcel by parcel number.
-   * TODO: replace with → return fetch(`/api/parcels/by-number/${encodeURIComponent(parcelNumber)}`).then(r => r.json())
-   */
-  async getByParcelNumber(parcelNumber: string): Promise<Parcel | undefined> {
-    const all = await parcelService.getAll();
-    return all.find((p) => p.parcelNumber === parcelNumber);
+  async getByParcelNumber(_parcelNumber: string): Promise<Parcel | undefined> {
+    return undefined;
   },
 
-  /**
-   * Apply filters client-side (move this logic to the server when API is ready).
-   */
   filterLocally(parcels: Parcel[], filters: ParcelFilters): Parcel[] {
     const search = filters.search.trim().toLowerCase();
     return parcels.filter((p) => {
       if (filters.status !== 'all' && p.activeWorkflow?.status !== filters.status) return false;
-      if (p.amountDue < filters.minAmountDue) return false;
-      if (filters.onlyNoPayment && p.lastPaymentDate !== null) return false;
       if (search) {
         const haystack = `${p.parcelNumber} ${p.ownerName} ${p.propertyAddress}`.toLowerCase();
         if (!haystack.includes(search)) return false;

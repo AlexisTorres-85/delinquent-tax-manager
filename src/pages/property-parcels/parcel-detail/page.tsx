@@ -1,12 +1,11 @@
 import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ContentWrapper } from '@/components/layout/content-wrapper';
-import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { useParcel } from '@/data/parcels/hooks/use-parcel';
+import { useParcelDetail } from '@/data/parcels/hooks/use-parcel-detail';
 import { useWorkflow } from '@/data/parcels/hooks/use-workflow';
 import { ArrowLeft, Flag, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
 import type { Parcel, ParcelFlags, ParcelStatus } from '@/data/parcels/types';
@@ -221,8 +220,8 @@ function VDivider() {
 
 function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (tab: Tab) => void }) {
   const [flagsInfoOpen, setFlagsInfoOpen] = useState(false);
-  const { balances } = useTaxYearBalances(parcel.parcelNumber);
-  const taxYears = balances.map((b) => b.taxYear).sort((a, b) => a - b).join(', ');
+  const taxYears = parcel.workflowTaxYears.join(', ');
+  const { totalDue, isLoading: totalDueLoading } = useTaxYearBalances(parcel.parcelNumber, parcel.workflowTaxYears.length > 0 ? parcel.workflowTaxYears : undefined);
 
   return (
     <div className="px-6 py-6">
@@ -263,11 +262,11 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
         <InfoCard
           label="Total Due"
           value={
-            <span className="text-destructive font-semibold">
-              ${parcel.amountDue.toLocaleString('en-US', {
-                minimumFractionDigits: 2,
-              })}
-            </span>
+            totalDueLoading
+              ? <span className="text-muted-foreground text-sm">—</span>
+              : <span className="text-destructive font-semibold">
+                  ${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
+                </span>
           }
         />
 
@@ -367,7 +366,7 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
         <div className="mx-4" />
 
         <div className="flex-1 min-w-0 flex flex-col">
-          <TaxYearBreakdown parcelNumber={parcel.parcelNumber} className="flex-1" />
+          <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.workflowTaxYears} className="flex-1" />
         </div>
       </div>
     </div>
@@ -429,7 +428,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
       </div>
 
       <TabsContent value="Tax Payments" className="mt-0">
-        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.workflowTaxYears} />
       </TabsContent>
 
       <TabsContent value="Payment Schedule" className="mt-0">
@@ -445,7 +444,12 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
       </TabsContent>
 
       <TabsContent value="Workflow History" className="mt-0">
-        <WorkflowHistoryTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <WorkflowHistoryTab
+            parcelNumber={parcel.parcelNumber}
+            stickyTop={stickyTop}
+            initialEntries={parcel.workflowHistory}
+            initialWorkflows={parcel.activeWorkflowMeta ? [parcel.activeWorkflowMeta] : undefined}
+          />
       </TabsContent>
 
       <TabsContent value="Notes" className="mt-0">
@@ -496,12 +500,11 @@ function LoadingSkeleton() {
 export function ParcelDetailPage() {
   const { parcelNumber, tab } = useParams<{ parcelNumber: string; tab: string }>();
   const navigate = useNavigate();
-  const { parcel, isLoading, notFound } = useParcel(parcelNumber ?? '');
-  const { balances } = useTaxYearBalances(parcelNumber ?? '');
+  const { parcel, isLoading, isError: apiError, error: apiErr } = useParcelDetail(parcelNumber ?? '');
   const [helpOpen, setHelpOpen] = useState(false);
 
-  const taxYearsSubtitle = balances.length > 0
-    ? `Current Workflow Tax Years: ${balances.map((b) => b.taxYear).sort((a, b) => a - b).join(', ')}`
+  const taxYearsSubtitle = parcel && parcel.workflowTaxYears.length > 0
+    ? `Current Workflow Tax Years: ${parcel.workflowTaxYears.join(', ')}`
     : undefined;
 
   const activeTab: Tab = (tab && SLUG_TO_TAB[tab]) ? SLUG_TO_TAB[tab] : 'Tax Payments';
@@ -561,13 +564,18 @@ export function ParcelDetailPage() {
       main={
         isLoading ? (
           <LoadingSkeleton />
-        ) : notFound ? (
+        ) : apiError ? (
+          <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
+            <p className="text-sm font-medium text-destructive">Failed to load parcel data from API.</p>
+            <p className="text-xs">{apiErr instanceof Error ? apiErr.message : 'An unexpected error occurred.'}</p>
+          </div>
+        ) : !parcel ? (
           <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
             <p className="text-sm font-medium">Parcel not found.</p>
             <p className="text-xs">No record exists for &quot;{parcelNumber}&quot;.</p>
           </div>
         ) : (
-          <ParcelDetailContent parcel={parcel!} activeTab={activeTab} onTabChange={handleTabChange} />
+          <ParcelDetailContent parcel={parcel} activeTab={activeTab} onTabChange={handleTabChange} />
         )
       }
     />

@@ -11,30 +11,38 @@ function fmt(amount: number) {
     return amount.toLocaleString('en-US', { style: 'currency', currency: 'USD' });
 }
 
-function formatDate(iso: string) {
+function formatDate(iso: string | null): string {
+    if (!iso) return '—';
     const [year, month, day] = iso.split('-');
     return `${month}/${day}/${year}`;
+}
+
+function typeVariant(desc: string): 'secondary' | 'destructive' | 'outline' {
+    if (desc === 'Redemption') return 'destructive';
+    if (desc === 'Lottery Credit') return 'secondary';
+    return 'outline';
 }
 
 // ─── Expanded detail panel ────────────────────────────────────────────────────
 
 function TaxPaymentDetail({ row }: { row: TaxPayment }) {
     const fields: { label: string; value: string }[] = [
-        { label: 'Property Tax', value: fmt(row.propertyTax) },
-        { label: 'Delinquent Charges', value: fmt(row.delinquentCharges) },
-        { label: 'Tax Penalty', value: fmt(row.taxPenalty) },
-        { label: 'Total Payment', value: fmt(row.totalPayment) },
-        { label: 'Payment Date', value: formatDate(row.paymentDate) },
+        { label: 'General Property Tax', value: fmt(row.generalPropertyTax) },
+        { label: 'Special Assessment', value: fmt(row.specialAssessment) },
+        { label: 'Special Charge', value: fmt(row.specialCharge) },
+        { label: 'Delinquent Utility Charge', value: fmt(row.delinquentUtilityCharge) },
+        { label: 'Interest', value: fmt(row.interest) },
+        { label: 'Penalty', value: fmt(row.penalty) },
+        { label: 'GP Tax Interest', value: fmt(row.generalPropertyTaxInterest) },
+        { label: 'Special Taxes Interest', value: fmt(row.specialTaxesInterest) },
+        { label: 'GP Tax Penalty', value: fmt(row.generalPropertyTaxPenalty) },
+        { label: 'Special Taxes Penalty', value: fmt(row.specialTaxesPenalty) },
+        { label: 'Other Charge', value: fmt(row.otherCharge) },
+        { label: 'Total Taxes', value: fmt(row.totalTaxes) },
+        { label: 'Total Interest & Penalties', value: fmt(row.totalInterestAndPenalties) },
+        { label: 'Receipt #', value: row.receiptNumber > 0 ? String(row.receiptNumber) : '—' },
+        { label: 'Payment Source', value: row.paymentSourceDescription },
         { label: 'Tax Year', value: String(row.taxYear) },
-        { label: 'Special Assessments', value: fmt(row.specialAssessments) },
-        { label: 'Tax Interest', value: fmt(row.taxInterest) },
-        { label: 'Special Tax Penalty', value: fmt(row.specialTaxPenalty) },
-        { label: 'Over-Payment', value: fmt(row.overPayment) },
-        { label: 'Payment Type', value: row.paymentType },
-        { label: 'Special Charges', value: fmt(row.specialCharges) },
-        { label: 'Special Interest', value: fmt(row.specialInterest) },
-        { label: 'Other Charges', value: fmt(row.otherCharges) },
-        { label: 'Receipt Number', value: row.receiptNumber },
     ];
 
     return (
@@ -99,41 +107,34 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
         meta: { skeleton: <Skeleton className="h-4 w-20" /> },
     },
     {
-        accessorKey: 'certificationNumber',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Certification #" />,
-        size: 170,
+        accessorKey: 'receiptNumber',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Receipt #" />,
+        size: 120,
         cell: ({ row }) => (
-            <span className="font-mono text-xs">{row.original.certificationNumber}</span>
-        ),
-        meta: { skeleton: <Skeleton className="h-4 w-28" /> },
-    },
-    {
-        accessorKey: 'receipt',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Receipt" />,
-        size: 130,
-        cell: ({ row }) => (
-            <span className="font-mono text-xs">{row.original.receipt}</span>
+            <span className="font-mono text-xs">
+                {row.original.receiptNumber > 0 ? row.original.receiptNumber : '—'}
+            </span>
         ),
         meta: { skeleton: <Skeleton className="h-4 w-16" /> },
     },
     {
-        accessorKey: 'type',
+        accessorKey: 'paymentTypeDescription',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Type" />,
-        size: 120,
+        size: 140,
         filterFn: 'equals',
         cell: ({ row }) => (
-            <Badge variant={row.original.type === 'Redemption' ? 'secondary' : 'outline'} className="text-xs">
-                {row.original.type}
+            <Badge variant={typeVariant(row.original.paymentTypeDescription)} className="text-xs">
+                {row.original.paymentTypeDescription}
             </Badge>
         ),
         meta: { skeleton: <Skeleton className="h-5 w-20 rounded-full" /> },
     },
     {
-        accessorKey: 'amountPaid',
+        accessorKey: 'amount',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Amount Paid" />,
         size: 140,
         cell: ({ row }) => (
-            <span className="font-semibold tabular-nums">{fmt(row.original.amountPaid)}</span>
+            <span className="font-semibold tabular-nums">{fmt(row.original.amount)}</span>
         ),
         meta: { skeleton: <Skeleton className="h-4 w-20" /> },
     },

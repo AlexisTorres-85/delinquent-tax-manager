@@ -10,7 +10,7 @@ type UseTaxPaymentsResult = {
   refetch: () => void;
 };
 
-export function useTaxPayments(parcelNumber: string): UseTaxPaymentsResult {
+export function useTaxPayments(parcelNumber: string, taxYears?: number[]): UseTaxPaymentsResult {
   const [payments, setPayments] = useState<TaxPayment[]>([]);
   const [isFetching, setIsFetching] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -22,7 +22,7 @@ export function useTaxPayments(parcelNumber: string): UseTaxPaymentsResult {
   useEffect(() => {
     let cancelled = false;
     setIsFetching(true);
-    taxPaymentService.getByParcelNumber(parcelNumber).then((data) => {
+    taxPaymentService.getByParcelNumber(parcelNumber, taxYears).then((data) => {
       if (cancelled) return;
       hasLoadedRef.current = true;
       setPayments(data);

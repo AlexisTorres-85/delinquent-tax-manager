@@ -1,86 +1,94 @@
-﻿import { useEffect, useState } from 'react';
+﻿import { useState } from 'react';
 import { Link } from 'react-router';
 import {
   useReactTable,
   getCoreRowModel,
   getSortedRowModel,
-  getPaginationRowModel,
   getExpandedRowModel,
   ColumnDef,
   SortingState,
   ColumnFiltersState,
   VisibilityState,
   OnChangeFn,
+  PaginationState,
 } from '@tanstack/react-table';
 import { DataGrid, DataGridContainer } from '@/components/ui/data-grid';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronRight, Mail, MapPin, Phone } from 'lucide-react';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 import type { Parcel } from '@/data/parcels/types';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
-import { ScopeSnapshot } from './scope-snapshot';
 
 export type { Parcel } from '@/data/parcels/types';
 
-function ParcelExpandedDetail({ parcel }: { parcel: Parcel }) {
+function DetailField({ label, value }: { label: string; value: React.ReactNode }) {
   return (
-    <div className="px-6 py-4 bg-muted/30 border-t border-border">
-      <div className="grid grid-cols-3 gap-6">
-        <div className="space-y-3">
-          <p className="font-semibold text-foreground">Property Details</p>
-          <div className="space-y-1.5 text-muted-foreground">
-            <div className="flex items-center gap-2">
-              <MapPin className="size-3.5 shrink-0" />
-              <span>{parcel.propertyAddress}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Phone className="size-3.5 shrink-0" />
-              <span>{parcel.phoneNumber}</span>
-            </div>
-            <div className="flex items-center gap-2">
-              <Mail className="size-3.5 shrink-0" />
-              <span>{parcel.email}</span>
-            </div>
-          </div>
-          <div className="pt-1 space-y-1 text-muted-foreground">
-            <div><span className="font-medium text-foreground">Legal: </span>{parcel.legalDescription}</div>
-            <div><span className="font-medium text-foreground">Lot Size: </span>{parcel.lotSize}</div>
-            <div><span className="font-medium text-foreground">Assessed Value: </span>${parcel.assessedValue.toLocaleString()}</div>
-          </div>
+    <div className="flex flex-col gap-0.5">
+      <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground">{label}</span>
+      <span className="text-sm font-medium text-foreground">{value ?? '—'}</span>
+    </div>
+  );
+}
+
+const FLAG_LABELS: { key: keyof typeof dummyFlags; label: string }[] = [
+  { key: 'isBankruptcy', label: 'Bankruptcy' },
+  { key: 'isFloodPlain', label: 'Flood Plain' },
+  { key: 'isInRem', label: 'In Rem' },
+  { key: 'isOutlot', label: 'Outlot' },
+  { key: 'isContaminated', label: 'Contaminated' },
+  { key: 'hasHistoricalContamination', label: 'Historical Contamination' },
+  { key: 'isDeeded', label: 'Deeded' },
+  { key: 'isEnvironmentalIssue', label: 'Environmental Issue' },
+  { key: 'isRazingOrder', label: 'Razing Order' },
+];
+const dummyFlags = { isBankruptcy: false, isFloodPlain: false, isInRem: false, isOutlot: false, isContaminated: false, hasHistoricalContamination: false, isDeeded: false, isEnvironmentalIssue: false, isRazingOrder: false };
+
+function fmt(n: number | undefined) {
+  return n != null ? `$${n.toLocaleString('en-US', { minimumFractionDigits: 2 })}` : '—';
+}
+
+function ParcelExpandedDetail({ parcel }: { parcel: Parcel }) {
+  const activeFlags = FLAG_LABELS.filter(({ key }) => parcel.flags[key]);
+
+  return (
+    <div className="px-8 py-5 bg-muted/30 border-t border-border">
+      <div className="grid grid-cols-3 gap-x-8 gap-y-4">
+        {/* Col 1: Location */}
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-divider pb-1">Location</p>
+          <DetailField label="Property Address" value={parcel.propertyAddress} />
+          <DetailField label="Municipality" value={parcel.municipality} />
+          <DetailField label="Lot Size" value={parcel.lotSize || '—'} />
         </div>
-        <div className="col-span-2 space-y-3">
-          <p className="font-semibold text-foreground">Payment History</p>
-          {parcel.paymentHistory.length === 0 ? (
-            <p className="text-muted-foreground italic">No payment history on record.</p>
+
+        {/* Col 2: Valuation */}
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-divider pb-1">Valuation</p>
+          <DetailField label="Total Assessed Value" value={fmt(parcel.assessedValue)} />
+          <DetailField label="Land Value" value={fmt(parcel.landValue)} />
+          <DetailField label="Improvement Value" value={fmt(parcel.improvementValue)} />
+        </div>
+
+        {/* Col 3: Flags */}
+        <div className="flex flex-col gap-3">
+          <p className="text-xs font-bold uppercase tracking-widest text-muted-foreground border-b border-divider pb-1">Active Flags</p>
+          {activeFlags.length === 0 ? (
+            <span className="text-sm text-muted-foreground italic">No flags set</span>
           ) : (
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="text-left text-muted-foreground border-b border-border">
-                  <th className="pb-1.5 font-medium">Date</th>
-                  <th className="pb-1.5 font-medium">Amount</th>
-                  <th className="pb-1.5 font-medium">Method</th>
-                  <th className="pb-1.5 font-medium">Receipt #</th>
-                </tr>
-              </thead>
-              <tbody>
-                {parcel.paymentHistory.map((p, i) => (
-                  <tr key={i} className="border-b border-border/50 last:border-0">
-                    <td className="py-1.5 text-muted-foreground">{p.date}</td>
-                    <td className="py-1.5 font-medium">${p.amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
-                    <td className="py-1.5 text-muted-foreground">{p.method}</td>
-                    <td className="py-1.5 text-muted-foreground">{p.receiptNo}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+            <div className="flex flex-wrap gap-1.5">
+              {activeFlags.map(({ key, label }) => (
+                <span key={key} className="inline-flex items-center rounded-full px-2 py-0.5 text-[11px] font-semibold bg-destructive/10 text-destructive border border-destructive/20">
+                  {label}
+                </span>
+              ))}
+            </div>
           )}
         </div>
       </div>
     </div>
   );
 }
-
 
 export const parcelColumns: ColumnDef<Parcel>[] = [
   {
@@ -111,22 +119,22 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
       </Link>
     ),
   },
-  { accessorKey: 'ownerName', header: 'Owner Name', size: 200 },
-  { accessorKey: 'propertyAddress', header: 'Property Address', size: 280 },
   {
-    accessorKey: 'taxYear',
-    header: 'Tax Year',
-    size: 100,
-    cell: ({ row }) => <span className="text-muted-foreground">{row.original.taxYear}</span>,
+    accessorKey: 'ownerName', header: 'Owner Name', size: 200, cell: ({ row }) => (
+      <span className="block truncate max-w-[200px]" title={row.original.ownerName ?? ''}>{row.original.ownerName ?? '—'}</span>
+    )
   },
   {
-    accessorKey: 'amountDue',
-    header: 'Amount Due',
-    size: 130,
+    accessorKey: 'propertyAddress', header: 'Property Address', size: 280, cell: ({ row }) => (
+      <span className="block truncate max-w-[280px]" title={row.original.propertyAddress ?? ''}>{row.original.propertyAddress ?? '—'}</span>
+    )
+  },
+  {
+    accessorKey: 'municipality',
+    header: 'Municipality',
+    size: 180,
     cell: ({ row }) => (
-      <span className="font-semibold text-destructive">
-        ${row.original.amountDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-      </span>
+      <span className="text-sm text-muted-foreground">{row.original.municipality || '—'}</span>
     ),
   },
   {
@@ -147,66 +155,90 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
       );
     },
   },
-  {
-    accessorKey: 'lastPaymentDate',
-    header: 'Last Payment',
-    size: 130,
-    cell: ({ row }) => (
-      <span className="text-muted-foreground">{row.original.lastPaymentDate || 'No payment'}</span>
-    ),
-  },
 ];
 
 interface ParcelsTableProps {
   data: Parcel[];
   pageSize?: number;
+  pageNumber?: number;
+  totalCount?: number;
+  totalPages?: number;
+  onPageChange?: (page: number) => void;
+  onPageSizeChange?: (size: number) => void;
+  isLoading?: boolean;
+  isFetching?: boolean;
   columnVisibility?: VisibilityState;
   onColumnVisibilityChange?: OnChangeFn<VisibilityState>;
 }
 
-export function ParcelsTable({ data, pageSize = 10, columnVisibility, onColumnVisibilityChange }: ParcelsTableProps) {
+export function ParcelsTable({
+  data,
+  pageSize = 10,
+  pageNumber = 1,
+  totalCount = 0,
+  totalPages = 1,
+  onPageChange,
+  onPageSizeChange,
+  isLoading,
+  isFetching,
+  columnVisibility,
+  onColumnVisibilityChange,
+}: ParcelsTableProps) {
   const [sorting, setSorting] = useState<SortingState>([]);
   const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
+
+  const pagination: PaginationState = {
+    pageIndex: pageNumber - 1,
+    pageSize,
+  };
 
   const table = useReactTable({
     data,
     columns: parcelColumns,
     getCoreRowModel: getCoreRowModel(),
     getSortedRowModel: getSortedRowModel(),
-    getPaginationRowModel: getPaginationRowModel(),
     getExpandedRowModel: getExpandedRowModel(),
     onSortingChange: setSorting,
     onColumnFiltersChange: setColumnFilters,
     onColumnVisibilityChange,
+    // Server-side pagination
+    manualPagination: true,
+    pageCount: totalPages,
+    onPaginationChange: (updater) => {
+      const next = typeof updater === 'function' ? updater(pagination) : updater;
+      if (next.pageIndex !== pagination.pageIndex) {
+        onPageChange?.(next.pageIndex + 1);
+      }
+      if (next.pageSize !== pagination.pageSize) {
+        onPageSizeChange?.(next.pageSize);
+      }
+    },
     state: {
       sorting,
       columnFilters,
+      pagination,
       ...(columnVisibility !== undefined ? { columnVisibility } : {}),
     },
-    autoResetPageIndex: true,
     autoResetAll: false,
-    initialState: { pagination: { pageSize } },
   });
-
-  useEffect(() => {
-    table.setPageSize(pageSize);
-  }, [pageSize]);
 
   return (
     <div className="w-full min-w-[980px]">
-      <ScopeSnapshot
-        scopedCount={data.length}
-        delinquentCount={data.filter((p) => p.activeWorkflow?.status === 'Delinquent').length}
-        noPaymentCount={data.filter((p) => p.lastPaymentDate === null).length}
-        totalDue={data.reduce((sum, p) => sum + p.amountDue, 0)}
-      />
       <DataGridContainer>
-        <DataGrid table={table} recordCount={data.length}>
-          <DataGridTable />
-          <div className="pt-4">
-            <DataGridPagination showRowsPerPage={false} showInfo={false} className="justify-center" />
-          </div>
-        </DataGrid>
+        <div className={`transition-opacity duration-200 ${isFetching && !isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
+          <DataGrid tableLayout={{ keepColumnsLeft: true }}
+            table={table}
+            recordCount={totalCount}
+            isLoading={isLoading}
+            loadingMode="skeleton"
+            skeletonRowCount={4}
+          >
+            <DataGridTable />
+            <div className="pt-4">
+              <DataGridPagination showRowsPerPage={false} showInfo={false} className="justify-center" />
+            </div>
+          </DataGrid>
+        </div>
       </DataGridContainer>
     </div>
   );

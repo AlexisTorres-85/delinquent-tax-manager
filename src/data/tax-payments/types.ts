@@ -1,10 +1,8 @@
-export type TaxPaymentType = 'Tax' | 'Redemption';
-
 export type TaxYearBalance = {
-  id: string;
-  parcelNumber: string;
   taxYear: number;
   isDelinquent: boolean;
+  hasBalanceDue: boolean;
+  paymentStatus: string;
   baseTax: number;
   interest: number;
   penalty: number;
@@ -15,31 +13,29 @@ export type TaxYearBalance = {
   currentDue: number;
   lastPaymentAmount: number | null;
   lastPaymentDate: string | null; // ISO date e.g. '2025-03-15'
-  assessedValue: number;
 };
 
 export type TaxPayment = {
-  id: string;
   parcelNumber: string;
   taxYear: number;
-  paymentDate: string;            // ISO date e.g. '2024-03-15'
-  certificationNumber: string;
-  receipt: string;
-  type: TaxPaymentType;
-  amountPaid: number;
-
-  // Expanded detail fields
-  propertyTax: number;
-  delinquentCharges: number;
-  taxPenalty: number;
-  totalPayment: number;
-  specialAssessments: number;
-  taxInterest: number;
-  specialTaxPenalty: number;
-  overPayment: number;
-  paymentType: string;            // e.g. 'Check', 'Online', 'Cash', 'Money Order'
-  specialCharges: number;
-  specialInterest: number;
-  otherCharges: number;
-  receiptNumber: string;
+  paymentType: string;            // code: "R"=Redemption, "T"=Tax, "L"=Lottery Credit
+  paymentSource: string;          // code: "C"=County, "M"=Municipality
+  paymentDate: string | null;     // ISO YYYY-MM-DD or null (invalid dates → null)
+  receiptNumber: number;          // 0 = no receipt
+  amount: number;
+  generalPropertyTax: number;
+  specialAssessment: number;
+  specialCharge: number;
+  delinquentUtilityCharge: number;
+  interest: number;
+  penalty: number;
+  generalPropertyTaxInterest: number;
+  specialTaxesInterest: number;
+  generalPropertyTaxPenalty: number;
+  specialTaxesPenalty: number;
+  otherCharge: number;
+  paymentTypeDescription: string; // "Redemption", "Tax", "Lottery Credit"
+  paymentSourceDescription: string;
+  totalTaxes: number;
+  totalInterestAndPenalties: number;
 };

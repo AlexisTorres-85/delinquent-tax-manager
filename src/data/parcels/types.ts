@@ -1,6 +1,7 @@
 import type { ParcelStatus, ParcelStage } from '@/data/workflow/workflow-status-definitions';
 export { STAGES_BY_STATUS, type ParcelStatus, type ParcelStage } from '@/data/workflow/workflow-status-definitions';
 export type { ParcelWorkflowEntry as ParcelActiveWorkflow } from '@/data/workflow/workflow-history/types';
+export type { ParcelWorkflow } from '@/data/workflow/workflow-history/types';
 
 export type ParcelFlags = {
   isBankruptcy: boolean;
@@ -21,7 +22,7 @@ export type PaymentRecord = {
   receiptNo: string;
 };
 
-import type { ParcelWorkflowEntry } from '@/data/workflow/workflow-history/types';
+import type { ParcelWorkflowEntry, ParcelWorkflow } from '@/data/workflow/workflow-history/types';
 export type Parcel = {
   id: string;
   parcelNumber: string;
@@ -31,6 +32,12 @@ export type Parcel = {
   amountDue: number;
   /** The active workflow entry, or null if this parcel has no active workflow. */
   activeWorkflow: ParcelWorkflowEntry | null;
+  /** Tax years associated with the active workflow (parsed from the API). */
+  workflowTaxYears: number[];
+  /** Full workflow object for the accordion grouping in the history tab. */
+  activeWorkflowMeta: ParcelWorkflow | null;
+  /** All workflow history entries for this parcel. */
+  workflowHistory: ParcelWorkflowEntry[];
   /** Structured flags from the database — each boolean field maps to a DB column. */
   flags: ParcelFlags;
   lastPaymentDate: string | null;
@@ -48,6 +55,9 @@ export type Parcel = {
   gcsLegal?: string;
   researchLegal?: string;
   approvedLegal?: string;
+  /** Valuation breakdown */
+  landValue?: number;
+  improvementValue?: number;
   /** Property physical details */
   platType?: string;
   platCode?: string;
@@ -98,20 +108,16 @@ export const PARCEL_COLUMN_LABELS: Record<string, string> = {
   parcelNumber: 'Parcel #',
   ownerName: 'Owner Name',
   propertyAddress: 'Property Address',
-  taxYear: 'Tax Year',
-  amountDue: 'Amount Due',
+  municipality: 'Municipality',
   status: 'Status / Stage',
-  lastPaymentDate: 'Last Payment',
 };
 
 export const DEFAULT_COLUMN_VISIBILITY = {
   parcelNumber: true,
-  ownerName: true,
+  ownerName: false,
   propertyAddress: true,
-  taxYear: true,
-  amountDue: false,
+  municipality: true,
   status: true,
-  lastPaymentDate: false,
 };
 
 export const PAGE_SIZE_OPTIONS = [

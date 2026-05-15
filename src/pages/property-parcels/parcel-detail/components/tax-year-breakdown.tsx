@@ -26,14 +26,11 @@ function DetailItem({ label, value, bold }: { label: string; value: React.ReactN
     );
 }
 
-function VDivider() {
-  return <div className="self-stretch w-px shrink-0 bg-divider" />;
-}
-
 function YearItem({ balance }: { balance: TaxYearBalance }) {
     const {
         taxYear,
         isDelinquent,
+        hasBalanceDue,
         baseTax,
         interest,
         penalty,
@@ -46,8 +43,14 @@ function YearItem({ balance }: { balance: TaxYearBalance }) {
         lastPaymentDate,
     } = balance;
 
-    const formattedLastPaidOn = lastPaymentDate
-        ? new Date(lastPaymentDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
+    // Parse YYYYMMDD or ISO date format
+    const parsedDate = lastPaymentDate
+        ? (/^\d{8}$/.test(lastPaymentDate)
+            ? `${lastPaymentDate.slice(0, 4)}-${lastPaymentDate.slice(4, 6)}-${lastPaymentDate.slice(6, 8)}`
+            : lastPaymentDate)
+        : null;
+    const formattedLastPaidOn = parsedDate
+        ? new Date(parsedDate + 'T00:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' })
         : '—';
 
     return (
@@ -55,9 +58,13 @@ function YearItem({ balance }: { balance: TaxYearBalance }) {
             <AccordionTrigger className="text-sm pt-2 pb-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                     <span className="font-semibold text-sm shrink-0">Tax Year {taxYear}</span>
-                    {currentDue > 0 ? (
+                    {isDelinquent ? (
                         <Badge className="bg-red-100 text-red-700 hover:bg-red-100 shrink-0 text-[11px] px-1.5 py-0">
                             Delinquent
+                        </Badge>
+                    ) : hasBalanceDue ? (
+                        <Badge className="bg-yellow-100 text-yellow-700 hover:bg-yellow-100 shrink-0 text-[11px] px-1.5 py-0">
+                            Balance Due
                         </Badge>
                     ) : (
                         <Badge className="bg-emerald-100 text-emerald-700 hover:bg-emerald-100 shrink-0 text-[11px] px-1.5 py-0">
@@ -111,8 +118,8 @@ function YearItem({ balance }: { balance: TaxYearBalance }) {
     );
 }
 
-export function TaxYearBreakdown({ parcelNumber, className }: { parcelNumber: string; className?: string }) {
-    const { balances, isLoading } = useTaxYearBalances(parcelNumber);
+export function TaxYearBreakdown({ parcelNumber, taxYears, className }: { parcelNumber: string; taxYears?: number[]; className?: string }) {
+    const { balances, totalDue, isLoading } = useTaxYearBalances(parcelNumber, taxYears);
 
     return (
         <PageSection
@@ -120,6 +127,16 @@ export function TaxYearBreakdown({ parcelNumber, className }: { parcelNumber: st
             title="Delinquent Tax Years Breakdown"
             className={className}
             subtitle="delinquent tax years balance summary"
+            action={
+                !isLoading && balances.length > 0 ? (
+                    <div className="flex items-center gap-1.5 shrink-0">
+                        <span className="text-xs text-muted-foreground uppercase tracking-wide font-medium">Total Due:</span>
+                        <span className={`text-sm font-semibold ${totalDue > 0 ? 'text-destructive' : 'text-foreground'}`}>
+                            ${fmt(totalDue)}
+                        </span>
+                    </div>
+                ) : undefined
+            }
             helperContent={
                 <div className="px-4 py-3 text-sm">
                     <p className="font-semibold">About Delinquent Tax Years Breakdown</p>
@@ -146,7 +163,7 @@ export function TaxYearBreakdown({ parcelNumber, className }: { parcelNumber: st
             ) : (
                 <Accordion type="single" collapsible variant="outline" defaultValue={String(balances[0].taxYear)}>
                     {balances.map((balance) => (
-                        <YearItem key={balance.id} balance={balance} />
+                        <YearItem key={balance.taxYear} balance={balance} />
                     ))}
                 </Accordion>
             )}

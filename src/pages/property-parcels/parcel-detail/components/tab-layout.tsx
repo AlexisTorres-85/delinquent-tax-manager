@@ -64,6 +64,13 @@ export interface TabLayoutProps<T> {
     onRefresh?: () => void;
     /** Optional per-row className callback, receives the raw row data. */
     getRowClassName?: (row: T) => string | undefined;
+    /** Row action buttons (right-aligned). */
+    allowView?: boolean;
+    allowEdit?: boolean;
+    allowDelete?: boolean;
+    onView?: (row: T) => void;
+    onEdit?: (row: T) => void;
+    onDelete?: (row: T) => void;
     /** When true, suppresses the catalis header (title/description/icon) section. */
     hideHeader?: boolean;
     /** Extra className applied to the title+description div inside the catalis header. */
@@ -214,6 +221,12 @@ export function TabLayout<T extends object>({
     children,
     headerClassName,
     headerActions,
+    allowView,
+    allowEdit,
+    allowDelete,
+    onView,
+    onEdit,
+    onDelete,
 }: TabLayoutProps<T>) {
     const elapsedLabel = useElapsedLabel(lastUpdated);
 
@@ -411,9 +424,15 @@ export function TabLayout<T extends object>({
             isLoading={isLoading}
             loadingMode='skeleton'
             skeletonRowCount={2}
-            tableLayout={{ headerSticky: true }}
+            tableLayout={{ headerSticky: true}}
             tableClassNames={{ headerSticky: 'sticky z-10 [top:var(--thead-top,0px)]' }}
             getRowClassName={getRowClassName as ((row: unknown) => string | undefined) | undefined}
+            allowView={allowView}
+            allowEdit={allowEdit}
+            allowDelete={allowDelete}
+            onView={onView as ((row: unknown) => void) | undefined}
+            onEdit={onEdit as ((row: unknown) => void) | undefined}
+            onDelete={onDelete as ((row: unknown) => void) | undefined}
         >
             <DataGridContainer>
                 <DataGridTable />

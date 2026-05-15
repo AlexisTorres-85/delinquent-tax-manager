@@ -5,9 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ArrowDownToLine, Maximize2, Minimize2, PlusCircle, Search } from 'lucide-react';
 import type { CatalisParcel } from '@/data/catalis/types';
-import { PARCELS_DUMMY_DATA } from '@/data/parcels/data/parcels-dummy-data';
 
-const DTM_PARCEL_NUMBERS = new Set(PARCELS_DUMMY_DATA.map((p) => p.parcelNumber));
 
 function StatusBadge({ status }: { status: string }) {
   const variant = status.toLowerCase() === 'delinquent' ? 'destructive' : 'success';
@@ -79,7 +77,6 @@ function ResultsTable({ results }: { results: CatalisParcel[] }) {
         </thead>
         <tbody>
           {results.map((row) => {
-            const inDtm = DTM_PARCEL_NUMBERS.has(row.parcelNumber);
             return (
               <tr
                 key={row.parcelNumber}
@@ -101,12 +98,10 @@ function ResultsTable({ results }: { results: CatalisParcel[] }) {
                 </td>
                 <td className={`${tdBase} pr-6`}>
                   <div className="flex items-center gap-1 justify-end">
-                    {!inDtm && (
-                      <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-primary border-primary/40 hover:bg-primary/5" title="Add this parcel to DTM">
-                        <PlusCircle className="h-3.5 w-3.5" />
-                        Add to DTM
-                      </Button>
-                    )}
+                    <Button variant="outline" size="sm" className="h-7 text-xs gap-1.5 text-primary border-primary/40 hover:bg-primary/5" title="Add this parcel to DTM">
+                      <PlusCircle className="h-3.5 w-3.5" />
+                      Add to DTM
+                    </Button>
                   </div>
                 </td>
               </tr>

@@ -12,7 +12,6 @@ import { History, ChevronDown } from 'lucide-react';
 import { Skeleton } from '@/components/ui/skeleton';
 import { useWorkflowHistory } from '@/data/workflow/workflow-history/hooks/use-workflow-history';
 import type { ParcelWorkflowEntry, WorkflowStatus } from '@/data/workflow/workflow-history/types';
-import { WORKFLOWS_DUMMY_DATA } from '@/data/workflow/workflow-history/data/workflows-dummy-data';
 import { TabLayout, type FilterConfig } from './tab-layout';
 import { createWorkflowHistoryColumns } from '../table-columns/workflow-history.columns';
 import { MoveToNextStageModal } from './move-to-next-stage-modal';
@@ -167,10 +166,18 @@ function WorkflowHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parc
 interface WorkflowHistoryTabProps {
     parcelNumber: string;
     stickyTop?: number;
+    initialEntries?: import('@/data/workflow/workflow-history/types').ParcelWorkflowEntry[];
+    initialWorkflows?: import('@/data/workflow/workflow-history/types').ParcelWorkflow[];
 }
 
-export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHistoryTabProps) {
-    const { entries, isLoading, isRefreshing, lastUpdated, refetch } = useWorkflowHistory(parcelNumber);
+export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0, initialEntries, initialWorkflows }: WorkflowHistoryTabProps) {
+    const { entries: fetchedEntries, isLoading: hookLoading, isRefreshing: hookRefreshing, lastUpdated, refetch } = useWorkflowHistory(
+        initialEntries ? '' : parcelNumber,
+    );
+
+    const entries = initialEntries ?? fetchedEntries;
+    const isLoading = initialEntries ? false : hookLoading;
+    const isRefreshing = initialEntries ? false : hookRefreshing;
 
     const sharedHeaderRef = useRef<HTMLDivElement>(null);
     const [sharedHeaderHeight, setSharedHeaderHeight] = useState(0);
@@ -184,10 +191,10 @@ export function WorkflowHistoryTab({ parcelNumber, stickyTop = 0 }: WorkflowHist
         return () => obs.disconnect();
     }, []);
 
-    // Workflows for this parcel (synchronous — constant data)
+    // Workflows for this parcel — provided directly from the parcel API
     const workflows = useMemo(
-        () => WORKFLOWS_DUMMY_DATA.filter((w) => w.parcelNumber === parcelNumber),
-        [parcelNumber],
+        () => initialWorkflows ?? [],
+        [initialWorkflows],
     );
 
     // Default open: the active workflow; fall back to the first one

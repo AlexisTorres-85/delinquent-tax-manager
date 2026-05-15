@@ -1,28 +1,27 @@
 import { Sparkles } from 'lucide-react';
 
-
 interface ScopeSnapshotProps {
-    scopedCount: number;
-    delinquentCount: number;
-    noPaymentCount: number;
-    totalDue: number;
+    totalCount: number;
+    delinquentInScope: number;
+    inRemCount: number;
+    bankruptcyCount: number;
 }
 
-export function ScopeSnapshot({ scopedCount, delinquentCount, noPaymentCount, totalDue }: ScopeSnapshotProps) {
+export function ScopeSnapshot({ totalCount, delinquentInScope, inRemCount, bankruptcyCount }: ScopeSnapshotProps) {
     return (
-        <div className="flex items-center gap-px bg-neutral-100 border-b border-divider">
-            <div className="flex items-center gap-2 px-6 pt-4 pb-4 text-xs text-muted-foreground">
+        <div className="flex items-center gap-px bg-neutral-100 flex-wrap">
+            <div className="flex items-center gap-2 px-6 py-3 text-xs text-muted-foreground">
                 <Sparkles className="h-5 w-5" />
                 <span className="font-medium text-foreground">Live Scope Snapshot</span>
             </div>
             <div className="h-4 w-px bg-neutral-300 mx-1" />
-            <Stat label="Matching Parcels" value={scopedCount} />
+            <Stat label="Matching Parcels" value={totalCount} />
             <div className="h-4 w-px bg-neutral-300 mx-1" />
-            <Stat label="Delinquent in Scope" value={delinquentCount} />
+            <Stat label="Delinquent in Scope" value={delinquentInScope} />
             <div className="h-4 w-px bg-neutral-300 mx-1" />
-            <Stat label="No-Payment Records" value={noPaymentCount} />
+            <Stat label="In Rem" value={inRemCount} />
             <div className="h-4 w-px bg-neutral-300 mx-1" />
-            <Stat label="Total Amount Due" value={`$${totalDue.toLocaleString('en-US', { maximumFractionDigits: 0 })}`} />
+            <Stat label="In Bankruptcy" value={bankruptcyCount} />
         </div>
     );
 }

@@ -5,21 +5,27 @@ import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectContent, SelectField, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Slider, SliderThumb } from '@/components/ui/slider';
 import { VisibilityState } from '@tanstack/react-table';
-import { PARCEL_COLUMN_LABELS, PARCEL_STATUS_OPTIONS, PAGE_SIZE_OPTIONS, type ParcelStatus } from '@/data/parcels/types';
+import { PARCEL_COLUMN_LABELS, PAGE_SIZE_OPTIONS } from '@/data/parcels/types';
+import { X } from 'lucide-react';
+import type { LegalStatus } from '@/data/parcels/hooks/use-parcel-filters';
+import { useMunicipalities } from '@/data/lookup/use-municipalities';
 
-type StatusFilter = ParcelStatus | 'all';
+const LEGAL_STATUS_OPTIONS = [
+  { value: 'all', label: 'All' },
+  { value: 'isDelinquent', label: 'In Delinquency' },
+  { value: 'isInRem', label: 'In Rem (In Foreclosure)' },
+  { value: 'isBankruptcy', label: 'In Bankruptcy' },
+  { value: 'isDeeded', label: 'Tax Deeded' },
+];
 
 interface GridControlsProps {
     search: string;
     onSearchChange: (value: string) => void;
-    statusFilter: StatusFilter;
-    onStatusFilterChange: (value: StatusFilter) => void;
-    minAmountDue: number;
-    onMinAmountDueChange: (value: number) => void;
-    onlyNoPayment: boolean;
-    onOnlyNoPaymentChange: (value: boolean) => void;
+    legalStatus: LegalStatus;
+    onLegalStatusChange: (value: LegalStatus) => void;
+    municipalityCode: string;
+    onMunicipalityCodeChange: (value: string) => void;
     pageSize: number;
     onPageSizeChange: (value: number) => void;
     columnVisibility: VisibilityState;
@@ -30,36 +36,61 @@ interface GridControlsProps {
 export function GridControls({
     search,
     onSearchChange,
-    statusFilter,
-    onStatusFilterChange,
-    minAmountDue,
-    onMinAmountDueChange,
-    onlyNoPayment,
-    onOnlyNoPaymentChange,
+    legalStatus,
+    onLegalStatusChange,
+    municipalityCode,
+    onMunicipalityCodeChange,
     pageSize,
     onPageSizeChange,
     columnVisibility,
     onColumnVisibilityChange,
     onReset,
 }: GridControlsProps) {
+    const { municipalities } = useMunicipalities();
+    const municipalityOptions = [
+        { value: '', label: 'All municipalities' },
+        ...municipalities.map((m) => ({ value: m.code, label: m.description })),
+    ];
     return (
         <div className="space-y-3 h-full">
             <div className="pl-6 pr-6 gap-3 flex flex-col pt-4">
-                <Input
-                    label="Scope Search"
-                    labelVariant='primary'
-                    value={search}
-                    onChange={(e) => onSearchChange(e.target.value)}
-                    placeholder="Owner, address, or parcel #"
-                />
+                <div className="relative">
+                    <Input
+                        label="Scope Search"
+                        labelVariant='primary'
+                        value={search}
+                        onChange={(e) => onSearchChange(e.target.value)}
+                        placeholder="Owner, address, or parcel #"
+                        className={search ? 'pr-8' : ''}
+                    />
+                    {search && (
+                        <button
+                            type="button"
+                            onClick={() => onSearchChange('')}
+                            className="absolute right-2 bottom-0 h-8 flex items-center text-muted-foreground hover:text-foreground transition-colors"
+                            aria-label="Clear search"
+                        >
+                            <X className="h-3.5 w-3.5" />
+                        </button>
+                    )}
+                </div>
                 <Combobox
-                    label="Status"
+                    label="Legal Status"
                     labelVariant="primary"
-                    value={statusFilter}
-                    onValueChange={(value) => onStatusFilterChange((value || 'all') as StatusFilter)}
+                    value={legalStatus}
+                    onValueChange={(value) => onLegalStatusChange((value || 'all') as LegalStatus)}
                     placeholder="All statuses"
                     searchPlaceholder="Search status..."
-                    options={PARCEL_STATUS_OPTIONS.map((o) => ({ value: o.value, label: o.label }))}
+                    options={LEGAL_STATUS_OPTIONS}
+                />
+                <Combobox
+                    label="Municipality"
+                    labelVariant="primary"
+                    value={municipalityCode}
+                    onValueChange={(value) => onMunicipalityCodeChange(value || '')}
+                    placeholder="All municipalities"
+                    searchPlaceholder="Search municipality..."
+                    options={municipalityOptions}
                 />
 
                 <SelectField
@@ -78,36 +109,6 @@ export function GridControls({
                     </SelectContent>
                 </SelectField>
 
-                <div className="space-y-2 ">
-                    <Label variant="primary">Minimum Amount Due: ${minAmountDue.toLocaleString()}</Label>
-                    <Slider className='pt-6 pb-3'
-                        value={[minAmountDue]}
-                        min={0}
-                        max={50000}
-                        step={500}
-                        onValueChange={(value) => onMinAmountDueChange(value[0] ?? 0)}
-                    >
-                        <SliderThumb />
-                    </Slider>
-                </div>
-
-
-                <div className="pt-1">
-                    <Card>
-                        <CardContent>
-                            <div className="flex items-center gap-2">
-                                <Checkbox
-                                    checked={onlyNoPayment}
-                                    onCheckedChange={(checked) => onOnlyNoPaymentChange(checked === true)}
-                                    id="no-payment"
-                                    variant="primary"
-                                />
-                                <Label htmlFor="no-payment" variant="primary">Only records with no payment</Label>
-                            </div>
-
-                        </CardContent>
-                    </Card>
-                </div>
 
                 <Card>
                     <CardHeader>

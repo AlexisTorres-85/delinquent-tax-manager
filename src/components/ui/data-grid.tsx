@@ -60,6 +60,13 @@ export interface DataGridProps<TData extends object> {
   emptyMessage?: ReactNode | string;
   /** Optional per-row className callback, receives the raw row data. */
   getRowClassName?: (row: unknown) => string | undefined;
+  /** Row action buttons (right-aligned in the trailing filler column) */
+  allowView?: boolean;
+  allowEdit?: boolean;
+  allowDelete?: boolean;
+  onView?: (row: TData) => void;
+  onEdit?: (row: TData) => void;
+  onDelete?: (row: TData) => void;
   tableLayout?: {
     dense?: boolean;
     cellBorder?: boolean;
@@ -76,6 +83,8 @@ export interface DataGridProps<TData extends object> {
     columnsMovable?: boolean;
     columnsDraggable?: boolean;
     rowsDraggable?: boolean;
+    /** Pins data columns to the left; a filler column absorbs remaining width. */
+    keepColumnsLeft?: boolean;
   };
   tableClassNames?: {
     base?: string;

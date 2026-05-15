@@ -2,25 +2,39 @@ import { ContentWrapper } from '@/components/layout/content-wrapper';
 import { Button } from '@/components/ui/button';
 import { Download, FileText, LandPlotIcon, SlidersHorizontal } from 'lucide-react';
 import { ParcelsTable } from './components/parcels-table';
+import { ScopeSnapshot } from './components/scope-snapshot';
 import { GridControls } from './components/grid-controls';
 import { useParcelFilters } from '@/data/parcels/hooks/use-parcel-filters';
-import { useParcels } from '@/data/parcels/hooks/use-parcels';
+import { useParcelsApi } from '@/data/parcels/hooks/use-parcels-api';
 
 export function ParcelsPage() {
   const {
-    filters,
+    search,
+    debouncedSearch,
+    legalStatus,
+    municipalityCode,
     pageSize,
+    pageNumber,
     columnVisibility,
     setSearch,
-    setStatus,
-    setMinAmountDue,
-    setOnlyNoPayment,
+    setLegalStatus,
+    setMunicipalityCode,
     setPageSize,
+    setPageNumber,
     setColumnVisibility,
     reset,
   } = useParcelFilters();
 
-  const { filtered } = useParcels(filters);
+  const { parcels, totalCount, totalPages, delinquentInScope, inRemCount, bankruptcyCount, isLoading, isFetching, isError, error } = useParcelsApi({
+    pageNumber,
+    pageSize,
+    search: debouncedSearch || undefined,
+    isDelinquent: legalStatus === 'isDelinquent' ? true : undefined,
+    isInRem: legalStatus === 'isInRem' ? true : undefined,
+    isBankruptcy: legalStatus === 'isBankruptcy' ? true : undefined,
+    isDeeded: legalStatus === 'isDeeded' ? true : undefined,
+    municipalityCode: municipalityCode || undefined,
+  });
 
   return (
     <ContentWrapper
@@ -58,14 +72,12 @@ export function ParcelsPage() {
       allowCollapseLeft
       left={
         <GridControls
-          search={filters.search}
+          search={search}
           onSearchChange={setSearch}
-          statusFilter={filters.status}
-          onStatusFilterChange={setStatus}
-          minAmountDue={filters.minAmountDue}
-          onMinAmountDueChange={setMinAmountDue}
-          onlyNoPayment={filters.onlyNoPayment}
-          onOnlyNoPaymentChange={setOnlyNoPayment}
+          legalStatus={legalStatus}
+          onLegalStatusChange={setLegalStatus}
+          municipalityCode={municipalityCode}
+          onMunicipalityCodeChange={setMunicipalityCode}
           pageSize={pageSize}
           onPageSizeChange={setPageSize}
           columnVisibility={columnVisibility}
@@ -75,10 +87,33 @@ export function ParcelsPage() {
       }
       main={
         <div className="h-full">
-          <div className='pb-20'>
+          {isError && (
+            <div className="px-6 py-4 bg-destructive/10 border-b border-destructive/20 text-sm text-destructive">
+              Failed to load parcels: {error instanceof Error ? error.message : 'An unexpected error occurred.'}
+            </div>
+          )}
+          <ScopeSnapshot
+            totalCount={totalCount}
+            delinquentInScope={delinquentInScope}
+            inRemCount={inRemCount}
+            bankruptcyCount={bankruptcyCount}
+          />
+          <div className='border-t border-divider bg-table-header'>
+            <div className={`h-1 bg-table-header overflow-hidden transition-opacity duration-200 ${isFetching || isLoading ? 'opacity-100' : 'opacity-0'}`}>
+              <div className="h-full w-2/5 bg-[var(--color-app-primary-from)] animate-[progress-indeterminate_1.4s_ease-in-out_infinite]" />
+            </div>
+          </div>
+          <div className='pb-20 overflow-x-auto'>
             <ParcelsTable
-              data={filtered}
+              data={parcels}
               pageSize={pageSize}
+              pageNumber={pageNumber}
+              totalCount={totalCount}
+              totalPages={totalPages}
+              onPageChange={setPageNumber}
+              onPageSizeChange={setPageSize}
+              isLoading={isLoading}
+              isFetching={isFetching}
               columnVisibility={columnVisibility}
               onColumnVisibilityChange={setColumnVisibility}
             />

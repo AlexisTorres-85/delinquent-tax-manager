@@ -23,9 +23,10 @@ interface TaxPaymentsTableProps {
     stickyTop?: number;
     parcelNumber: string;
     onRefresh?: () => void;
+    taxYears?: number[];
 }
 
-function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh }: TaxPaymentsTableProps) {
+function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh, taxYears: _taxYears }: TaxPaymentsTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'paymentDate', desc: true }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -49,8 +50,8 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
     function handleTypeChange(val: string) {
         setTypeFilter(val);
         setColumnFilters((prev) => {
-            const next = prev.filter((f) => f.id !== 'type');
-            if (val !== 'all') next.push({ id: 'type', value: val });
+            const next = prev.filter((f) => f.id !== 'paymentTypeDescription');
+            if (val !== 'all') next.push({ id: 'paymentTypeDescription', value: val });
             return next;
         });
     }
@@ -97,6 +98,7 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
                 { value: 'all', label: 'All Types' },
                 { value: 'Tax', label: 'Tax' },
                 { value: 'Redemption', label: 'Redemption' },
+                { value: 'Lottery Credit', label: 'Lottery Credit' },
             ],
         },
     ];
@@ -120,6 +122,12 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
+            allowView
+            allowEdit
+            allowDelete
+            onView={(row) => console.log('view', row)}
+            onEdit={(row) => console.log('edit', row)}
+            onDelete={(row) => console.log('delete', row)}
         />
     );
 }
@@ -129,10 +137,11 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
 interface TaxPaymentsTabProps {
     parcelNumber: string;
     stickyTop?: number;
+    taxYears?: number[];
 }
 
-export function TaxPaymentsTab({ parcelNumber, stickyTop }: TaxPaymentsTabProps) {
-    const { payments, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber);
+export function TaxPaymentsTab({ parcelNumber, stickyTop, taxYears }: TaxPaymentsTabProps) {
+    const { payments, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber, taxYears);
 
-    return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} />;
+    return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} taxYears={taxYears} />;
 }
