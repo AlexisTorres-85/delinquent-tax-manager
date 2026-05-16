@@ -1,7 +1,8 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { API_BASE, unwrapApiResponse } from '@/lib/api';
 import type { ApiParcelListItem, ApiParcelPage } from '../api-types';
-import type { Parcel } from '../types';
+import type { Parcel, ParcelStatus, ParcelStage } from '../types';
+import type { ParcelCaseStageHistory } from '@/data/cases/case-stage-history/types';
 
 // ─── Mapper ───────────────────────────────────────────────────────────────────
 
@@ -19,7 +20,39 @@ export function mapApiListItemToParcel(item: ApiParcelListItem): Parcel {
     assessedValue: item.totalValue,
     landValue: item.landValue,
     improvementValue: item.improvementValue,
-    activeWorkflow: null,
+    activeCase: item.activeCase
+      ? ({
+          id: String(item.activeCase.id),
+          caseId: String(item.activeCase.id),
+          dateTime: item.activeCase.currentStageDateTime,
+          status: item.activeCase.currentStatusDefinitionName as ParcelStatus,
+          stage: item.activeCase.currentStageDefinitionName as ParcelStage,
+          actionTaken: 'Case Opened',
+          performedBy: '',
+          documentCount: 0,
+          isActive: true,
+        } satisfies ParcelCaseStageHistory)
+      : null,
+    activeCaseMeta: item.activeCase
+      ? {
+          caseId: String(item.activeCase.id),
+          parcelNumber: item.parcelNumber,
+          taxYears: item.activeCase.taxYears
+            .split(',')
+            .map((y) => parseInt(y.trim(), 10))
+            .filter((n) => !isNaN(n)),
+          activeCaseStageHistoryId: String(item.activeCase.id),
+          isActive: true,
+        }
+      : null,
+    caseTaxYears: item.activeCase
+      ? item.activeCase.taxYears
+          .split(',')
+          .map((y) => parseInt(y.trim(), 10))
+          .filter((n) => !isNaN(n))
+      : [],
+    caseStageHistory: [],
+    paymentPlan: null,
     flags: {
       isBankruptcy: item.isBankruptcy,
       isFloodPlain: item.isFloodPlain,
@@ -37,9 +70,10 @@ export function mapApiListItemToParcel(item: ApiParcelListItem): Parcel {
     legalDescription: item.legalDescription ?? '',
     lotSize: item.valuationAcres ? `${item.valuationAcres} acres` : '',
     paymentHistory: [],
-    // extra fields
-    totalYearsDelinquent: item.totalYearsDelinquent,
-  } as Parcel & { totalYearsDelinquent: number };
+    isInPaymentPlan: item.isInPaymentPlan ?? false,
+    delinquentYears: item.delinquentYears ?? '',
+    totalYearsDelinquent: item.totalYearsDelinquent ?? 0,
+  };
 }
 
 // ─── Fetch ────────────────────────────────────────────────────────────────────
@@ -53,6 +87,9 @@ export interface ParcelsListParams {
   isBankruptcy?: boolean;
   isDeeded?: boolean;
   municipalityCode?: string;
+  isInPaymentPlan?: boolean;
+  /** Range as [minYear, maxYear] — sent as "2020-2022" */
+  delinquentTaxYears?: [number, number];
 }
 
 async function fetchParcels(params: ParcelsListParams): Promise<ApiParcelPage> {
@@ -65,6 +102,8 @@ async function fetchParcels(params: ParcelsListParams): Promise<ApiParcelPage> {
   if (params.isBankruptcy !== undefined) url.searchParams.set('isBankruptcy', String(params.isBankruptcy));
   if (params.isDeeded !== undefined) url.searchParams.set('isDeeded', String(params.isDeeded));
   if (params.municipalityCode) url.searchParams.set('municipalityCode', params.municipalityCode);
+  if (params.isInPaymentPlan !== undefined) url.searchParams.set('isInPaymentPlan', String(params.isInPaymentPlan));
+  if (params.delinquentTaxYears) url.searchParams.set('delinquentTaxYears', `${params.delinquentTaxYears[0]}-${params.delinquentTaxYears[1]}`);
   const res = await fetch(url.toString());
   return unwrapApiResponse<ApiParcelPage>(res);
 }

@@ -9,27 +9,15 @@ import {
     type ColumnFiltersState,
 } from '@tanstack/react-table';
 import { usePaymentSchedule } from '@/data/payment-schedule/hooks/use-payment-schedule';
-import type { PaymentScheduleEntry, PaymentPlanSummary } from '@/data/payment-schedule/types';
+import type { PaymentScheduleEntry } from '@/data/payment-schedule/types';
 import { CalendarDays } from 'lucide-react';
-import { ScheduleBanner } from './schedule-banner';
 import { TabLayout, type FilterConfig } from './tab-layout';
 import { paymentScheduleColumns } from '../table-columns/payment-schedule.columns';
-
-const EMPTY_SUMMARY: PaymentPlanSummary = {
-    startDate: '',
-    missedPayments: 0,
-    currentAmountDue: 0,
-    monthlyPayment: 0,
-    payoffDate: null,
-    totalPayments: 0,
-    lastPaymentDate: null,
-};
 
 // ─── Inner table component ────────────────────────────────────────────────────
 
 interface PaymentScheduleTableProps {
     entries: PaymentScheduleEntry[];
-    summary: PaymentPlanSummary;
     isLoading: boolean;
     lastUpdated: Date | null;
     stickyTop?: number;
@@ -37,7 +25,7 @@ interface PaymentScheduleTableProps {
     onRefresh?: () => void;
 }
 
-function PaymentScheduleTable({ entries, summary, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh }: PaymentScheduleTableProps) {    const [sorting, setSorting] = useState<SortingState>([{ id: 'dueDate', desc: false }]);
+function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh }: PaymentScheduleTableProps) {    const [sorting, setSorting] = useState<SortingState>([{ id: 'dueDate', desc: false }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [yearFilter, setYearFilter] = useState('all');
@@ -91,9 +79,10 @@ function PaymentScheduleTable({ entries, summary, isLoading, lastUpdated, sticky
     ];
 
     return (
+        <div className='h-[620px]'>
         <TabLayout
             stickyTop={stickyTop}
-            title="Payment Schedule"
+            title="Payment Plan Schedule"
             parcelNumber={parcelNumber}
             description="Scheduled tax installment due dates, charges, and payment for each delinquent tax year on this parcel."
             icon={<CalendarDays className="h-8 w-8" />}
@@ -109,8 +98,8 @@ function PaymentScheduleTable({ entries, summary, isLoading, lastUpdated, sticky
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
-            banner={<ScheduleBanner summary={summary} isLoading={isLoading} disabled={entries.length === 0 && !isLoading} />}
         />
+        </div>
     );
 }
 
@@ -119,15 +108,15 @@ function PaymentScheduleTable({ entries, summary, isLoading, lastUpdated, sticky
 interface PaymentScheduleTabProps {
     parcelNumber: string;
     stickyTop?: number;
+    taxYears?: number[];
 }
 
-export function PaymentScheduleTab({ parcelNumber, stickyTop }: PaymentScheduleTabProps) {
-    const { plan, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber);
+export function PaymentScheduleTab({ parcelNumber, stickyTop, taxYears }: PaymentScheduleTabProps) {
+    const { plan, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber, taxYears);
 
     return (
         <PaymentScheduleTable
             entries={plan?.paymentSchedule ?? []}
-            summary={plan?.paymentPlanSummary ?? EMPTY_SUMMARY}
             isLoading={isRefreshing}
             lastUpdated={lastUpdated}
             stickyTop={stickyTop}

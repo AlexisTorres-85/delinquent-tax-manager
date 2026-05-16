@@ -1,20 +1,20 @@
 import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 
-export type { ParcelStatus as WorkflowStatus, ParcelStage as WorkflowStage };
+export type { ParcelStatus as CaseStatus, ParcelStage as CaseStage };
 
 /**
- * Workflow — the actual parcel case.
+ * ParcelCase — the active case for a parcel.
  * Tracks tax years, active/closed state, and a pointer to the current history entry.
  */
-export type ParcelWorkflow = {
-  workflowId: string;
+export type ParcelCase = {
+  caseId: string;
   parcelNumber: string;
   taxYears: number[];
-  activeWorkflowHistoryId: string | null;
+  activeCaseStageHistoryId: string | null;
   isActive: boolean;
 };
 
-export type WorkflowActionTaken =
+export type CaseActionTaken =
   | 'Case Opened'
   | 'Stage Advanced'
   | 'Status Changed'
@@ -33,20 +33,21 @@ export type WorkflowActionTaken =
   | 'Hold Released'
   | 'Case Closed';
 
-export type ParcelWorkflowEntry = {
+export type ParcelCaseStageHistory = {
   id: string;
-  workflowId: string;
+  caseId: string;
   dateTime: string; // MM/DD/YYYY HH:mm
   status: ParcelStatus;
   stage: ParcelStage;
-  actionTaken: WorkflowActionTaken;
+  actionTaken: CaseActionTaken;
   performedBy: string;
   documentCount: number;
   notes?: string;
   isActive: boolean;
 };
 
-export type ParcelWorkflowHistory = {
+export type ParcelCaseStageHistoryRecord = {
   parcelNumber: string;
-  entries: ParcelWorkflowEntry[];
+  entries: ParcelCaseStageHistory[];
 };
+

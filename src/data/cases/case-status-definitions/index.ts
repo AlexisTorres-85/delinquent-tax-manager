@@ -5,7 +5,7 @@
  * This is the single source of truth for `ParcelStatus`, `ParcelStage`, and `STAGES_BY_STATUS`.
  * Replace the service implementation (workflow.service.ts) when the real API is ready.
  */
-export const WORKFLOW_STATUS_DEFINITIONS = [
+export const CASE_STATUS_DEFINITIONS = [
   {
     id: 'status-01',
     name: 'Delinquent',
@@ -141,29 +141,29 @@ export const WORKFLOW_STATUS_DEFINITIONS = [
 
 // ─── Derived types ────────────────────────────────────────────────────────────
 
-/** All valid parcel status values — derived from WORKFLOW_STATUS_DEFINITIONS. */
-export type ParcelStatus = (typeof WORKFLOW_STATUS_DEFINITIONS)[number]['name'];
+/** All valid parcel status values — derived from CASE_STATUS_DEFINITIONS. */
+export type ParcelStatus = (typeof CASE_STATUS_DEFINITIONS)[number]['name'];
 
-/** All valid parcel stage values — derived from WORKFLOW_STATUS_DEFINITIONS. */
-export type ParcelStage = (typeof WORKFLOW_STATUS_DEFINITIONS)[number]['stages'][number]['name'];
+/** All valid parcel stage values — derived from CASE_STATUS_DEFINITIONS. */
+export type ParcelStage = (typeof CASE_STATUS_DEFINITIONS)[number]['stages'][number]['name'];
 
-/** Maps each status to its ordered stages — derived from WORKFLOW_STATUS_DEFINITIONS. */
+/** Maps each status to its ordered stages — derived from CASE_STATUS_DEFINITIONS. */
 export const STAGES_BY_STATUS = Object.fromEntries(
-  WORKFLOW_STATUS_DEFINITIONS.map((s) => [s.name, s.stages.map((st) => st.name)]),
+  CASE_STATUS_DEFINITIONS.map((s) => [s.name, s.stages.map((st) => st.name)]),
 ) as Record<ParcelStatus, ParcelStage[]>;
 
 // ─── Record types (for the service / hook layer) ─────────────────────────────
 
-export type WorkflowStageRecord = {
+export type CaseStageRecord = {
   id: string;
   name: ParcelStage;
   sortOrder: number;
 };
 
-export type WorkflowStatusRecord = {
+export type CaseStatusRecord = {
   id: string;
   name: ParcelStatus;
   sortOrder: number;
   /** Readonly — do not mutate at runtime. */
-  stages: ReadonlyArray<WorkflowStageRecord>;
+  stages: ReadonlyArray<CaseStageRecord>;
 };

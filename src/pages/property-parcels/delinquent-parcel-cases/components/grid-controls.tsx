@@ -1,10 +1,11 @@
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Combobox } from '@/components/ui/combobox';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { SelectContent, SelectField, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Slider } from '@/components/ui/slider';
+import { Badge } from '@/components/ui/badge';
 import { VisibilityState } from '@tanstack/react-table';
 import { PARCEL_COLUMN_LABELS, PAGE_SIZE_OPTIONS } from '@/data/parcels/types';
 import { X } from 'lucide-react';
@@ -30,6 +31,12 @@ interface GridControlsProps {
     onPageSizeChange: (value: number) => void;
     columnVisibility: VisibilityState;
     onColumnVisibilityChange: (value: VisibilityState) => void;
+    isInPaymentPlan: boolean | undefined;
+    onIsInPaymentPlanChange: (value: boolean | undefined) => void;
+    /** Sorted list of all unique delinquent calendar years found in the loaded data. */
+    availableDelinquentYears: number[];
+    delinquentYearRange: [number, number] | null;
+    onDelinquentYearRangeChange: (value: [number, number] | null) => void;
     onReset: () => void;
 }
 
@@ -44,6 +51,11 @@ export function GridControls({
     onPageSizeChange,
     columnVisibility,
     onColumnVisibilityChange,
+    isInPaymentPlan,
+    onIsInPaymentPlanChange,
+    availableDelinquentYears,
+    delinquentYearRange,
+    onDelinquentYearRangeChange,
     onReset,
 }: GridControlsProps) {
     const { municipalities } = useMunicipalities();
@@ -110,30 +122,91 @@ export function GridControls({
                 </SelectField>
 
 
-                <Card>
-                    <CardHeader>
-                        <CardTitle className="font-medium">Visible Columns</CardTitle>
-                    </CardHeader>
-                    <CardContent>
-                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {(Object.entries(PARCEL_COLUMN_LABELS) as [keyof VisibilityState, string][]).map(([key, label]) => (
-                                <div key={String(key)} className="flex items-center gap-2">
-                                    <Checkbox
-                                        id={`col-${String(key)}`}
-                                        checked={columnVisibility[key] !== false}
-                                        onCheckedChange={(checked) =>
-                                            onColumnVisibilityChange({ ...columnVisibility, [key]: checked === true })
-                                        }
-                                        variant="primary"
-                                    />
-                                    <Label htmlFor={`col-${String(key)}`} variant="primary">{label}</Label>
-                                </div>
-                            ))}
-                        </div>
-                    </CardContent>
-                </Card>
+                <div className="flex items-center gap-2 pt-2">
+                    <Checkbox
+                        id="filter-payment-plan"
+                        checked={isInPaymentPlan === true}
+                        onCheckedChange={(c) => onIsInPaymentPlanChange(c === true ? true : undefined)}
+                        variant="primary"
+                    />
+                    <Label htmlFor="filter-payment-plan" variant="primary">In Payment Plan</Label>
+                </div>
 
-                <Button onClick={onReset} variant="secondary" className="w-full">Reset Panel</Button>
+                <div className="flex flex-col gap-2 border-t border-divider pt-4 pb-2">
+                    <div className="flex items-center justify-between">
+                        <Label variant="primary">Delinquent Year</Label>
+                    </div>
+                    {availableDelinquentYears.length < 2 ? (
+                        <span className="text-xs text-muted-foreground italic">
+                            {availableDelinquentYears.length === 0 ? 'No delinquent years in data' : String(availableDelinquentYears[0])}
+                        </span>
+                    ) : (
+                        <>
+                            <Slider
+                                min={availableDelinquentYears[0]}
+                                max={availableDelinquentYears[availableDelinquentYears.length - 1]}
+                                step={1}
+                                value={[
+                                    delinquentYearRange?.[0] ?? availableDelinquentYears[0],
+                                    delinquentYearRange?.[1] ?? availableDelinquentYears[availableDelinquentYears.length - 1],
+                                ]}
+                                onValueChange={([lo, hi]) => {
+                                    const fullMin = availableDelinquentYears[0];
+                                    const fullMax = availableDelinquentYears[availableDelinquentYears.length - 1];
+                                    if (lo === fullMin && hi === fullMax) {
+                                        onDelinquentYearRangeChange(null);
+                                    } else {
+                                        onDelinquentYearRangeChange([lo, hi]);
+                                    }
+                                }}
+                                className="w-full"
+                            />
+                            <div className="flex justify-between text-xs -mt-2 text-muted-foreground">
+                                <span>{availableDelinquentYears[0]}</span>
+                                <span>{availableDelinquentYears[availableDelinquentYears.length - 1]}</span>
+                            </div>
+                            <div className="flex flex-wrap gap-1 mt-1">
+                                {availableDelinquentYears.map((year) => {
+                                    const lo = delinquentYearRange?.[0] ?? availableDelinquentYears[0];
+                                    const hi = delinquentYearRange?.[1] ?? availableDelinquentYears[availableDelinquentYears.length - 1];
+                                    const inRange = year >= lo && year <= hi;
+                                    return (
+                                        <Badge
+                                            key={year}
+                                            variant={inRange ? 'destructive' : 'outline'}
+                                            className="text-xs px-2 py-0"
+                                        >
+                                            {year}
+                                        </Badge>
+                                    );
+                                })}
+                            </div>
+                        </>
+                    )}
+                </div>
+
+                <div className="border-t border-divider pt-4 flex flex-col gap-2 mb-2">
+                    <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-1">Visible Columns</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        {(Object.entries(PARCEL_COLUMN_LABELS) as [keyof VisibilityState, string][]).map(([key, label]) => (
+                            <div key={String(key)} className="flex items-center gap-2">
+                                <Checkbox
+                                    id={`col-${String(key)}`}
+                                    checked={columnVisibility[key] !== false}
+                                    onCheckedChange={(checked) =>
+                                        onColumnVisibilityChange({ ...columnVisibility, [key]: checked === true })
+                                    }
+                                    variant="primary"
+                                />
+                                <Label htmlFor={`col-${String(key)}`} variant="primary">{label}</Label>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+
+                <div className="border-t border-divider pt-4">
+                    <Button onClick={onReset} variant="outline">Reset Panel</Button>
+                </div>
             </div>
         </div>
     );

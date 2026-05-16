@@ -2,8 +2,8 @@ import { useQuery } from '@tanstack/react-query';
 import { API_BASE, unwrapApiResponse } from '@/lib/api';
 import type { ApiParcelData, CatalisParcelInformation } from '../api-types';
 import type { Parcel } from '../types';
-import type { ParcelWorkflowEntry, ParcelWorkflow } from '@/data/workflow/workflow-history/types';
-import type { ParcelStatus, ParcelStage } from '@/data/workflow/workflow-status-definitions';
+import type { ParcelCaseStageHistory, ParcelCase } from '@/data/cases/case-stage-history/types';
+import type { ParcelStatus, ParcelStage } from '@/data/cases/case-status-definitions';
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -134,52 +134,68 @@ export function mapApiParcelToParcel(raw: ApiParcelData, base?: Parcel): Parcel 
     lotSize: base?.lotSize ?? '',
     paymentHistory: base?.paymentHistory ?? [],
 
-    // Workflow — mapped from the API activeWorkflow object
+    // Case — mapped from the API activeCase object
     ...(() => {
-      const aw = raw.activeWorkflow;
-      if (!aw) {
+      const ac = raw.activeCase;
+      if (!ac) {
         return {
-          activeWorkflow: base?.activeWorkflow ?? null,
-          workflowTaxYears: base?.workflowTaxYears ?? [],
-          activeWorkflowMeta: base?.activeWorkflowMeta ?? null,
-          workflowHistory: base?.workflowHistory ?? [],
+          activeCase: base?.activeCase ?? null,
+          caseTaxYears: base?.caseTaxYears ?? [],
+          activeCaseMeta: base?.activeCaseMeta ?? null,
+          caseStageHistory: base?.caseStageHistory ?? [],
+          paymentPlan: base?.paymentPlan ?? null,
         };
       }
 
-      const workflowId = String(aw.id);
-      const workflowTaxYears = aw.taxYears
+      const caseId = String(ac.id);
+      const caseTaxYears = ac.taxYears
         .split(',')
         .map((s) => parseInt(s.trim(), 10))
         .filter((n) => !isNaN(n))
         .sort((a, b) => a - b);
 
-      const workflowHistory: ParcelWorkflowEntry[] = aw.workflowHistoryEntries.map((e) => ({
+      const caseStageHistory: ParcelCaseStageHistory[] = ac.caseStageHistories.map((e) => ({
         id: String(e.id),
-        workflowId,
+        caseId,
         dateTime: formatIsoDatetime(e.dateTime),
-        status: e.workflowStatusDefinitionName as ParcelStatus,
-        stage: e.workflowStageDefinitionName as ParcelStage,
-        actionTaken: e.actionTaken as ParcelWorkflowEntry['actionTaken'],
+        status: e.caseStatusDefinitionName as ParcelStatus,
+        stage: e.caseStageDefinitionName as ParcelStage,
+        actionTaken: e.actionTaken as ParcelCaseStageHistory['actionTaken'],
         performedBy: e.performedBy,
         documentCount: 0,
         isActive: e.isActive,
       }));
 
-      const activeEntry = workflowHistory.find((e) => e.isActive) ?? workflowHistory[0] ?? null;
+      const activeEntry = caseStageHistory.find((e) => e.isActive) ?? caseStageHistory[0] ?? null;
 
-      const activeWorkflowMeta: ParcelWorkflow = {
-        workflowId,
+      const activeCaseMeta: ParcelCase = {
+        caseId,
         parcelNumber: raw.parcelNumber,
-        taxYears: workflowTaxYears,
-        activeWorkflowHistoryId: activeEntry?.id ?? null,
+        taxYears: caseTaxYears,
+        activeCaseStageHistoryId: activeEntry?.id ?? null,
         isActive: true,
       };
 
+      const paymentPlan = ac.isInPaymentPlan && ac.paymentPlan
+        ? {
+            paymentPlanDescription: ac.paymentPlan.paymentPlanDescription,
+            taxYearsCovered: ac.paymentPlan.taxYearsCovered,
+            monthlyAmount: ac.paymentPlan.paymentPlanMonthlyAmount,
+            numberOfPaymentsMade: ac.paymentPlan.numberOfPaymentsMade,
+            planStartDate: ac.paymentPlan.planStartDate,
+            expectedPayoffDate: ac.paymentPlan.expectedPayoffDate,
+            expectedPayoffAmount: ac.paymentPlan.expectedPayoffAmount,
+            totalDue: ac.paymentPlan.totalDue,
+            lastPaymentDate: ac.paymentPlan.lastPaymentDate,
+          }
+        : null;
+
       return {
-        activeWorkflow: activeEntry,
-        workflowTaxYears,
-        activeWorkflowMeta,
-        workflowHistory,
+        activeCase: activeEntry,
+        caseTaxYears,
+        activeCaseMeta,
+        caseStageHistory,
+        paymentPlan,
       };
     })(),
   };

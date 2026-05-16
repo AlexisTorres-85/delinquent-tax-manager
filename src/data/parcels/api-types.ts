@@ -89,8 +89,13 @@ export interface ApiParcelListItem {
   postOffice: string | null;
   zipCode: string | null;
   legalDescription: string | null;
-  isDelinquent: number;
+  isCurrentYearDelinquent: number;
+  hasAnyDelinquency: number;
   totalYearsDelinquent: number;
+  delinquentYears: string | null;
+  isInPaymentPlan: boolean;
+  paymentPlanDescription: string | null;
+  paymentPlanTaxYearsCovered: string | null;
   valuationAcres: number;
   landValue: number;
   improvementValue: number;
@@ -99,6 +104,19 @@ export interface ApiParcelListItem {
   generalPropertyTaxBalancecode: string | null;
   specialAssessmentBalancecode: string | null;
   otherSpecialTaxesBalanceCode: string | null;
+  activeCase: ApiActiveCaseSummary | null;
+}
+
+/** Active case summary embedded in the parcel list response. */
+export interface ApiActiveCaseSummary {
+  id: number;
+  taxYears: string;
+  createdDate: string;
+  currentStatusDefinitionId: number;
+  currentStatusDefinitionName: string;
+  currentStageDefinitionId: number;
+  currentStageDefinitionName: string;
+  currentStageDateTime: string;
 }
 
 /** Pagination envelope returned by the list endpoint. */
@@ -118,23 +136,41 @@ export interface ApiParcelPage {
   environmentalIssueCount: number;
 }
 
-export interface ApiWorkflowHistoryEntry {
+export interface ApiCaseStageHistory {
   id: number;
   dateTime: string; // ISO datetime e.g. "2026-05-15T07:38:54.6666667"
-  workflowStatusDefinitionId: number;
-  workflowStatusDefinitionName: string;
-  workflowStageDefinitionId: number;
-  workflowStageDefinitionName: string;
+  caseStatusDefinitionId: number;
+  caseStatusDefinitionName: string;
+  caseStageDefinitionId: number;
+  caseStageDefinitionName: string;
   actionTaken: string;
   performedBy: string;
   isActive: boolean;
 }
 
-export interface ApiActiveWorkflow {
+export interface ApiPaymentPlan {
+  parcelNumber: string;
+  isInPaymentPlan: boolean;
+  taxYearsCovered: string;
+  numberOfPaymentsMade: number;
+  paymentPlanMonthlyAmount: number;
+  paymentPlanDescription: string;
+  planStartDate: string;
+  expectedPayoffDate: string;
+  expectedPayoffAmount: number;
+  totalDue: number;
+  currentDueTotal: number;
+  lastPaymentDate: string;
+  planCreateDate: string;
+}
+
+export interface ApiActiveCase {
   id: number;
   taxYears: string; // comma-separated e.g. "2022,2024,2025"
   createdDate: string;
-  workflowHistoryEntries: ApiWorkflowHistoryEntry[];
+  isInPaymentPlan: boolean;
+  paymentPlan: ApiPaymentPlan | null;
+  caseStageHistories: ApiCaseStageHistory[];
 }
 
 /**
@@ -160,8 +196,8 @@ export interface ApiParcelData {
   updatedDate: string;
   contactsCount: number;
   legalDescriptionsCount: number;
-  workflowsCount: number;
+  casesCount: number;
   internalNotesCount: number;
   catalisParcelInformation: CatalisParcelInformation | null;
-  activeWorkflow: ApiActiveWorkflow | null;
+  activeCase: ApiActiveCase | null;
 }

@@ -6,6 +6,7 @@ import { ScopeSnapshot } from './components/scope-snapshot';
 import { GridControls } from './components/grid-controls';
 import { useParcelFilters } from '@/data/parcels/hooks/use-parcel-filters';
 import { useParcelsApi } from '@/data/parcels/hooks/use-parcels-api';
+import { useMemo } from 'react';
 
 export function ParcelsPage() {
   const {
@@ -16,12 +17,16 @@ export function ParcelsPage() {
     pageSize,
     pageNumber,
     columnVisibility,
+    isInPaymentPlan,
+    delinquentYearRange,
     setSearch,
     setLegalStatus,
     setMunicipalityCode,
     setPageSize,
     setPageNumber,
     setColumnVisibility,
+    setIsInPaymentPlan,
+    setDelinquentYearRange,
     reset,
   } = useParcelFilters();
 
@@ -34,7 +39,25 @@ export function ParcelsPage() {
     isBankruptcy: legalStatus === 'isBankruptcy' ? true : undefined,
     isDeeded: legalStatus === 'isDeeded' ? true : undefined,
     municipalityCode: municipalityCode || undefined,
+    isInPaymentPlan,
+    delinquentTaxYears: delinquentYearRange ?? undefined,
   });
+
+  // Unique calendar years from delinquentYears strings, sorted ascending
+  const availableDelinquentYears = useMemo(() => {
+    const yearSet = new Set<number>();
+    for (const p of parcels) {
+      if (p.delinquentYears) {
+        p.delinquentYears.split(',').forEach((y) => {
+          const n = parseInt(y.trim(), 10);
+          if (!isNaN(n)) yearSet.add(n);
+        });
+      }
+    }
+    return Array.from(yearSet).sort((a, b) => a - b);
+  }, [parcels]);
+
+  // Client-side filter by delinquent year range — removed; API now handles delinquentTaxYears param
 
   return (
     <ContentWrapper
@@ -82,6 +105,11 @@ export function ParcelsPage() {
           onPageSizeChange={setPageSize}
           columnVisibility={columnVisibility}
           onColumnVisibilityChange={setColumnVisibility}
+          isInPaymentPlan={isInPaymentPlan}
+          onIsInPaymentPlanChange={setIsInPaymentPlan}
+          availableDelinquentYears={availableDelinquentYears}
+          delinquentYearRange={delinquentYearRange}
+          onDelinquentYearRangeChange={setDelinquentYearRange}
           onReset={reset}
         />
       }

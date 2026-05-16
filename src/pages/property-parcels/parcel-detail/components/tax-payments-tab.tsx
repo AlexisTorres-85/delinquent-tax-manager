@@ -104,6 +104,7 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
     ];
 
     return (
+        <div className='h-[620px]'>
         <TabLayout
             stickyTop={stickyTop}
             title='Tax Payments'
@@ -129,6 +130,7 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
             onEdit={(row) => console.log('edit', row)}
             onDelete={(row) => console.log('delete', row)}
         />
+        </div>
     );
 }
 

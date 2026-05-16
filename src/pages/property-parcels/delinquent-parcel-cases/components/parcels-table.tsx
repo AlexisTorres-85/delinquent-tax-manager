@@ -16,7 +16,7 @@ import { DataGrid, DataGridContainer } from '@/components/ui/data-grid';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
 import { Badge } from '@/components/ui/badge';
-import { ChevronDown, ChevronRight } from 'lucide-react';
+import { CheckCircle2, ChevronDown, ChevronRight, XCircle } from 'lucide-react';
 import type { Parcel } from '@/data/parcels/types';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
 
@@ -138,21 +138,63 @@ export const parcelColumns: ColumnDef<Parcel>[] = [
     ),
   },
   {
-    accessorKey: 'activeWorkflow',
+    accessorKey: 'activeCase',
     header: 'Status / Stage',
     size: 320,
     cell: ({ row }) => {
-      const wf = row.original.activeWorkflow;
-      if (!wf) {
-        return <span className="text-xs text-muted-foreground italic">No Workflow detected</span>;
+      const ac = row.original.activeCase;
+      if (!ac) {
+        return <span className="text-xs text-muted-foreground italic">No Case detected</span>;
       }
       return (
         <div className="flex items-center gap-2">
-          <StatusBadge status={wf.status} />
+          <StatusBadge status={ac.status} />
           <div className="self-stretch w-px shrink-0 bg-border" />
-          <StageBadge stage={wf.stage} />
+          <StageBadge stage={ac.stage} />
         </div>
       );
+    },
+  },
+  {
+    accessorKey: 'totalYearsDelinquent',
+    header: 'Years Delinquent',
+    size: 130,
+    cell: ({ getValue }) => {
+      const val = getValue<number>();
+      return (
+        <span className={`text-sm font-medium ${val > 0 ? 'text-destructive' : 'text-muted-foreground'}`}>
+          {val ?? 0}
+        </span>
+      );
+    },
+  },
+  {
+    accessorKey: 'delinquentYears',
+    header: 'Delinquent Years',
+    size: 180,
+    cell: ({ getValue }) => {
+      const val = getValue<string>();
+      if (!val) return <span className="text-xs text-muted-foreground italic">—</span>;
+      return (
+        <div className="flex flex-wrap gap-1">
+          {val.split(',').map((y) => (
+            <Badge key={y.trim()} variant="destructive" className="text-[10px] px-1.5 py-0 font-semibold">
+              {y.trim()}
+            </Badge>
+          ))}
+        </div>
+      );
+    },
+  },
+  {
+    accessorKey: 'isInPaymentPlan',
+    header: 'In Payment Plan',
+    size: 130,
+    cell: ({ getValue }) => {
+      const val = getValue<boolean>();
+      return val
+        ? <span className="inline-flex items-center gap-1 text-xs font-semibold text-emerald-600"><CheckCircle2 className="size-3.5" />Yes</span>
+        : <span className="inline-flex items-center gap-1 text-xs text-muted-foreground"><XCircle className="size-3.5" />No</span>;
     },
   },
 ];

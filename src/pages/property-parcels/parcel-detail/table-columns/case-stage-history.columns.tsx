@@ -21,11 +21,11 @@ import {
   Ban,
 } from 'lucide-react';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
-import type { ParcelWorkflowEntry, WorkflowActionTaken } from '@/data/workflow/workflow-history/types';
+import type { ParcelCaseStageHistory, CaseActionTaken } from '@/data/cases/case-stage-history/types';
 
-export function createWorkflowHistoryColumns(
-    onMoveToNextStage: (entry: ParcelWorkflowEntry) => void,
-): ColumnDef<ParcelWorkflowEntry>[] {
+export function createCaseStageHistoryColumns(
+    onMoveToNextStage: (entry: ParcelCaseStageHistory) => void,
+): ColumnDef<ParcelCaseStageHistory>[] {
   return [
   {
     id: 'activeStage',
@@ -45,8 +45,8 @@ export function createWorkflowHistoryColumns(
     },
   },
   {
-    accessorKey: 'workflowId',
-    header: ({ column }) => <DataGridColumnHeader column={column} title="Workflow ID" />,
+    accessorKey: 'caseId',
+    header: ({ column }) => <DataGridColumnHeader column={column} title="Case ID" />,
     cell: ({ getValue }) => (
       <span className="text-sm font-mono text-muted-foreground">{getValue<string>()}</span>
     ),
@@ -70,7 +70,7 @@ export function createWorkflowHistoryColumns(
   {
     accessorKey: 'status',
     header: ({ column }) => <DataGridColumnHeader column={column} title="Status" />,
-    cell: ({ getValue }) => <StatusBadge status={getValue<ParcelWorkflowEntry['status']>()} />,
+    cell: ({ getValue }) => <StatusBadge status={getValue<ParcelCaseStageHistory['status']>()} />,
     filterFn: (row, columnId, filterValue) =>
       filterValue === 'all' || row.getValue(columnId) === filterValue,
     meta: { skeleton: <Skeleton className="h-5 w-32" /> },
@@ -78,7 +78,7 @@ export function createWorkflowHistoryColumns(
   {
     accessorKey: 'stage',
     header: ({ column }) => <DataGridColumnHeader column={column} title="Stage" />,
-    cell: ({ getValue }) => <StageBadge stage={getValue<ParcelWorkflowEntry['stage']>()} />,
+    cell: ({ getValue }) => <StageBadge stage={getValue<ParcelCaseStageHistory['stage']>()} />,
     filterFn: (row, columnId, filterValue) =>
       filterValue === 'all' || row.getValue(columnId) === filterValue,
     meta: { skeleton: <Skeleton className="h-5 w-36" /> },
@@ -86,7 +86,7 @@ export function createWorkflowHistoryColumns(
   {
     accessorKey: 'actionTaken',
     header: ({ column }) => <DataGridColumnHeader column={column} title="Action Taken" />,
-    cell: ({ getValue }) => <span className="text-sm">{getValue<WorkflowActionTaken>()}</span>,
+    cell: ({ getValue }) => <span className="text-sm">{getValue<CaseActionTaken>()}</span>,
     meta: { skeleton: <Skeleton className="h-4 w-32" /> },
   },
   {
@@ -156,7 +156,7 @@ export function createWorkflowHistoryColumns(
               <DropdownMenuSeparator />
               <DropdownMenuItem disabled={isActive}>
                 <RotateCcw className="mr-2 h-4 w-4" />
-                Reopen Workflow
+                Reopen Case
               </DropdownMenuItem>
               <DropdownMenuItem variant="destructive">
                 <Ban className="mr-2 h-4 w-4" />

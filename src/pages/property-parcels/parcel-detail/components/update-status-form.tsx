@@ -4,7 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import type { ParcelStatus } from '@/data/parcels/types';
-import type { WorkflowStatusRecord, WorkflowStageRecord } from '@/data/workflow/workflow-status-definitions';
+import type { CaseStatusRecord, CaseStageRecord } from '@/data/cases/case-status-definitions';
 
 export const CURRENT_YEAR = new Date().getFullYear();
 export const AVAILABLE_TAX_YEARS = Array.from({ length: 8 }, (_, i) => CURRENT_YEAR - 7 + i);
@@ -15,9 +15,9 @@ export type UpdateStatusFormProps = {
     stage: string;
     note: string;
     selectedYears: number[];
-    availableStages: ReadonlyArray<WorkflowStageRecord>;
+    availableStages: ReadonlyArray<CaseStageRecord>;
     workflowLoading: boolean;
-    statuses: WorkflowStatusRecord[];
+    statuses: CaseStatusRecord[];
     onStatusChange: (status: ParcelStatus) => void;
     onStageChange: (stage: string) => void;
     onNoteChange: (note: string) => void;

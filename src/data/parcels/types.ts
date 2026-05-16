@@ -1,7 +1,19 @@
-import type { ParcelStatus, ParcelStage } from '@/data/workflow/workflow-status-definitions';
-export { STAGES_BY_STATUS, type ParcelStatus, type ParcelStage } from '@/data/workflow/workflow-status-definitions';
-export type { ParcelWorkflowEntry as ParcelActiveWorkflow } from '@/data/workflow/workflow-history/types';
-export type { ParcelWorkflow } from '@/data/workflow/workflow-history/types';
+import type { ParcelStatus, ParcelStage } from '@/data/cases/case-status-definitions';
+export { STAGES_BY_STATUS, type ParcelStatus, type ParcelStage } from '@/data/cases/case-status-definitions';
+export type { ParcelCaseStageHistory as ParcelActiveCase } from '@/data/cases/case-stage-history/types';
+export type { ParcelCase } from '@/data/cases/case-stage-history/types';
+
+export type PaymentPlanInfo = {
+  paymentPlanDescription: string;
+  taxYearsCovered: string;
+  monthlyAmount: number;
+  numberOfPaymentsMade: number;
+  planStartDate: string;
+  expectedPayoffDate: string;
+  expectedPayoffAmount: number;
+  totalDue: number;
+  lastPaymentDate: string;
+};
 
 export type ParcelFlags = {
   isBankruptcy: boolean;
@@ -22,7 +34,7 @@ export type PaymentRecord = {
   receiptNo: string;
 };
 
-import type { ParcelWorkflowEntry, ParcelWorkflow } from '@/data/workflow/workflow-history/types';
+import type { ParcelCaseStageHistory, ParcelCase } from '@/data/cases/case-stage-history/types';
 export type Parcel = {
   id: string;
   parcelNumber: string;
@@ -30,14 +42,22 @@ export type Parcel = {
   propertyAddress: string;
   municipality: string;
   amountDue: number;
-  /** The active workflow entry, or null if this parcel has no active workflow. */
-  activeWorkflow: ParcelWorkflowEntry | null;
-  /** Tax years associated with the active workflow (parsed from the API). */
-  workflowTaxYears: number[];
-  /** Full workflow object for the accordion grouping in the history tab. */
-  activeWorkflowMeta: ParcelWorkflow | null;
-  /** All workflow history entries for this parcel. */
-  workflowHistory: ParcelWorkflowEntry[];
+  /** The active case stage history entry, or null if this parcel has no active case. */
+  activeCase: ParcelCaseStageHistory | null;
+  /** Tax years associated with the active case (parsed from the API). */
+  caseTaxYears: number[];
+  /** Full case object for the accordion grouping in the history tab. */
+  activeCaseMeta: ParcelCase | null;
+  /** All case stage history entries for this parcel. */
+  caseStageHistory: ParcelCaseStageHistory[];
+  /** Active payment plan info, or null if not in a payment plan. */
+  paymentPlan: PaymentPlanInfo | null;
+  /** Whether this parcel is currently in a payment plan. */
+  isInPaymentPlan: boolean;
+  /** Comma-separated delinquent tax years (e.g. "2023, 2024, 2025"). */
+  delinquentYears: string;
+  /** Total number of delinquent years. */
+  totalYearsDelinquent: number;
   /** Structured flags from the database — each boolean field maps to a DB column. */
   flags: ParcelFlags;
   lastPaymentDate: string | null;
@@ -71,12 +91,12 @@ export type Parcel = {
 
 /**
  * Raw parcel data as stored in the data layer.
- * `activeWorkflow` is embedded directly in each parcel record.
- * Legacy parcels without a workflow have `activeWorkflow: null` (or omitted).
+ * `activeCase` is embedded directly in each parcel record.
+ * Legacy parcels without a case have `activeCase: null` (or omitted).
  */
-export type RawParcelData = Omit<Parcel, 'activeWorkflow'> & {
-  activeWorkflow?: ParcelWorkflowEntry | null;
-  /** Legacy field — kept for parcels that pre-date the workflow system. */
+export type RawParcelData = Omit<Parcel, 'activeCase'> & {
+  activeCase?: ParcelCaseStageHistory | null;
+  /** Legacy field — kept for parcels that pre-date the case system. */
   status?: ParcelStatus;
   /** Legacy field — kept for parcels that pre-date the workflow system. */
   stage?: ParcelStage;
@@ -109,7 +129,10 @@ export const PARCEL_COLUMN_LABELS: Record<string, string> = {
   ownerName: 'Owner Name',
   propertyAddress: 'Property Address',
   municipality: 'Municipality',
-  status: 'Status / Stage',
+  activeCase: 'Status / Stage',
+  totalYearsDelinquent: 'Years Delinquent',
+  delinquentYears: 'Delinquent Years',
+  isInPaymentPlan: 'In Payment Plan',
 };
 
 export const DEFAULT_COLUMN_VISIBILITY = {
@@ -117,7 +140,10 @@ export const DEFAULT_COLUMN_VISIBILITY = {
   ownerName: false,
   propertyAddress: true,
   municipality: true,
-  status: true,
+  activeCase: true,
+  totalYearsDelinquent: true,
+  delinquentYears: true,
+  isInPaymentPlan: true,
 };
 
 export const PAGE_SIZE_OPTIONS = [

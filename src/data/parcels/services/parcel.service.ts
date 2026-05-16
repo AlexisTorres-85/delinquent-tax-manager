@@ -24,7 +24,7 @@ export const parcelService = {
   filterLocally(parcels: Parcel[], filters: ParcelFilters): Parcel[] {
     const search = filters.search.trim().toLowerCase();
     return parcels.filter((p) => {
-      if (filters.status !== 'all' && p.activeWorkflow?.status !== filters.status) return false;
+      if (filters.status !== 'all' && p.activeCase?.status !== filters.status) return false;
       if (search) {
         const haystack = `${p.parcelNumber} ${p.ownerName} ${p.propertyAddress}`.toLowerCase();
         if (!haystack.includes(search)) return false;

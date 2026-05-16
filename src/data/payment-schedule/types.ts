@@ -1,5 +1,19 @@
 export type PaymentScheduleStatus = 'Pending' | 'Paid' | 'Partial' | 'Overdue';
 
+/** Raw entry shape from GET /api/parcels/{n}/payment-plan-schedule */
+export interface ApiPaymentScheduleEntry {
+  id: number;
+  parcelNumber: string;
+  taxYear: number;
+  dueDate: string;         // ISO date e.g. '2025-02-28'
+  tax: number;
+  interest: number;
+  penalty: number;
+  total: number;
+  totalPaid: number;
+  status: string;          // 'Pending' | 'Paid' | 'Partial' | 'Overdue'
+}
+
 export type PaymentScheduleEntry = {
   id: string;
   parcelNumber: string;

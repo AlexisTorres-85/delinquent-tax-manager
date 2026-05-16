@@ -6,7 +6,7 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useParcelDetail } from '@/data/parcels/hooks/use-parcel-detail';
-import { useWorkflow } from '@/data/parcels/hooks/use-workflow';
+import { useCase } from '@/data/parcels/hooks/use-case';
 import { ArrowLeft, Flag, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
 import type { Parcel, ParcelFlags, ParcelStatus } from '@/data/parcels/types';
 import { UpdateStatusForm, CURRENT_YEAR } from './components/update-status-form';
@@ -17,11 +17,12 @@ import { TaxPaymentsTab } from './components/tax-payments-tab';
 import { PaymentScheduleTab } from './components/payment-schedule-tab';
 import { DocumentsTab } from './components/documents-tab';
 import { ContactsTab } from './components/contacts-tab';
-import { WorkflowHistoryTab } from './components/workflow-history-tab';
+import { CaseStageHistoryTab } from './components/case-stage-history-tab';
 import { NotesTab } from './components/notes-tab';
 import { ExpensesTab } from './components/expenses-tab';
 import { LegalDescriptionTab } from './components/legal-description-tab';
 import { TaxYearBreakdown } from './components/tax-year-breakdown';
+import { PaymentPlanSection } from './components/payment-plan-section';
 import { PageSection } from '@/components/layout/page-section';
 import { useTaxYearBalances } from '@/data/tax-payments/hooks/use-tax-year-balances';
 
@@ -128,18 +129,18 @@ function FlagsInfoModal({ open, onOpenChange }: { open: boolean; onOpenChange: (
 }
 
 function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
-  const isNewWorkflow = !parcel.activeWorkflow;
+  const isNewCase = !parcel.activeCase;
   const [open, setOpen] = useState(false);
-  const [status, setStatus] = useState<ParcelStatus | ''>(parcel.activeWorkflow?.status ?? '');
-  const [stage, setStage] = useState<string>(parcel.activeWorkflow?.stage ?? '');
+  const [status, setStatus] = useState<ParcelStatus | ''>(parcel.activeCase?.status ?? '');
+  const [stage, setStage] = useState<string>(parcel.activeCase?.stage ?? '');
   const [note, setNote] = useState('');
   const [selectedYears, setSelectedYears] = useState<number[]>([CURRENT_YEAR - 1]);
-  const { statuses, isLoading: workflowLoading } = useWorkflow();
+  const { statuses, isLoading: caseLoading } = useCase();
 
   function handleOpenChange(newOpen: boolean) {
     if (!newOpen) {
       setNote('');
-      if (isNewWorkflow) setSelectedYears([CURRENT_YEAR - 1]);
+      if (isNewCase) setSelectedYears([CURRENT_YEAR - 1]);
     }
     setOpen(newOpen);
   }
@@ -157,12 +158,12 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   }
 
   function handleSave() {
-    const finalStatus = isNewWorkflow ? 'Delinquent' : status;
-    const finalStage = isNewWorkflow ? 'Initial Delinquency' : stage;
+    const finalStatus = isNewCase ? 'Delinquent' : status;
+    const finalStage = isNewCase ? 'Initial Delinquency' : stage;
     // TODO: wire to API - parcelService.updateStatus(parcel.id, { status: finalStatus, stage: finalStage, note, taxYears: selectedYears })
-    console.log('Update case status:', { status: finalStatus, stage: finalStage, note, taxYears: isNewWorkflow ? selectedYears : undefined });
+    console.log('Update case status:', { status: finalStatus, stage: finalStage, note, taxYears: isNewCase ? selectedYears : undefined });
     setNote('');
-    if (isNewWorkflow) setSelectedYears([CURRENT_YEAR - 1]);
+    if (isNewCase) setSelectedYears([CURRENT_YEAR - 1]);
     setOpen(false);
   }
 
@@ -171,7 +172,7 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   return (
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
-        {isNewWorkflow ? (
+        {isNewCase ? (
           <Button variant="primary" size="sm">
             <RefreshCw className="h-4 w-4" />
             Start Delinquent Process
@@ -185,13 +186,13 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
       </PopoverTrigger>
       <PopoverContent className="w-100 p-0 rounded-xl border-r-4 border-r-app-secondary/50 overflow-hidden shadow-xl shadow-black/15" align="end">
         <UpdateStatusForm
-          isNewWorkflow={isNewWorkflow}
+          isNewWorkflow={isNewCase}
           status={status}
           stage={stage}
           note={note}
           selectedYears={selectedYears}
           availableStages={availableStages}
-          workflowLoading={workflowLoading}
+          workflowLoading={caseLoading}
           statuses={statuses}
           onStatusChange={handleStatusChange}
           onStageChange={setStage}
@@ -220,8 +221,8 @@ function VDivider() {
 
 function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (tab: Tab) => void }) {
   const [flagsInfoOpen, setFlagsInfoOpen] = useState(false);
-  const taxYears = parcel.workflowTaxYears.join(', ');
-  const { totalDue, isLoading: totalDueLoading } = useTaxYearBalances(parcel.parcelNumber, parcel.workflowTaxYears.length > 0 ? parcel.workflowTaxYears : undefined);
+  const taxYears = parcel.caseTaxYears.join(', ');
+  const { totalDue, isLoading: totalDueLoading } = useTaxYearBalances(parcel.parcelNumber, parcel.caseTaxYears.length > 0 ? parcel.caseTaxYears : undefined);
 
   return (
     <div className="px-6 py-6">
@@ -236,16 +237,16 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
-          {parcel.activeWorkflow ? (
+          {parcel.activeCase ? (
             <>
               <span className="text-sm font-semibold">Status:</span>
-              <StatusBadge status={parcel.activeWorkflow.status} />
+              <StatusBadge status={parcel.activeCase.status} />
               <div className="w-px h-4 shrink-0 bg-divider" />
               <span className="text-sm font-semibold">Stage:</span>
-              <StageBadge stage={parcel.activeWorkflow.stage} />
+              <StageBadge stage={parcel.activeCase.stage} />
             </>
           ) : (
-            <span className="text-xs text-muted-foreground italic">No Workflow detected</span>
+            <span className="text-xs text-muted-foreground italic">No Case detected</span>
           )}
         </div>
       </div>
@@ -282,20 +283,24 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
         <InfoCard
           label="Current Payment Plan"
           value={
-            <button
-              type="button"
-              onClick={() => onTabChange('Payment Schedule')}
-              className="text-sm font-semibold text-primary hover:underline underline-offset-2 text-left leading-tight"
-            >
-              PP-2024-001
-            </button>
+            parcel.paymentPlan
+              ? (
+                <button
+                  type="button"
+                  onClick={() => onTabChange('Payment Plan Schedule')}
+                  className="text-sm font-semibold text-primary hover:underline underline-offset-2 text-left leading-tight"
+                >
+                  {parcel.paymentPlan.paymentPlanDescription}
+                </button>
+              )
+              : <span className="text-muted-foreground text-sm">—</span>
           }
         />
       </div>
 
       <div className="flex items-stretch gap-0 border-t border-divider pt-6">
-        {/* Left: Flags */}
-        <div className="flex flex-col gap-2 flex-1 min-w-0">
+        {/* Left: Flags + Property Details */}
+        <section className="flex flex-col gap-2 w-[40%] shrink-0 min-w-0">
           <PageSection
             icon={<Flag className="size-5 text-muted-foreground" />}
             title="Flags"
@@ -361,13 +366,14 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
               </div>
             </div>
           </PageSection>
-        </div>
+        </section>
 
         <div className="mx-4" />
 
-        <div className="flex-1 min-w-0 flex flex-col">
-          <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.workflowTaxYears} className="flex-1" />
-        </div>
+        <section className="flex-1 min-w-0 flex flex-col gap-4">
+          {parcel.paymentPlan && <PaymentPlanSection paymentPlan={parcel.paymentPlan} />}
+          <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.caseTaxYears} className="flex-1" />
+        </section>
       </div>
     </div>
   );
@@ -375,7 +381,7 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
 
 const TABS = [
   'Tax Payments',
-  'Payment Schedule',
+  'Payment Plan Schedule',
   'Documents',
   'Contacts',
   'Workflow History',
@@ -388,7 +394,7 @@ type Tab = typeof TABS[number];
 
 const TAB_TO_SLUG: Record<Tab, string> = {
   'Tax Payments': 'tax-payments',
-  'Payment Schedule': 'payment-schedule',
+  'Payment Plan Schedule': 'payment-plan-schedule',
   'Documents': 'documents',
   'Contacts': 'contacts',
   'Workflow History': 'workflow-history',
@@ -428,11 +434,11 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
       </div>
 
       <TabsContent value="Tax Payments" className="mt-0">
-        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.workflowTaxYears} />
+        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} />
       </TabsContent>
 
-      <TabsContent value="Payment Schedule" className="mt-0">
-        <PaymentScheduleTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+      <TabsContent value="Payment Plan Schedule" className="mt-0">
+        <PaymentScheduleTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} />
       </TabsContent>
 
       <TabsContent value="Documents" className="mt-0">
@@ -444,11 +450,11 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
       </TabsContent>
 
       <TabsContent value="Workflow History" className="mt-0">
-        <WorkflowHistoryTab
+        <CaseStageHistoryTab
             parcelNumber={parcel.parcelNumber}
             stickyTop={stickyTop}
-            initialEntries={parcel.workflowHistory}
-            initialWorkflows={parcel.activeWorkflowMeta ? [parcel.activeWorkflowMeta] : undefined}
+            initialEntries={parcel.caseStageHistory}
+            initialCases={parcel.activeCaseMeta ? [parcel.activeCaseMeta] : undefined}
           />
       </TabsContent>
 
@@ -464,7 +470,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
         <LegalDescriptionTab parcel={parcel} parcelNumber={parcel.parcelNumber} isLoading={false} stickyTop={stickyTop} />
       </TabsContent>
 
-      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History' && tab !== 'Notes' && tab !== 'Expenses' && tab !== 'Legal Description').map((tab) => (
+      {TABS.filter((tab) => tab !== 'Tax Payments' && tab !== 'Payment Plan Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History' && tab !== 'Notes' && tab !== 'Expenses' && tab !== 'Legal Description').map((tab) => (
         <TabsContent key={tab} value={tab} className="p-6 mt-0">
           <div className="flex items-center justify-center text-sm text-muted-foreground">
             {tab}
@@ -503,8 +509,8 @@ export function ParcelDetailPage() {
   const { parcel, isLoading, isError: apiError, error: apiErr } = useParcelDetail(parcelNumber ?? '');
   const [helpOpen, setHelpOpen] = useState(false);
 
-  const taxYearsSubtitle = parcel && parcel.workflowTaxYears.length > 0
-    ? `Current Workflow Tax Years: ${parcel.workflowTaxYears.join(', ')}`
+  const taxYearsSubtitle = parcel && parcel.caseTaxYears.length > 0
+    ? `Current Case Tax Years: ${parcel.caseTaxYears.join(', ')}`
     : undefined;
 
   const activeTab: Tab = (tab && SLUG_TO_TAB[tab]) ? SLUG_TO_TAB[tab] : 'Tax Payments';

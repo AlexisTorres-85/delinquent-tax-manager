@@ -10,7 +10,7 @@ type UsePaymentScheduleResult = {
   refetch: () => void;
 };
 
-export function usePaymentSchedule(parcelNumber: string): UsePaymentScheduleResult {
+export function usePaymentSchedule(parcelNumber: string, taxYears?: number[]): UsePaymentScheduleResult {
   const [plan, setPlan] = useState<ParcelPaymentPlan | null>(null);
   const [isFetching, setIsFetching] = useState(true);
   const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
@@ -22,7 +22,7 @@ export function usePaymentSchedule(parcelNumber: string): UsePaymentScheduleResu
   useEffect(() => {
     let cancelled = false;
     setIsFetching(true);
-    paymentScheduleService.getByParcelNumber(parcelNumber).then((data) => {
+    paymentScheduleService.getByParcelNumber(parcelNumber, taxYears).then((data) => {
       if (cancelled) return;
       hasLoadedRef.current = true;
       setPlan(data);
@@ -30,7 +30,7 @@ export function usePaymentSchedule(parcelNumber: string): UsePaymentScheduleResu
       setIsFetching(false);
     });
     return () => { cancelled = true; };
-  }, [parcelNumber, refreshKey]);
+  }, [parcelNumber, taxYears?.join(','), refreshKey]);
 
   return {
     plan,

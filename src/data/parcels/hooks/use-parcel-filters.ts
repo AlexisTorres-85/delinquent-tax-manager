@@ -12,12 +12,16 @@ type UseParcelFiltersResult = {
   pageSize: number;
   pageNumber: number;
   columnVisibility: VisibilityState;
+  isInPaymentPlan: boolean | undefined;
+  delinquentYearRange: [number, number] | null;
   setSearch: (value: string) => void;
   setLegalStatus: (value: LegalStatus) => void;
   setMunicipalityCode: (value: string) => void;
   setPageSize: (value: number) => void;
   setPageNumber: (value: number) => void;
   setColumnVisibility: OnChangeFn<VisibilityState>;
+  setIsInPaymentPlan: (value: boolean | undefined) => void;
+  setDelinquentYearRange: (value: [number, number] | null) => void;
   reset: () => void;
 };
 
@@ -29,6 +33,8 @@ export function useParcelFilters(): UseParcelFiltersResult {
   const [pageSize, setPageSizeRaw] = useState(10);
   const [pageNumber, setPageNumber] = useState(1);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_COLUMN_VISIBILITY);
+  const [isInPaymentPlan, setIsInPaymentPlanRaw] = useState<boolean | undefined>(undefined);
+  const [delinquentYearRange, setDelinquentYearRangeRaw] = useState<[number, number] | null>(null);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -52,6 +58,16 @@ export function useParcelFilters(): UseParcelFiltersResult {
     setPageNumber(1);
   }
 
+  function setIsInPaymentPlan(value: boolean | undefined) {
+    setIsInPaymentPlanRaw(value);
+    setPageNumber(1);
+  }
+
+  function setDelinquentYearRange(value: [number, number] | null) {
+    setDelinquentYearRangeRaw(value);
+    setPageNumber(1);
+  }
+
   function setPageSize(value: number) {
     setPageSizeRaw(value);
     setPageNumber(1);
@@ -65,6 +81,8 @@ export function useParcelFilters(): UseParcelFiltersResult {
     setPageSizeRaw(10);
     setPageNumber(1);
     setColumnVisibility(DEFAULT_COLUMN_VISIBILITY);
+    setIsInPaymentPlanRaw(undefined);
+    setDelinquentYearRangeRaw(null);
   };
 
   return {
@@ -75,11 +93,15 @@ export function useParcelFilters(): UseParcelFiltersResult {
     pageSize,
     pageNumber,
     columnVisibility,
+    isInPaymentPlan,
+    delinquentYearRange,
     setSearch,
     setLegalStatus,
     setMunicipalityCode,
     setPageSize,
     setPageNumber,
+    setIsInPaymentPlan,
+    setDelinquentYearRange,
     setColumnVisibility: (updater) =>
       setColumnVisibility((old) => functionalUpdate(updater, old)),
     reset,

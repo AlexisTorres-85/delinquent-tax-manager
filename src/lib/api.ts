@@ -1,3 +1,5 @@
+import { toast } from 'sonner';
+
 /**
  * Generic API response wrapper — matches the shape returned by all endpoints.
  *
@@ -67,3 +69,29 @@ export async function unwrapApiResponse<T>(res: Response): Promise<T> {
 
 /** Base URL — override via VITE_API_BASE_URL env var */
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'https://localhost:7189';
+
+/**
+ * Drop-in replacement for `fetch` + `unwrapApiResponse`.
+ * Automatically shows a Sonner toast whenever the request fails —
+ * either an HTTP error, a `success: false` body, or a network failure.
+ * Still re-throws so calling code can handle the error if needed.
+ *
+ * Usage:
+ *   const data = await apiFetch<MyType>(`${API_BASE}/api/my-endpoint`);
+ */
+export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
+  try {
+    const res = await fetch(url, options);
+    return await unwrapApiResponse<T>(res);
+  } catch (err) {
+    if (err instanceof ApiError) {
+      const description = err.errors.length > 0 ? err.errors.join('\n') : undefined;
+      toast.error(err.message, { description });
+    } else {
+      toast.error('Network error', {
+        description: err instanceof Error ? err.message : String(err),
+      });
+    }
+    throw err;
+  }
+}
