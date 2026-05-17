@@ -211,7 +211,7 @@ export function TabLayout<T extends object>({
     table,
     recordCount = 0,
     isLoading = false,
-    paginationSizes = [10, 25, 50, 100],
+    paginationSizes = [20, 50, 100],
     banner,
     hideSearch = false,
     extraToolbarButtons,
@@ -395,25 +395,12 @@ export function TabLayout<T extends object>({
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
 
             {/* Refresh + Expand button group */}
-            <div className='inline-flex items-center border border-input rounded-md overflow-hidden shrink-0'>
-                <button
-                    className='h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50'
-                    title='Refresh'
-                    disabled={isLoading}
-                    onClick={handleRefresh}
-                >
-                    <RefreshCw className={`h-3.5 w-3.5 transition-transform ${isLoading ? 'animate-spin' : ''}`} />
-                </button>
-                <div className='w-px self-stretch bg-input' />
-                <button
-                    className='h-8 w-8 flex items-center justify-center text-muted-foreground hover:bg-accent hover:text-foreground transition-colors disabled:opacity-50'
-                    title={maximized ? 'Minimize' : 'Maximize'}
-                    disabled={isLoading}
-                    onClick={() => setMaximized((v) => !v)}
-                >
-                    {maximized ? <Minimize2 className='h-3.5 w-3.5' /> : <Maximize2 className='h-3.5 w-3.5' />}
-                </button>
-            </div>
+            <Button variant='outline' size='sm' title='Refresh' disabled={isLoading} onClick={handleRefresh}>
+                <RefreshCw className={`h-3.5 w-3.5 transition-transform ${isLoading ? 'animate-spin' : ''}`} />
+            </Button>
+            <Button variant='outline' size='sm' title={maximized ? 'Minimize' : 'Maximize'} disabled={isLoading} onClick={() => setMaximized((v) => !v)}>
+                {maximized ? <Minimize2 className='h-3.5 w-3.5' /> : <Maximize2 className='h-3.5 w-3.5' />}
+            </Button>
         </div>
     );
 

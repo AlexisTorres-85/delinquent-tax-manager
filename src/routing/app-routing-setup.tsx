@@ -84,7 +84,7 @@ export function AppRoutingSetup() {
         <Route path="/property-parcels/delinquent-parcel-cases" element={<ParcelsPage />} />
         <Route path="/property-parcels/catalis-parcel-search" element={<CatalisParcelSearchPage />} />
         <Route path="/property-parcels/delinquent-parcel-cases/audit-logs" element={<AuditLogsPage />} />
-        <Route path="/property-parcels/delinquent-parcel-cases/:parcelNumber" element={<Navigate to="tax-payments" replace />} />
+        <Route path="/property-parcels/delinquent-parcel-cases/:parcelNumber" element={<Navigate to="overview" replace />} />
         <Route path="/property-parcels/delinquent-parcel-cases/:parcelNumber/:tab" element={<ParcelDetailPage />} />
 
         {/* Payments */}

@@ -4,6 +4,16 @@ import { DEFAULT_COLUMN_VISIBILITY } from '../types';
 
 export type LegalStatus = 'all' | 'isDelinquent' | 'isInRem' | 'isBankruptcy' | 'isDeeded';
 
+export type PaymentPlanFilter =
+  | 'all'
+  | 'inPlan'
+  | 'notInPlan'
+  | 'activePlan'
+  | 'brokenPlan'
+  | 'coversCaseTaxYears'
+  | 'partiallyCoversCaseTaxYears'
+  | 'historicalOnly';
+
 type UseParcelFiltersResult = {
   search: string;
   debouncedSearch: string;
@@ -12,16 +22,24 @@ type UseParcelFiltersResult = {
   pageSize: number;
   pageNumber: number;
   columnVisibility: VisibilityState;
-  isInPaymentPlan: boolean | undefined;
+  paymentPlanFilter: PaymentPlanFilter;
   delinquentYearRange: [number, number] | null;
+  flagIsDelinquent: boolean;
+  flagIsInRem: boolean;
+  flagIsBankruptcy: boolean;
+  flagIsDeeded: boolean;
   setSearch: (value: string) => void;
   setLegalStatus: (value: LegalStatus) => void;
   setMunicipalityCode: (value: string) => void;
   setPageSize: (value: number) => void;
   setPageNumber: (value: number) => void;
   setColumnVisibility: OnChangeFn<VisibilityState>;
-  setIsInPaymentPlan: (value: boolean | undefined) => void;
+  setPaymentPlanFilter: (value: PaymentPlanFilter) => void;
   setDelinquentYearRange: (value: [number, number] | null) => void;
+  setFlagIsDelinquent: (value: boolean) => void;
+  setFlagIsInRem: (value: boolean) => void;
+  setFlagIsBankruptcy: (value: boolean) => void;
+  setFlagIsDeeded: (value: boolean) => void;
   reset: () => void;
 };
 
@@ -33,8 +51,12 @@ export function useParcelFilters(): UseParcelFiltersResult {
   const [pageSize, setPageSizeRaw] = useState(10);
   const [pageNumber, setPageNumber] = useState(1);
   const [columnVisibility, setColumnVisibility] = useState<VisibilityState>(DEFAULT_COLUMN_VISIBILITY);
-  const [isInPaymentPlan, setIsInPaymentPlanRaw] = useState<boolean | undefined>(undefined);
+  const [paymentPlanFilter, setPaymentPlanFilterRaw] = useState<PaymentPlanFilter>('all');
   const [delinquentYearRange, setDelinquentYearRangeRaw] = useState<[number, number] | null>(null);
+  const [flagIsDelinquent, setFlagIsDelinquentRaw] = useState(false);
+  const [flagIsInRem, setFlagIsInRemRaw] = useState(false);
+  const [flagIsBankruptcy, setFlagIsBankruptcyRaw] = useState(false);
+  const [flagIsDeeded, setFlagIsDeedRaw] = useState(false);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -58,8 +80,8 @@ export function useParcelFilters(): UseParcelFiltersResult {
     setPageNumber(1);
   }
 
-  function setIsInPaymentPlan(value: boolean | undefined) {
-    setIsInPaymentPlanRaw(value);
+  function setPaymentPlanFilter(value: PaymentPlanFilter) {
+    setPaymentPlanFilterRaw(value);
     setPageNumber(1);
   }
 
@@ -67,6 +89,11 @@ export function useParcelFilters(): UseParcelFiltersResult {
     setDelinquentYearRangeRaw(value);
     setPageNumber(1);
   }
+
+  function setFlagIsDelinquent(value: boolean) { setFlagIsDelinquentRaw(value); setPageNumber(1); }
+  function setFlagIsInRem(value: boolean) { setFlagIsInRemRaw(value); setPageNumber(1); }
+  function setFlagIsBankruptcy(value: boolean) { setFlagIsBankruptcyRaw(value); setPageNumber(1); }
+  function setFlagIsDeeded(value: boolean) { setFlagIsDeedRaw(value); setPageNumber(1); }
 
   function setPageSize(value: number) {
     setPageSizeRaw(value);
@@ -81,8 +108,12 @@ export function useParcelFilters(): UseParcelFiltersResult {
     setPageSizeRaw(10);
     setPageNumber(1);
     setColumnVisibility(DEFAULT_COLUMN_VISIBILITY);
-    setIsInPaymentPlanRaw(undefined);
+    setPaymentPlanFilterRaw('all');
     setDelinquentYearRangeRaw(null);
+    setFlagIsDelinquentRaw(false);
+    setFlagIsInRemRaw(false);
+    setFlagIsBankruptcyRaw(false);
+    setFlagIsDeedRaw(false);
   };
 
   return {
@@ -93,15 +124,23 @@ export function useParcelFilters(): UseParcelFiltersResult {
     pageSize,
     pageNumber,
     columnVisibility,
-    isInPaymentPlan,
+    paymentPlanFilter,
     delinquentYearRange,
+    flagIsDelinquent,
+    flagIsInRem,
+    flagIsBankruptcy,
+    flagIsDeeded,
     setSearch,
     setLegalStatus,
     setMunicipalityCode,
     setPageSize,
     setPageNumber,
-    setIsInPaymentPlan,
+    setPaymentPlanFilter,
     setDelinquentYearRange,
+    setFlagIsDelinquent,
+    setFlagIsInRem,
+    setFlagIsBankruptcy,
+    setFlagIsDeeded,
     setColumnVisibility: (updater) =>
       setColumnVisibility((old) => functionalUpdate(updater, old)),
     reset,

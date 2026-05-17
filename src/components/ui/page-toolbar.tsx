@@ -47,7 +47,7 @@ export function PageToolbar({ crumbs, actions, className }: PageToolbarProps) {
                 zIndex: index + 1,
                 height: ARROW_HEIGHT,
                 backgroundColor: isLast ? 'var(--color-breadcrumb-active)' : 'var(--color-breadcrumb-inactive)',
-                borderBottom: '2px solid var(--color-divider)',
+                borderBottom: '2px solid var(--color-divider-dark)',
               }}
               onMouseEnter={!isLast ? (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-breadcrumb-hover)'; } : undefined}
               onMouseLeave={!isLast ? (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-breadcrumb-inactive)'; } : undefined}

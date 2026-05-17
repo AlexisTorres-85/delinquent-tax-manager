@@ -15,7 +15,7 @@ export function Wrapper() {
     <>
       <div
         className="fixed inset-0 -z-10"
-        style={{ background: 'linear-gradient(to top, var(--color-app-gradient-from), var(--color-app-gradient-to))' }}
+        style={{ background: 'var(--color-app-gradient)' }}
       />
       <Header />
 

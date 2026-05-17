@@ -75,7 +75,7 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         state: { sorting, globalFilter, columnFilters },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const filters: FilterConfig[] = [

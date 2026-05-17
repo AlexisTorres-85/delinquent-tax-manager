@@ -77,7 +77,7 @@ function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNu
         onSortingChange: setSorting,
         onColumnFiltersChange: setColumnFilters,
         state: { sorting, columnFilters },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const typeOptions: FilterConfig['options'] = [

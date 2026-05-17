@@ -50,7 +50,7 @@ export function PaymentPlanSection({ paymentPlan }: PaymentPlanSectionProps) {
             subtitle="current installment agreement details"
         >
             <Accordion type="single" collapsible variant="outline" defaultValue="plan">
-                <AccordionItem value="plan" className="border border-divider">
+                <AccordionItem value="plan" className="border border-divider/50 bg-muted">
                     <AccordionTrigger className="text-sm pt-2 pb-2">
                         <div className="flex items-center gap-3 min-w-0 flex-1">
                             <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />

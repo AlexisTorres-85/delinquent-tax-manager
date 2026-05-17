@@ -83,7 +83,7 @@ export function NotesTab({ parcelNumber, stickyTop = 0 }: NotesTabProps) {
         onColumnFiltersChange: setColumnFilters,
         onExpandedChange: setExpanded,
         state: { sorting, globalFilter, columnFilters, expanded },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const filters: FilterConfig[] = useMemo(() => [

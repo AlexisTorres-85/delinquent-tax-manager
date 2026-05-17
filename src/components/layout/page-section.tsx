@@ -13,6 +13,8 @@ interface PageSectionProps {
   action?: React.ReactNode;
   children: React.ReactNode;
   className?: string;
+  /** When true, wraps the section in a white card with rounded corners */
+  isCard?: boolean;
 }
 
 export function PageSection({
@@ -24,6 +26,7 @@ export function PageSection({
   action,
   children,
   className,
+  isCard = false,
 }: PageSectionProps) {
   const hasHelper = Boolean(helperContent || onHelperClick);
 
@@ -58,8 +61,8 @@ export function PageSection({
   ) : null;
 
   return (
-    <div className={`flex flex-col ${className ? ` ${className}` : ''}`}>
-      <div className="flex items-center gap-2 mb-4 border-b border-divider pb-4">
+    <div className={`flex flex-col ${isCard ? ' bg-white p-4 rounded-xl' : ''}${className ? ` ${className}` : ''}`}>
+      <div className="flex items-center gap-2 mb-4 border-b border-divider pb-4 shrink-0">
         <div className="flex items-center justify-center rounded-lg bg-black/10 p-2 shrink-0">
           {icon}
         </div>

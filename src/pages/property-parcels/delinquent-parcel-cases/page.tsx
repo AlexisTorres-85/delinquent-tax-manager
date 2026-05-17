@@ -1,10 +1,11 @@
 import { ContentWrapper } from '@/components/layout/content-wrapper';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, LandPlotIcon, SlidersHorizontal } from 'lucide-react';
+import { Download, FileText, LandPlotIcon } from 'lucide-react';
 import { ParcelsTable } from './components/parcels-table';
 import { ScopeSnapshot } from './components/scope-snapshot';
 import { GridControls } from './components/grid-controls';
 import { useParcelFilters } from '@/data/parcels/hooks/use-parcel-filters';
+import type { PaymentPlanFilter } from '@/data/parcels/hooks/use-parcel-filters';
 import { useParcelsApi } from '@/data/parcels/hooks/use-parcels-api';
 import { useMemo } from 'react';
 
@@ -17,7 +18,7 @@ export function ParcelsPage() {
     pageSize,
     pageNumber,
     columnVisibility,
-    isInPaymentPlan,
+    paymentPlanFilter,
     delinquentYearRange,
     setSearch,
     setLegalStatus,
@@ -25,23 +26,62 @@ export function ParcelsPage() {
     setPageSize,
     setPageNumber,
     setColumnVisibility,
-    setIsInPaymentPlan,
+    setPaymentPlanFilter,
     setDelinquentYearRange,
     reset,
   } = useParcelFilters();
 
+  // Derive isInPaymentPlan API param from the richer PaymentPlanFilter value
+  function toIsInPaymentPlan(f: PaymentPlanFilter): boolean | undefined {
+    if (f === 'all') return undefined;
+    if (f === 'notInPlan') return false;
+    return true; // inPlan, activePlan, brokenPlan, coversCaseTaxYears, partiallyCoversCaseTaxYears, historicalOnly
+  }
+
+  // Shared filter params (without year range) — used for both grid and chart baseline
+  const sharedParams = {
+    search: debouncedSearch || undefined,
+    isDelinquent: legalStatus === 'isDelinquent' || undefined,
+    isInRem: legalStatus === 'isInRem' || undefined,
+    isBankruptcy: legalStatus === 'isBankruptcy' || undefined,
+    isDeeded: legalStatus === 'isDeeded' || undefined,
+    municipalityCode: municipalityCode || undefined,
+    isInPaymentPlan: toIsInPaymentPlan(paymentPlanFilter),
+  };
+
   const { parcels, totalCount, totalPages, delinquentInScope, inRemCount, bankruptcyCount, isLoading, isFetching, isError, error } = useParcelsApi({
     pageNumber,
     pageSize,
-    search: debouncedSearch || undefined,
-    isDelinquent: legalStatus === 'isDelinquent' ? true : undefined,
-    isInRem: legalStatus === 'isInRem' ? true : undefined,
-    isBankruptcy: legalStatus === 'isBankruptcy' ? true : undefined,
-    isDeeded: legalStatus === 'isDeeded' ? true : undefined,
-    municipalityCode: municipalityCode || undefined,
-    isInPaymentPlan,
+    ...sharedParams,
     delinquentTaxYears: delinquentYearRange ?? undefined,
   });
+
+  // Baseline call (no year filter, pageSize=1) — provides total counts for chart breakdown
+  const { totalCount: baselineTotal, delinquentInScope: baselineDelinquent } = useParcelsApi({
+    pageNumber: 1,
+    pageSize: 1,
+    ...sharedParams,
+  });
+
+  // Chart breakdown counts
+  const chartInRange = delinquentInScope;
+  const chartOutsideRange = Math.max(0, baselineDelinquent - chartInRange);
+  const chartNoDelinquency = Math.max(0, baselineTotal - baselineDelinquent);
+
+  // Municipality breakdown for current page — all municipalities, no truncation
+  const municipalityBreakdown = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of parcels) {
+      const key = p.municipality || 'Unknown';
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
+  }, [parcels]);
+
+  const inPaymentPlanCount = useMemo(
+    () => parcels.filter((p) => p.isInPaymentPlan).length,
+    [parcels]
+  );
 
   // Unique calendar years from delinquentYears strings, sorted ascending
   const availableDelinquentYears = useMemo(() => {
@@ -83,36 +123,7 @@ export function ParcelsPage() {
         title: 'Delinquent Parcel Cases',
         subtitle: 'Access parcel records and account details',
       }}
-      leftHeader={{
-        icon: <SlidersHorizontal className="h-6 w-6" />,
-        title: 'Grid Controls',
-        subtitle: 'Control columns, filters, and data layout',
-      }}
-      leftWidth="30%"
-      mainWidth="70%"
-      leftClassName="bg-white"
       mainClassName="p-0"
-      allowCollapseLeft
-      left={
-        <GridControls
-          search={search}
-          onSearchChange={setSearch}
-          legalStatus={legalStatus}
-          onLegalStatusChange={setLegalStatus}
-          municipalityCode={municipalityCode}
-          onMunicipalityCodeChange={setMunicipalityCode}
-          pageSize={pageSize}
-          onPageSizeChange={setPageSize}
-          columnVisibility={columnVisibility}
-          onColumnVisibilityChange={setColumnVisibility}
-          isInPaymentPlan={isInPaymentPlan}
-          onIsInPaymentPlanChange={setIsInPaymentPlan}
-          availableDelinquentYears={availableDelinquentYears}
-          delinquentYearRange={delinquentYearRange}
-          onDelinquentYearRangeChange={setDelinquentYearRange}
-          onReset={reset}
-        />
-      }
       main={
         <div className="h-full">
           {isError && (
@@ -120,6 +131,30 @@ export function ParcelsPage() {
               Failed to load parcels: {error instanceof Error ? error.message : 'An unexpected error occurred.'}
             </div>
           )}
+          <GridControls
+            search={search}
+            onSearchChange={setSearch}
+            legalStatus={legalStatus}
+            onLegalStatusChange={setLegalStatus}
+            municipalityCode={municipalityCode}
+            onMunicipalityCodeChange={setMunicipalityCode}
+            pageSize={pageSize}
+            onPageSizeChange={setPageSize}
+            columnVisibility={columnVisibility}
+            onColumnVisibilityChange={setColumnVisibility}
+            paymentPlanFilter={paymentPlanFilter}
+            onPaymentPlanFilterChange={setPaymentPlanFilter}
+            availableDelinquentYears={availableDelinquentYears}
+            delinquentYearRange={delinquentYearRange}
+            onDelinquentYearRangeChange={setDelinquentYearRange}
+            chartInRange={chartInRange}
+            chartOutsideRange={chartOutsideRange}
+            chartNoDelinquency={chartNoDelinquency}
+            municipalityBreakdown={municipalityBreakdown}
+            inPaymentPlanCount={inPaymentPlanCount}
+            pageParcelsCount={parcels.length}
+            onReset={reset}
+          />
           <ScopeSnapshot
             totalCount={totalCount}
             delinquentInScope={delinquentInScope}

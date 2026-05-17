@@ -112,7 +112,7 @@ function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, par
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         state: { sorting, globalFilter, columnFilters },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const filters: FilterConfig[] = [

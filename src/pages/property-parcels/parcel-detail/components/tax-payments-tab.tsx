@@ -77,7 +77,7 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         state: { sorting, globalFilter, columnFilters },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const filters: FilterConfig[] = [

@@ -30,6 +30,46 @@
   --input: var(--color-zinc-200);
   --ring: var(--color-zinc-400);
   --radius: 0.5rem;
+
+  /* Slider gradient stops — edit these to restyle the range track */
+  --slider-stop-0: #223B38;   /* Te Papa Green */
+  --slider-stop-1: #2F5954;   /* Spectra */
+  --slider-stop-2: #62938D;   /* app teal */
+  --slider-stop-3: #C9D9CD;   /* Tasman */
+  --slider-stop-4: #CCEC60;   /* Sulu accent */
+
+  --slider-gradient: linear-gradient(
+    to right,
+    var(--slider-stop-0),
+    var(--slider-stop-1),
+    var(--slider-stop-2),
+    var(--slider-stop-3),
+    var(--slider-stop-4)
+  );
+  --slider-thumb-color: #2F5954;
+
+  /* Delinquency scope chart */
+  --chart-in-range: #2F5954;        /* Spectra - primary chart value */
+  --chart-outside-range: #C09F6D;   /* Twine - warning/outside range */
+  --chart-no-delinquency: #C9D9CD;  /* Tasman - inactive/no delinquency */
+
+  /* Municipality chart palette (16 slots) */
+  --chart-muni-0:  #223B38; /* Te Papa Green */
+  --chart-muni-1:  #294744; /* Plantation */
+  --chart-muni-2:  #2F5954; /* Spectra */
+  --chart-muni-3:  #3D6B65; /* deep muted teal */
+  --chart-muni-4:  #4F8079; /* softened teal */
+  --chart-muni-5:  #62938D; /* existing app teal */
+  --chart-muni-6:  #7FA9A2; /* light teal */
+  --chart-muni-7:  #A7C1B6; /* muted sage */
+  --chart-muni-8:  #C9D9CD; /* Tasman */
+  --chart-muni-9:  #D8E2DC; /* breadcrumb hover / pale sage */
+  --chart-muni-10: #E2D6BD; /* Bone */
+  --chart-muni-11: #C09F6D; /* Twine */
+  --chart-muni-12: #E9C554; /* app secondary gold */
+  --chart-muni-13: #CCEC60; /* Sulu accent */
+  --chart-muni-14: #8FA63B; /* muted olive-lime */
+  --chart-muni-15: #151515; /* Cod Gray */
 }
 
 /** Theme Setup **/
@@ -64,37 +104,41 @@
   /** Typography **/
   --text-base: 14px;
 
-  /** App colors (from general.config.ts) **/
-  --color-divider: #CFD3D1;               /* dividerBorder @ 72% opacity */
-  --color-section-header: #FAF5E7;          /* sectionHeaderBg */
+    /** App colors (from general.config.ts) **/
+  --color-divider: #C7C7C7;   
+  --color-divider-dark: #B9B9B9;                       /* Tasman */
+  --color-section-header: #FFFFFF;             /* Linen */
+  --color-bg-menu-header: #D8E2DC;
+  --color-menu-rounded-right: #3FBC9F;                 /* Linen */
   
-  --color-table-header: #EEF5F4;            /* tableHeaderBg */
-  --color-table-row: #ffffff;               /* tableRowBg */
-  --color-table-row-hover: #F4FDFC;         /* tableRowHoverBg */
-  --color-table-separator: #E2E2E2;         /* tableRowSeparator */
-  --color-table-footer: #F4F4F5; 
-  --color-table-expanded-content-bg: #F4F4F5;   
+  --color-table-header: #D8E2DC;               /* pale sage */
+  --color-table-row: #ffffff;
+  --color-table-row-hover: #F4FDFC;
+  --color-table-separator: #E2E2E2;            /* Bone */
+  --color-table-footer: #F2F2F2;
+  --color-table-expanded-content-bg: var(--bg-muted);  /* Linen */
 
-  --color-menu-accent: #E9C554;             /* menuAccent */
-  --color-sidebar-menu-from: #DBE8E6;       /* sidebarMenuBgFrom */
-  --color-sidebar-menu-to: #FFFFFF;         /* sidebarMenuBgTo */
+  --color-menu-accent: #315C52;                /* app gold */
+  --color-sidebar-menu-from: #C9D9CD;          /* Tasman */
+  --color-sidebar-menu-to: #F8EEDA;            /* Linen */
 
-  --color-breadcrumb-inactive: #DBE8E6;     /* breadcrumbInactiveBg */
-  --color-breadcrumb-hover: #D8E2DC;        /* breadcrumbHoverBg */
-  --color-breadcrumb-active: #62938D;       /* breadcrumbActiveBg */
-  --color-breadcrumb-trail: #E9C554;        /* breadcrumbTrailBg */
+  --color-breadcrumb-inactive: #D8E2DC;        /* pale sage */
+  --color-breadcrumb-hover: #C9D9CD;           /* Tasman */
+  --color-breadcrumb-active: #223B38;          /* Te Papa Green - stronger active */
+  --color-breadcrumb-trail: #C09F6D;           /* Twine */
 
-  --color-app-primary: #2B4441;             /* primary */
-  --color-app-primary-fg: #ffffff;          /* primaryFg */
-  --color-app-primary-from: #3D5C58;        /* primaryFrom */
-  --color-app-primary-to: #1E2F2D;          /* primaryTo */
-  --color-app-primary-border: #162220;      /* primaryBorder */
+  --color-app-primary: #223B38;                /* Te Papa Green */
+  --color-app-primary-fg: #ffffff;
+  --color-app-primary-from: #2F5954;           /* Spectra */
+  --color-app-primary-to: #1E2F2D;             /* deeper green */
+  --color-app-primary-border: #151515;         /* Cod Gray */
 
-  --color-app-secondary: #E9C554;           /* secondary */
-  --color-app-secondary-fg: #2B2B2B;        /* secondaryFg */
-  --color-app-secondary-from: #F9DFA8;      /* secondaryFrom */
-  --color-app-secondary-to: #E8B95E;        /* secondaryTo */
-  --color-app-secondary-border: #C9963A;    /* secondaryBorder */
+  --color-app-secondary: #C09F6D;              /* Twine */
+  --color-app-secondary-fg: #223B38;           /* Te Papa Green */
+  --color-app-secondary-stop-0: #E2D6BD;       /* Bone */
+  --color-app-secondary-stop-1: #C09F6D;       /* Twine */
+  --color-app-secondary-stop-2: #9F7D4D;       /* darker twine */
+  --color-app-secondary-border: #9F7D4D;       /* darker twine */
 
   /** Button theme vars — defined here so portals (dialogs, dropdowns) inherit them **/
   --btn-primary: var(--color-app-primary);
@@ -104,16 +148,39 @@
   --btn-primary-border: var(--color-app-primary-border);
   --btn-secondary: var(--color-app-secondary);
   --btn-secondary-fg: var(--color-app-secondary-fg);
-  --btn-secondary-from: var(--color-app-secondary-from);
-  --btn-secondary-to: var(--color-app-secondary-to);
+  --btn-secondary-from: var(--color-app-secondary-stop-0);
+  --btn-secondary-to: var(--color-app-secondary-stop-2);
   --btn-secondary-border: var(--color-app-secondary-border);
 
-  --color-app-gradient-from: #62938D;       /* appGradientFrom */
-  --color-app-gradient-to: #224B46;         /* appGradientTo */
+  --color-app-gradient-stop-0: #2F5954;        /* Spectra */
+  --color-app-gradient-stop-1: #294744;        /* Plantation */
+  --color-app-gradient-stop-2: #223B38;        /* Te Papa Green */
+  --color-app-gradient: linear-gradient(
+    to top,
+    var(--color-app-gradient-stop-0),
+    var(--color-app-gradient-stop-1),
+    var(--color-app-gradient-stop-2)
+  );
+ 
+  --color-app-primary-toolbar: #294744;        /* Plantation */
+  --color-app-primary-toolbar-header: #ffffff;
+  --color-app-primary-toolbar-fg: #F8EEDA;     /* Linen */
 
-  --color-app-primary-toolbar: #62938D;        /* primaryToolbar */
-  --color-app-primary-toolbar-header: #FFFFFF;        /* primaryToolbarHeader */
-  --color-app-primary-toolbar-fg: #F4F4F5;     /* primaryToolbarFg */
+  --color-active-workflow-highlight: #EFF7F2;  /* soft green tint */
+  --color-active-workflow-side-line: #CCEC60;  /* Sulu accent */
+  --color-modal-header-banner: #C9D9CD;        /* Tasman */
+
+  /** Button theme vars — defined here so portals (dialogs, dropdowns) inherit them **/
+  --btn-primary: var(--color-app-primary);
+  --btn-primary-fg: var(--color-app-primary-fg);
+  --btn-primary-from: var(--color-app-primary-from);
+  --btn-primary-to: var(--color-app-primary-to);
+  --btn-primary-border: var(--color-app-primary-border);
+  --btn-secondary: var(--color-app-secondary);
+  --btn-secondary-fg: var(--color-app-secondary-fg);
+  --btn-secondary-from: var(--color-app-secondary-stop-0);
+  --btn-secondary-to: var(--color-app-secondary-stop-2);
+  --btn-secondary-border: var(--color-app-secondary-border);
 
   --color-active-workflow-highlight: #F0FDF9;  /* active workflow row background */
   --color-active-workflow-side-line: #10B981;  /* active workflow left border line */

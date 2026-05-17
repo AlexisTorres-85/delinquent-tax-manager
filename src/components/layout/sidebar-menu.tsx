@@ -43,59 +43,59 @@ export function SidebarMenu() {
       style={{ '--menu-accent': 'var(--color-menu-accent)' } as React.CSSProperties}
     >
 
-      <div className="lg:rounded-tl-2xl px-4 py-1 flex flex-col h-full" style={{ backgroundImage: 'linear-gradient(to bottom, var(--color-sidebar-menu-from), var(--color-sidebar-menu-to))' }}>
-      <div className="mb-3 px-1 mt-3 flex-shrink-0">
-        <span className="text-sm font-semibold text-black">{activeMenuItem?.title}</span>
-      </div>
+      <div className="lg:rounded-tl-2xl flex flex-col h-full" style={{ backgroundImage: 'linear-gradient(to bottom, var(--color-sidebar-menu-from), var(--color-sidebar-menu-to))' }}>
+        <div className="mb-3 px-1 flex-shrink-0 bg-bg-menu-header lg:rounded-tl-2xl h-[45px] pl-6 pt-3 border-b-2 border-divider-dark">
+          <span className="text-sm font-semibold text-black">{activeMenuItem?.title}</span>
+        </div>
 
-      <ScrollArea className="flex-1 min-h-0 [&_[data-slot=scroll-area-scrollbar]]:hidden">
-        <AccordionMenu
-          selectedValue={pathname.toLowerCase()}
-          matchPath={matchPath}
-          type="multiple"
-          className="space-y-5"
-          classNames={{
-            separator: '-mx-2 mb-2.5',
-            label: 'text-xs font-normal text-muted-foreground',
-            item: 'h-10 my-0.5 rounded-md px-2.5 text-sm font-normal text-black hover:bg-[var(--menu-accent)]/25 hover:text-primary data-[selected=true]:bg-[var(--menu-accent)]/50 data-[selected=true]:border-r-4 data-[selected=true]:border-r-[var(--menu-accent)] data-[selected=true]:font-medium data-[selected=true]:text-foreground [&[data-selected=true]_svg]:opacity-100',
-            group: '',
-          }}
-        >
-          {menuGroups.map((group, index) => (
-            <AccordionMenuGroup key={index}>
-              {group.children?.map((child, childIndex) => (
-                <React.Fragment key={childIndex}>
-                  <AccordionMenuItem value={child.path || '#'}>
-                    <Link to={child.path || '#'}>
-                      {child.icon && <child.icon />}
-                      <span>{child.title}</span>
-                    </Link>
-                  </AccordionMenuItem>
-                  {parcelNumber && child.path === '/property-parcels/delinquent-parcel-cases' && (
-                    <div className="ml-[16px] pl-4 border-l border-black/30">
-                      <Link
-                        to={pathname.toLowerCase()}
-                        className="relative flex items-center h-9 rounded-md px-2.5 text-sm font-medium bg-[var(--menu-accent)]/50 border-r-4 border-r-[var(--menu-accent)] text-foreground before:absolute before:-left-4 before:top-1/2 before:-translate-y-px before:w-3 before:h-px before:bg-black/30"
-                      >
-                        <span className="truncate">Parcel: {parcelNumber}</span>
+        <ScrollArea className="flex-1 min-h-0 pr-4 [&_[data-slot=scroll-area-scrollbar]]:hidden">
+          <AccordionMenu
+            selectedValue={pathname.toLowerCase()}
+            matchPath={matchPath}
+            type="multiple"
+            className="space-y-5"
+            classNames={{
+              separator: '-mx-2 mb-2.5',
+              label: 'text-xs font-normal text-muted-foreground',
+              item: 'rounded-l-none h-10 my-0.5 px-6 text-sm font-normal text-black hover:bg-[var(--menu-accent)]/25 hover:text-primary data-[selected=true]:bg-[var(--menu-accent)] data-[selected=true]:border-r-5 data-[selected=true]:border-r-menu-rounded-right data-[selected=true]:rounded-l-none data-[selected=true]:rounded-r-xl data-[selected=true]:font-medium data-[selected=true]:text-white [&[data-selected=true]_svg]:opacity-100',
+              group: '',
+            }}
+          >
+            {menuGroups.map((group, index) => (
+              <AccordionMenuGroup key={index}>
+                {group.children?.map((child, childIndex) => (
+                  <React.Fragment key={childIndex}>
+                    <AccordionMenuItem value={child.path || '#'}>
+                      <Link to={child.path || '#'}>
+                        {child.icon && <child.icon />}
+                        <span>{child.title}</span>
                       </Link>
-                    </div>
-                  )}
-                </React.Fragment>
-              ))}
-            </AccordionMenuGroup>
-          ))}
-        </AccordionMenu>
-      </ScrollArea>
+                    </AccordionMenuItem>
+                    {parcelNumber && child.path === '/property-parcels/delinquent-parcel-cases' && (
+                      <div className="ml-[16px] pl-4 border-l border-black/30">
+                        <Link
+                          to={pathname.toLowerCase()}
+                          className="relative flex items-center h-9 px-2.5 text-sm font-medium bg-[var(--menu-accent)] border-r-5 border-r-menu-rounded-right rounded-l-none rounded-r-xl text-white before:absolute before:-left-4 before:top-1/2 before:-translate-y-px before:w-3 before:h-px before:bg-black/30"
+                        >
+                          <span className="truncate">Parcel: {parcelNumber}</span>
+                        </Link>
+                      </div>
+                    )}
+                  </React.Fragment>
+                ))}
+              </AccordionMenuGroup>
+            ))}
+          </AccordionMenu>
+        </ScrollArea>
 
-      <div className="shrink-0 py-3 flex justify-center">
-        <img
-          src="/images/kenosha-county-logo.png"
-          alt="Kenosha County"
-          className="h-10 w-auto object-contain"
-        />
+        <div className="shrink-0 py-3 flex justify-center">
+          <img
+            src="/images/kenosha-county-logo.png"
+            alt="Kenosha County"
+            className="h-10 w-auto object-contain"
+          />
+        </div>
       </div>
-    </div>
     </div>
   );
 }

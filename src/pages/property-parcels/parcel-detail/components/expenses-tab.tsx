@@ -96,7 +96,7 @@ export function ExpensesTab({ parcelNumber, stickyTop = 0 }: ExpensesTabProps) {
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
         state: { sorting, globalFilter, columnFilters },
-        initialState: { pagination: { pageSize: 10 } },
+        initialState: { pagination: { pageSize: 20 } },
     });
 
     const filters: FilterConfig[] = useMemo(() => [

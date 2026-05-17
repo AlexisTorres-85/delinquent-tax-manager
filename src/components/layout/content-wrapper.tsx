@@ -89,7 +89,7 @@ export function ContentWrapper({
         {hasLeft ? (
           <aside
             className={cn(
-              'h-full min-h-0 bg-white flex flex-col transition-all duration-200 border-r border-l-2 border-divider',
+              'h-full min-h-0 bg-white flex flex-col transition-all duration-200 border-r border-l-2 border-divider-dark',
               leftCollapsed ? 'overflow-hidden bg-section-header' : 'overflow-x-auto overflow-y-auto',
               leftClassName,
             )}
@@ -157,7 +157,7 @@ export function ContentWrapper({
         ) : null}
 
         <main
-          className={cn('h-full min-h-0 min-w-0 overflow-x-auto overflow-y-auto bg-white flex flex-col', !hasLeft && 'border-l-2 border-divider', mainClassName)}
+          className={cn('h-full min-h-0 min-w-0 overflow-x-auto overflow-y-auto bg-white flex flex-col', !hasLeft && 'border-l-2 border-divider-dark', mainClassName)}
           style={(leftCollapsed || rightCollapsed) ? { flex: '1 1 0', minWidth: 0 } : createPanelStyle(resolvedMainWidth)}
         >
           {mainHeader && (

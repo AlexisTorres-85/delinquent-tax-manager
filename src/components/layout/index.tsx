@@ -17,8 +17,8 @@ export function Layout() {
         '--btn-primary-border': 'var(--color-app-primary-border)',
         '--btn-secondary': 'var(--color-app-secondary)',
         '--btn-secondary-fg': 'var(--color-app-secondary-fg)',
-        '--btn-secondary-from': 'var(--color-app-secondary-from)',
-        '--btn-secondary-to': 'var(--color-app-secondary-to)',
+        '--btn-secondary-from': 'var(--color-app-secondary-stop-0)',
+        '--btn-secondary-to': 'var(--color-app-secondary-stop-2)',
         '--btn-secondary-border': 'var(--color-app-secondary-border)',
       } as React.CSSProperties}
     >

@@ -54,7 +54,7 @@ function YearItem({ balance }: { balance: TaxYearBalance }) {
         : '—';
 
     return (
-        <AccordionItem value={String(taxYear)} className="border border-divider">
+        <AccordionItem value={String(taxYear)} className="border border-divider/50 bg-muted">
             <AccordionTrigger className="text-sm pt-2 pb-2">
                 <div className="flex items-center gap-3 min-w-0 flex-1">
                     <span className="font-semibold text-sm shrink-0">Tax Year {taxYear}</span>
