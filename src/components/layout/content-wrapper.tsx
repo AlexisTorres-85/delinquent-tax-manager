@@ -162,7 +162,7 @@ export function ContentWrapper({
         >
           {mainHeader && (
             <div
-              className="flex items-center gap-2 shrink-0 pl-6 pr-6 pt-4 pb-4 border-b border-divider bg-section-header"
+              className="flex items-center gap-2 shrink-0 pl-6 pr-6 pt-6 pb-6 border-b border-divider bg-section-header"
             >
               {mainHeader.icon && <div className="text-muted-foreground [&_svg]:size-8">{mainHeader.icon}</div>}
               <div className="flex flex-col flex-1 min-w-0">

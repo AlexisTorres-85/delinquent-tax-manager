@@ -79,7 +79,7 @@ function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, 
     ];
 
     return (
-        <div className='h-[620px]'>
+        <div>
         <TabLayout
             stickyTop={stickyTop}
             title="Payment Plan Schedule"

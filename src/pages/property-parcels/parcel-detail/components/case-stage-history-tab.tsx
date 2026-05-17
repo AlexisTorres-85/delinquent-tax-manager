@@ -129,7 +129,7 @@ function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, par
 
     return (
         <>
-        <div className='h-[500px]'>
+        <div>
             <TabLayout
                 stickyTop={stickyTop}
                 title="Case Stage History"
@@ -229,7 +229,7 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
     }
 
     return (
-        <div className='h-[620px]'>
+        <div>
             {/* Section header shared by all workflows */}
             <div ref={sharedHeaderRef} className="bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex border-b border-divider items-center gap-2 sticky z-10" style={{ top: stickyTop }}>
                 <div className="shrink-0 text-muted-foreground">

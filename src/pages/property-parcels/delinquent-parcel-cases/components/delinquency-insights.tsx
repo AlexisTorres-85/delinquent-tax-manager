@@ -89,7 +89,7 @@ export function DelinquencyInsights({
                       plotOptions: {
                           pie: {
                               donut: {
-                                  size: '80%',
+                                  size: '50%',
                                   labels: {
                                       show: false,
                                   },
@@ -135,7 +135,9 @@ export function DelinquencyInsights({
     );
 
     return (
-        <div className="border-t border-l border-divider p-6 flex flex-col">
+        <div
+  className="border-t border-divider p-6 flex flex-col border-divider"
+>
             <PageSection
                 icon={<Building2 className="size-4 text-muted-foreground" />}
                 title="Parcel Composition"

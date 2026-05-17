@@ -226,7 +226,7 @@ function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (t
 
   return (
     <div>
-      <section className="bg-muted px-6 pt-6 border-b border-divider">
+      <section className="bg-app-primary-toolbar-header px-6 pt-6 border-b border-divider">
         <div className="flex items-start justify-between gap-4 mb-6">
           <div className="flex items-center gap-3">
             <div className="flex items-center justify-center rounded-full bg-black/10 p-2 shrink-0">
@@ -395,7 +395,7 @@ const TABS = [
   'Payment Plan Schedule',
   'Documents',
   'Contacts',
-  'Workflow History',
+  'Case Stage History',
   'Notes',
   'Expenses',
   'Legal Description',
@@ -409,7 +409,7 @@ const TAB_TO_SLUG: Record<Tab, string> = {
   'Payment Plan Schedule': 'payment-plan-schedule',
   'Documents': 'documents',
   'Contacts': 'contacts',
-  'Workflow History': 'workflow-history',
+  'Case Stage History': 'case-stage-history',
   'Notes': 'notes',
   'Expenses': 'expenses',
   'Legal Description': 'legal-description',
@@ -438,7 +438,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
         <TabsList variant="app-primary" className="px-6 w-full justify-start">
           {TABS.map((tab) => (
             <TabsTrigger key={tab} value={tab}>
-              <div className='pt-1 pb-1'>{tab}</div>
+              <div className='pt-2 pb-2'>{tab}</div>
             </TabsTrigger>
           ))}
         </TabsList>
@@ -464,7 +464,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
         <ContactsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
       </TabsContent>
 
-      <TabsContent value="Workflow History" className="mt-0">
+      <TabsContent value="Case Stage History" className="mt-0">
         <CaseStageHistoryTab
           parcelNumber={parcel.parcelNumber}
           stickyTop={stickyTop}
@@ -485,7 +485,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
         <LegalDescriptionTab parcel={parcel} parcelNumber={parcel.parcelNumber} isLoading={false} stickyTop={stickyTop} />
       </TabsContent>
 
-      {TABS.filter((tab) => tab !== 'Overview' && tab !== 'Tax Payments' && tab !== 'Payment Plan Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Workflow History' && tab !== 'Notes' && tab !== 'Expenses' && tab !== 'Legal Description').map((tab) => (
+      {TABS.filter((tab) => tab !== 'Overview' && tab !== 'Tax Payments' && tab !== 'Payment Plan Schedule' && tab !== 'Documents' && tab !== 'Contacts' && tab !== 'Case Stage History' && tab !== 'Notes' && tab !== 'Expenses' && tab !== 'Legal Description').map((tab) => (
         <TabsContent key={tab} value={tab} className="p-6 mt-0">
           <div className="flex items-center justify-center text-sm text-muted-foreground">
             {tab}

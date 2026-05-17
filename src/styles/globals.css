@@ -125,7 +125,7 @@
   --color-breadcrumb-inactive: #D8E2DC;        /* pale sage */
   --color-breadcrumb-hover: #C9D9CD;           /* Tasman */
   --color-breadcrumb-active: #223B38;          /* Te Papa Green - stronger active */
-  --color-breadcrumb-trail: #C09F6D;           /* Twine */
+  --color-breadcrumb-trail: #B88B48;           /* Twine */
 
   --color-app-primary: #223B38;                /* Te Papa Green */
   --color-app-primary-fg: #ffffff;
@@ -139,6 +139,7 @@
   --color-app-secondary-stop-1: #C09F6D;       /* Twine */
   --color-app-secondary-stop-2: #9F7D4D;       /* darker twine */
   --color-app-secondary-border: #9F7D4D;       /* darker twine */
+
 
   /** Button theme vars — defined here so portals (dialogs, dropdowns) inherit them **/
   --btn-primary: var(--color-app-primary);
@@ -163,9 +164,9 @@
   );
  
   --color-app-primary-toolbar: #294744;        /* Plantation */
-  --color-app-primary-toolbar-header: #ffffff;
-  --color-app-primary-toolbar-fg: #F8EEDA;     /* Linen */
-
+  --color-app-primary-toolbar-header: #EFF4F3;
+  --color-app-primary-toolbar-fg: #EFF4F3;     /* Linen */
+   --color-app-tabs-selector: #EFF4F3;    
   --color-active-workflow-highlight: #EFF7F2;  /* soft green tint */
   --color-active-workflow-side-line: #CCEC60;  /* Sulu accent */
   --color-modal-header-banner: #C9D9CD;        /* Tasman */

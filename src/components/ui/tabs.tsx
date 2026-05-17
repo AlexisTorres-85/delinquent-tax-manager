@@ -13,7 +13,7 @@ const tabsListVariants = cva('flex items-center shrink-0', {
       default: 'bg-accent p-1',
       button: '',
       line: 'border-b border-divider',
-      'app-primary': 'bg-app-primary-toolbar border-b border-app-divider',
+      'app-primary': 'bg-app-primary-toolbar',
     },
     shape: {
       default: '',
@@ -95,7 +95,7 @@ const tabsTriggerVariants = cva(
         button:
           'focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-lg text-accent-foreground hover:text-foreground data-[state=active]:bg-accent data-[state=active]:text-foreground',
         line: 'border-b-4 text-muted-foreground border-transparent data-[state=active]:[border-color:var(--tabs-active-color)] hover:[color:var(--tabs-active-color)] data-[state=active]:[color:var(--tabs-active-color)]',
-        'app-primary': "relative border-b-0 border-transparent text-white/75 hover:text-white data-[state=active]:text-white data-[state=active]:[border-color:var(--color-app-secondary)] after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-l-[14px] after:border-l-transparent after:border-r-[14px] after:border-r-transparent after:border-b-[8px] after:border-b-transparent data-[state=active]:after:[border-bottom-color:var(--color-app-secondary)] after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity",
+        'app-primary': "relative border-b-0 border-transparent text-white/55 hover:text-white data-[state=active]:text-white data-[state=active]:[border-color:var(--color-app-tabs-selector)] after:content-[''] after:absolute after:-bottom-0 after:left-1/2 after:-translate-x-1/2 after:w-0 after:h-0 after:border-l-[18px] after:border-l-transparent after:border-r-[18px] after:border-r-transparent after:border-b-[8px] after:border-b-transparent data-[state=active]:after:[border-bottom-color:var(--color-app-tabs-selector)] after:opacity-0 data-[state=active]:after:opacity-100 after:transition-opacity",
       },
       size: {
         lg: 'gap-2.5 [&_svg]:size-5 text-sm',
@@ -174,7 +174,7 @@ function TabsList({
       <TabsPrimitive.List
         data-slot="tabs-list"
         className={cn(tabsListVariants({ variant, shape, size }), className)}
-        style={variant === 'line' || variant === 'app-primary' ? { '--tabs-active-color': variant === 'app-primary' ? 'var(--color-app-secondary)' : 'var(--color-app-primary)' } as React.CSSProperties : undefined}
+        style={variant === 'line' || variant === 'app-primary' ? { '--tabs-active-color': variant === 'app-primary' ? 'var(--color-app-tabs-selector)' : 'var(--color-app-primary)' } as React.CSSProperties : undefined}
         {...props}
       />
     </TabsContext.Provider>

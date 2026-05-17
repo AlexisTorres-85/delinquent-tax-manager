@@ -287,7 +287,7 @@ export function TabLayout<T extends object>({
     const catalisHeader = (
         <div
             ref={catalisHeaderRef}
-            className={`bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex items-center justify-between z-10${headerClassName ? ` ${headerClassName}` : ''}`}
+            className={`bg-app-primary-toolbar-header pl-6 pr-6 pt-6 pb-6 flex items-center justify-between z-10${headerClassName ? ` ${headerClassName}` : ''}`}
             style={maximized ? undefined : { position: 'sticky', top: stickyTop }}
         >
             <div className='flex items-center gap-2'>
@@ -326,7 +326,7 @@ export function TabLayout<T extends object>({
     const toolbar = (
         <div
             ref={toolbarRef}
-            className='flex items-center gap-2 px-6 py-4 h-14 border-b border-t border-divider bg-app-primary-toolbar-fg z-20'
+            className='flex items-center gap-2 px-6 h-16 border-b border-t border-divider bg-app-primary-toolbar-fg z-20'
             style={maximized ? undefined : { position: 'sticky', top: stickyTop + catalisHeaderHeight + bannerHeight }}
         >
             {!hideSearch && (

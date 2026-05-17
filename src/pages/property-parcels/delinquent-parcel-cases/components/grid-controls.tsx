@@ -78,9 +78,9 @@ export function GridControls({
     ];
 
     return (
-        <div className="flex flex-col gap-0 border-b border-divider bg-neutral-100">
+        <div className="flex flex-col gap-0 border-b border-divider bg-muted">
             {/* ── Row 1: main filter controls ── */}
-            <div className="flex flex-wrap items-end gap-3 px-6 py-4">
+            <div className="flex flex-wrap items-end gap-3 px-6 pt-4 pb-6">
                 {/* Search */}
                 <div className="relative min-w-[220px] flex-1">
                     <Input
@@ -231,7 +231,9 @@ export function GridControls({
                 </div>
             </div>
 
-            <div className="grid grid-cols-[40%_60%]">
+            <div
+  className="grid grid-cols-[40%_60%] "
+>
                 <DelinquencyRangeSummary
                     from={delinquentYearRange?.[0] ?? (availableDelinquentYears.length ? Math.min(...availableDelinquentYears) : 0)}
                     to={delinquentYearRange?.[1] ?? (availableDelinquentYears.length ? Math.max(...availableDelinquentYears) : 0)}

@@ -104,7 +104,7 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
     ];
 
     return (
-        <div className='h-[620px]'>
+        <div>
         <TabLayout
             stickyTop={stickyTop}
             title='Tax Payments'

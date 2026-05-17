@@ -35,7 +35,7 @@ export const documentColumns: ColumnDef<ParcelDocument>[] = [
     },
     {
         accessorKey: 'workflowHistoryId',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Workflow History ID" />,
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Case Stage History ID" />,
         cell: ({ getValue }) => <span className="text-sm font-mono text-muted-foreground">{getValue<string>()}</span>,
         meta: { skeleton: <Skeleton className="h-4 w-24" /> },
     },

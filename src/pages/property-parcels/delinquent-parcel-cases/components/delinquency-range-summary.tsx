@@ -96,7 +96,7 @@ export function DelinquencyRangeSummary({
                     plotOptions: {
                         pie: {
                             donut: {
-                                size: '80%',
+                                size: '50%',
                                 labels: {
                                     show: false,
                                     total: {
@@ -160,7 +160,7 @@ export function DelinquencyRangeSummary({
     );
 
     return (
-        <div className="border-t border-divider p-6 flex flex-col">
+        <div className="border-t border-divider p-6 flex flex-col border-r">
             <PageSection
                 icon={<PieChart className="size-4 text-muted-foreground" />}
                 title="Delinquency Scope Breakdown"
