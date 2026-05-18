@@ -1,32 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { expensesService } from '../services/expenses.service';
-import type { Expense } from '../types';
+
+export const EXPENSES_QUERY_KEY = (parcelNumber: string) =>
+  ['expenses', 'by-parcel', parcelNumber] as const;
 
 export function useExpenses(parcelNumber: string) {
-  const [expenses, setExpenses] = useState<Expense[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    if (!parcelNumber) return;
-    setIsFetching(true);
-    expensesService.getByParcelNumber(parcelNumber).then((data) => {
-      hasLoadedRef.current = true;
-      setExpenses(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-  }, [parcelNumber, refreshKey]);
+  const query = useQuery({
+    queryKey: EXPENSES_QUERY_KEY(parcelNumber),
+    queryFn: () => expensesService.getByParcelNumber(parcelNumber),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    expenses,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    expenses: query.data ?? [],
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }

@@ -1,6 +1,7 @@
 import { useRef, useEffect, useState, type CSSProperties, type ReactNode } from 'react';
 import { createPortal } from 'react-dom';
 import type { Table } from '@tanstack/react-table';
+import { TAB_TRANSITION_MS } from '@/config/general.config';
 import { DataGrid, DataGridContainer } from '@/components/ui/data-grid';
 import { DataGridTable } from '@/components/ui/data-grid-table';
 import { DataGridPagination } from '@/components/ui/data-grid-pagination';
@@ -8,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X, Download, Printer, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
+import { Skeleton } from '@/components/ui/skeleton';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -26,8 +28,8 @@ export interface FilterConfig {
 export interface TabLayoutProps<T> {
     /** Height of sticky elements above this component (e.g. tabs bar). */
     stickyTop?: number;
-    /** Optional icon rendered to the left of the title/description. */
-    icon?: ReactNode;
+    /** Optional icon rendered to the left of the title/description. Pass a ReactNode or an image src string. */
+    icon?: ReactNode | string;
     /** Catalis header title. */
     title: string;
     /** Parcel number appended to the print/export document title. */
@@ -79,6 +81,8 @@ export interface TabLayoutProps<T> {
     headerActions?: ReactNode;
     /** Custom content rendered below the header when no table is provided. */
     children?: ReactNode;
+    /** Called whenever the sticky header's rendered height changes. Useful for nested components that need to offset their own sticky rows. */
+    onHeaderHeightChange?: (height: number) => void;
 }
 
 // ─── Export / print utilities ─────────────────────────────────────────────────
@@ -183,6 +187,44 @@ function useElapsedLabel(lastUpdated: Date | null | undefined): string {
     return label;
 }
 
+// ─── Tab skeleton ─────────────────────────────────────────────────────────────
+
+function TabSkeleton() {
+    return (
+        <div className="flex flex-col">
+            {/* Top Header */}
+
+            <div
+                className="bg-app-primary-toolbar-header z-10 flex items-center justify-between gap-6 px-6 py-5">
+                <div className="flex min-w-0 flex-1 items-center  gap-2">
+                    <Skeleton className="h-13 w-13 rounded-md" />
+
+                    <div className="flex min-w-0 flex-col gap-1.5">
+                        <Skeleton className="h-5 w-80 rounded-md" />
+                        <Skeleton className="h-5 w-40 rounded-md" />
+                    </div>
+                </div>
+
+                <div className="ml-auto flex shrink-0 items-center justify-end gap-4">
+                    <div className="flex flex-col items-end gap-2">
+                        <Skeleton className="h-6 w-50 rounded-md" />
+                        <Skeleton className="h-4 w-28 rounded-md" />
+                    </div>
+                </div>
+            </div>
+
+            <div className="h-1.5 overflow-hidden bg-muted">
+                <div className="h-full bg-[var(--color-app-primary-from)] animate-[progress-indeterminate_1.4s_ease-in-out_infinite]" style={{ width: '40%' }} />
+            </div>
+
+            <div className='pl-6 pr-6 py-4'>
+                <Skeleton className="h-100 w-full rounded-md" />
+            </div>
+
+            
+        </div>
+    );
+}
 // ─── Component ────────────────────────────────────────────────────────────────
 
 /**
@@ -219,6 +261,7 @@ export function TabLayout<T extends object>({
     getRowClassName,
     hideHeader = false,
     children,
+    onHeaderHeightChange,
     headerClassName,
     headerActions,
     allowView,
@@ -247,6 +290,11 @@ export function TabLayout<T extends object>({
         return () => document.removeEventListener('keydown', handler);
     }, [maximized]);
 
+    // Fade transition between skeleton and content
+    const [renderSkeleton, setRenderSkeleton] = useState(isLoading);
+    const [renderContent, setRenderContent] = useState(!isLoading);
+    const [contentVisible, setContentVisible] = useState(!isLoading);
+
     const catalisHeaderRef = useRef<HTMLDivElement>(null);
     const [catalisHeaderHeight, setCatalisHeaderHeight] = useState(0);
     const bannerRef = useRef<HTMLDivElement>(null);
@@ -257,11 +305,16 @@ export function TabLayout<T extends object>({
     useEffect(() => {
         const el = catalisHeaderRef.current;
         if (!el) return;
-        setCatalisHeaderHeight(el.offsetHeight);
-        const obs = new ResizeObserver(() => setCatalisHeaderHeight(el.offsetHeight));
+        const update = () => {
+            const h = el.offsetHeight;
+            setCatalisHeaderHeight(h);
+            onHeaderHeightChange?.(h);
+        };
+        update();
+        const obs = new ResizeObserver(update);
         obs.observe(el);
         return () => obs.disconnect();
-    }, [maximized]);
+    }, [maximized, onHeaderHeightChange, renderContent]);
 
     useEffect(() => {
         const el = bannerRef.current;
@@ -270,7 +323,7 @@ export function TabLayout<T extends object>({
         const obs = new ResizeObserver(() => setBannerHeight(el.offsetHeight));
         obs.observe(el);
         return () => obs.disconnect();
-    }, [maximized, banner]);
+    }, [maximized, banner, renderContent]);
 
     useEffect(() => {
         const el = toolbarRef.current;
@@ -279,47 +332,74 @@ export function TabLayout<T extends object>({
         const obs = new ResizeObserver(() => setToolbarHeight(el.offsetHeight));
         obs.observe(el);
         return () => obs.disconnect();
-    }, [maximized]);
+    }, [maximized, renderContent]);
+
+    useEffect(() => {
+        if (!isLoading) {
+            setRenderContent(true);
+            const raf = requestAnimationFrame(() => setContentVisible(true));
+            const t = setTimeout(() => setRenderSkeleton(false), TAB_TRANSITION_MS);
+            return () => { cancelAnimationFrame(raf); clearTimeout(t); };
+        } else {
+            setRenderSkeleton(true);
+            setRenderContent(false);
+            setContentVisible(false);
+        }
+    }, [isLoading]);
 
     // Normal-mode thead top (in maximized mode --thead-top is 0 on the scroll wrapper).
     const theadTop = stickyTop + (hideHeader ? 0 : catalisHeaderHeight) + bannerHeight + toolbarHeight;
 
-    const catalisHeader = (
+    const TabHeader = (
         <div
             ref={catalisHeaderRef}
-            className={`bg-app-primary-toolbar-header pl-6 pr-6 pt-6 pb-6 flex items-center justify-between z-10${headerClassName ? ` ${headerClassName}` : ''}`}
+            className={`bg-app-primary-toolbar-header z-10 flex items-center justify-between gap-6 px-6 py-5${headerClassName ? ` ${headerClassName}` : ''
+                }`}
             style={maximized ? undefined : { position: 'sticky', top: stickyTop }}
         >
-            <div className='flex items-center gap-2'>
+            {/* Left side: icon + title/description */}
+            <div className="flex min-w-0 flex-1 items-center gap-2">
                 {icon && (
-                    <div className='shrink-0 text-muted-foreground'>
-                        {isLoading
-                            ? <img src='/images/loading.gif' className='h-8 w-8 object-contain' alt='Loading' />
-                            : icon}
+                    <div className="flex shrink-0 items-center justify-center text-muted-foreground">
+                        {typeof icon === 'string' ? (
+                            <img src={icon} alt="" className="h-13 w-13 object-contain" />
+                        ) : icon}
                     </div>
                 )}
-                <div className='flex flex-col'>
-                    <h2 className='text-lg font-semibold text-neutral-900'>
-                        {isLoading ? `Loading ${title}...` : title}
+
+                <div className="flex min-w-0 flex-col gap-1.5 -mt-1">
+                    <h2 className="truncate text-lg font-semibold text-app-primary">
+                        {title}
                     </h2>
-                    <p className='text-sm -mt-1 text-muted-foreground max-w-2xl'>{description}</p>
+
+                    {description && (
+                        <p className="-mt-2 max-w-2xl truncate text-xs text-muted-foreground">
+                            {description}
+                        </p>
+                    )}
                 </div>
             </div>
-            {isCatalisData && (
-                <div className='flex items-center gap-2 pl-6 ml-6'>
-                    <div className='flex flex-col gap-1 items-end'>
-                        <img className='w-26' src='/images/catalis-logo.png' />
-                        <span className='text-xs -mt-1 text-muted-foreground'>
-                            {elapsedLabel ? `Last updated ${elapsedLabel}` : 'Loading...'}
-                        </span>
+
+            {/* Right side: header actions + Catalis */}
+            <div className="ml-auto flex shrink-0 items-center justify-end gap-4">
+                {headerActions && (
+                    <div className="flex items-center justify-end gap-2">
+                        {headerActions}
                     </div>
-                </div>
-            )}
-            {headerActions && (
-                <div className='flex items-center gap-2 ml-auto'>
-                    {headerActions}
-                </div>
-            )}
+                )}
+
+                {isCatalisData && (
+                    <div className="flex items-center pl-6">
+                        <div className="flex flex-col items-end gap-1">
+                            <img className="w-26" src="/images/catalis-logo.png" />
+
+                            <span className="-mt-1 text-xs text-muted-foreground">
+                                {elapsedLabel ? `Last updated ${elapsedLabel}` : 'Loading...'}
+                            </span>
+                        </div>
+                    </div>
+                )}
+            </div>
         </div>
     );
 
@@ -411,7 +491,7 @@ export function TabLayout<T extends object>({
             isLoading={isLoading}
             loadingMode='skeleton'
             skeletonRowCount={2}
-            tableLayout={{ headerSticky: true}}
+            tableLayout={{ headerSticky: true }}
             tableClassNames={{ headerSticky: 'sticky z-10 [top:var(--thead-top,0px)]' }}
             getRowClassName={getRowClassName as ((row: unknown) => string | undefined) | undefined}
             allowView={allowView}
@@ -437,12 +517,29 @@ export function TabLayout<T extends object>({
         // only the DataGrid area scrolls. thead sticks at top:0 within its own scroll container.
         return createPortal(
             <div className='fixed inset-0 z-50 bg-background flex flex-col'>
-                {catalisHeader}
-                {banner}
-                {table && toolbar}
-                <div className='flex-1 min-h-0 overflow-y-auto' style={{ '--thead-top': '0px' } as CSSProperties}>
-                    {dataGrid}
-                    {!table && children}
+                {renderContent && (
+                    <div style={{ opacity: contentVisible ? 1 : 0, transition: `opacity ${TAB_TRANSITION_MS}ms ease` }}>
+                        {TabHeader}
+                        {banner}
+                        {table && toolbar}
+                    </div>
+                )}
+                <div className='flex-1 min-h-0 overflow-y-auto relative' style={{ '--thead-top': '0px' } as CSSProperties}>
+                    {renderSkeleton && (
+                        <div style={{
+                            opacity: isLoading ? 1 : 0,
+                            transition: `opacity ${TAB_TRANSITION_MS}ms ease`,
+                            ...(!isLoading ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden' } : {}),
+                        } as CSSProperties}>
+                            <TabSkeleton />
+                        </div>
+                    )}
+                    {renderContent && (
+                        <div style={{ opacity: contentVisible ? 1 : 0, transition: `opacity ${TAB_TRANSITION_MS}ms ease` }}>
+                            {dataGrid}
+                            {!table && children}
+                        </div>
+                    )}
                 </div>
             </div>,
             document.body,
@@ -450,20 +547,33 @@ export function TabLayout<T extends object>({
     }
 
     return (
-        <div style={{ '--thead-top': `${theadTop}px` } as CSSProperties}>
-            {!hideHeader && catalisHeader}
-            {banner && (
-                <div
-                    ref={bannerRef}
-                    className='sticky z-10'
-                    style={{ top: stickyTop + (hideHeader ? 0 : catalisHeaderHeight) }}
-                >
-                    {banner}
+        <div style={{ position: 'relative', '--thead-top': `${theadTop}px` } as CSSProperties}>
+            {renderSkeleton && (
+                <div style={{
+                    opacity: isLoading ? 1 : 0,
+                    transition: `opacity ${TAB_TRANSITION_MS}ms ease`,
+                    ...(!isLoading ? { position: 'absolute', top: 0, left: 0, right: 0, pointerEvents: 'none', zIndex: 1, overflow: 'hidden' } : {}),
+                } as CSSProperties}>
+                    <TabSkeleton />
                 </div>
             )}
-            {table && toolbar}
-            {dataGrid}
-            {!table && children}
+            {renderContent && (
+                <div style={{ opacity: contentVisible ? 1 : 0, transition: `opacity ${TAB_TRANSITION_MS}ms ease` }}>
+                    {!hideHeader && TabHeader}
+                    {banner && (
+                        <div
+                            ref={bannerRef}
+                            className='sticky z-10'
+                            style={{ top: stickyTop + (hideHeader ? 0 : catalisHeaderHeight) }}
+                        >
+                            {banner}
+                        </div>
+                    )}
+                    {table && toolbar}
+                    {dataGrid}
+                    {!table && children}
+                </div>
+            )}
         </div>
     );
 }

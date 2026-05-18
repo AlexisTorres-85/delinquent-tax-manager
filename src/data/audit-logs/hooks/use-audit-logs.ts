@@ -1,27 +1,17 @@
-import { useEffect, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { auditLogService } from '../services/audit-log.service';
-import type { AuditLogEntry } from '../types';
 
-type UseAuditLogsResult = {
-  entries: AuditLogEntry[];
-  isLoading: boolean;
-};
+export const AUDIT_LOGS_QUERY_KEY = ['audit-logs'] as const;
 
-export function useAuditLogs(): UseAuditLogsResult {
-  const [entries, setEntries] = useState<AuditLogEntry[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+export function useAuditLogs() {
+  const query = useQuery({
+    queryKey: AUDIT_LOGS_QUERY_KEY,
+    queryFn: () => auditLogService.getAll(),
+    staleTime: 1000 * 60 * 5,
+  });
 
-  useEffect(() => {
-    let cancelled = false;
-    setIsLoading(true);
-    auditLogService.getAll().then((data) => {
-      if (!cancelled) {
-        setEntries(data);
-        setIsLoading(false);
-      }
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  return { entries, isLoading };
+  return {
+    entries: query.data ?? [],
+    isLoading: query.isLoading,
+  };
 }

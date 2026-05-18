@@ -8,18 +8,19 @@
 
 import type { AuditLogEntry, AuditLogSearchParams } from '../types';
 import { AUDIT_LOG_DUMMY_DATA } from '../data/audit-log-dummy-data';
+import { fakeDelay } from '@/lib/api';
 
 function normalize(s: string) {
   return s.toLowerCase().trim();
 }
 
 async function getAll(): Promise<AuditLogEntry[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  await fakeDelay();
   return [...AUDIT_LOG_DUMMY_DATA];
 }
 
 async function search(params: AuditLogSearchParams): Promise<AuditLogEntry[]> {
-  await new Promise((resolve) => setTimeout(resolve, 300));
+  await fakeDelay();
 
   return AUDIT_LOG_DUMMY_DATA.filter((entry) => {
     if (params.query) {

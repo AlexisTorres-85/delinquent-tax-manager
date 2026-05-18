@@ -1,42 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { paymentScheduleService } from '../services/payment-schedule.service';
-import type { ParcelPaymentPlan } from '../types';
 
-type UsePaymentScheduleResult = {
-  plan: ParcelPaymentPlan | null;
-  isLoading: boolean;
-  isRefreshing: boolean;
-  lastUpdated: Date | null;
-  refetch: () => void;
-};
+export const PAYMENT_SCHEDULE_QUERY_KEY = (parcelNumber: string, taxYears?: number[]) =>
+  ['payment-schedule', 'by-parcel', parcelNumber, taxYears ?? []] as const;
 
-export function usePaymentSchedule(parcelNumber: string, taxYears?: number[]): UsePaymentScheduleResult {
-  const [plan, setPlan] = useState<ParcelPaymentPlan | null>(null);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsFetching(true);
-    paymentScheduleService.getByParcelNumber(parcelNumber, taxYears).then((data) => {
-      if (cancelled) return;
-      hasLoadedRef.current = true;
-      setPlan(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-    return () => { cancelled = true; };
-  }, [parcelNumber, taxYears?.join(','), refreshKey]);
+export function usePaymentSchedule(parcelNumber: string, taxYears?: number[]) {
+  const query = useQuery({
+    queryKey: PAYMENT_SCHEDULE_QUERY_KEY(parcelNumber, taxYears),
+    queryFn: () => paymentScheduleService.getByParcelNumber(parcelNumber, taxYears),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    plan,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    plan: query.data ?? null,
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }

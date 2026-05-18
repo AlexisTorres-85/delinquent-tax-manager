@@ -1,42 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { taxPaymentService } from '../services/tax-payment.service';
-import type { TaxPayment } from '../types';
 
-type UseTaxPaymentsResult = {
-  payments: TaxPayment[];
-  isLoading: boolean;
-  isRefreshing: boolean;
-  lastUpdated: Date | null;
-  refetch: () => void;
-};
+export const TAX_PAYMENTS_QUERY_KEY = (parcelNumber: string, taxYears?: number[]) =>
+  ['tax-payments', 'by-parcel', parcelNumber, taxYears ?? []] as const;
 
-export function useTaxPayments(parcelNumber: string, taxYears?: number[]): UseTaxPaymentsResult {
-  const [payments, setPayments] = useState<TaxPayment[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsFetching(true);
-    taxPaymentService.getByParcelNumber(parcelNumber, taxYears).then((data) => {
-      if (cancelled) return;
-      hasLoadedRef.current = true;
-      setPayments(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-    return () => { cancelled = true; };
-  }, [parcelNumber, refreshKey]);
+export function useTaxPayments(parcelNumber: string, taxYears?: number[]) {
+  const query = useQuery({
+    queryKey: TAX_PAYMENTS_QUERY_KEY(parcelNumber, taxYears),
+    queryFn: () => taxPaymentService.getByParcelNumber(parcelNumber, taxYears),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    payments,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    payments: query.data ?? [],
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }

@@ -1,5 +1,5 @@
 import type { TaxPayment, TaxYearBalance } from '../types';
-import { API_BASE, unwrapApiResponse } from '@/lib/api';
+import { apiFetch, API_BASE } from '@/lib/api';
 
 // Raw shape returned by GET /api/parcels/tax-payments/{parcelNumber}
 interface RawTaxPayment {
@@ -132,8 +132,7 @@ export const taxPaymentService = {
     if (taxYears && taxYears.length > 0) {
       url.searchParams.set('taxYears', taxYears.join(','));
     }
-    const res = await fetch(url.toString());
-    const data = await unwrapApiResponse<RawTaxPayment[]>(res);
+    const data = await apiFetch<RawTaxPayment[]>(url.toString());
     return data.map(mapPayment);
   },
 
@@ -146,8 +145,7 @@ export const taxPaymentService = {
     if (taxYears && taxYears.length > 0) {
       url.searchParams.set('taxYears', taxYears.join(','));
     }
-    const res = await fetch(url.toString());
-    const data = await unwrapApiResponse<RawTaxBreakdownResponse>(res);
+    const data = await apiFetch<RawTaxBreakdownResponse>(url.toString());
     return {
       balances: data.taxYears.map(mapBalance).sort((a, b) => b.taxYear - a.taxYear),
       totalDue: data.totalDue,

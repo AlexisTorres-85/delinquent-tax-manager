@@ -4,38 +4,34 @@ import {
     getCoreRowModel,
     getSortedRowModel,
     getPaginationRowModel,
-    getExpandedRowModel,
     getFilteredRowModel,
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { useTaxPayments } from '@/data/tax-payments/hooks/use-tax-payments';
-import type { TaxPayment } from '@/data/tax-payments/types';
-import { Receipt } from 'lucide-react';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { taxPaymentsColumns } from '../table-columns/tax-payments.columns';
+import { usePaymentSchedule } from '@/data/payment-schedule/hooks/use-payment-schedule';
+import type { PaymentScheduleEntry } from '@/data/payment-schedule/types';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { paymentScheduleColumns } from '../../table-columns/payment-schedule.columns';
 
+// ─── Inner table component ────────────────────────────────────────────────────
 
-interface TaxPaymentsTableProps {
-    payments: TaxPayment[];
+interface PaymentScheduleTableProps {
+    entries: PaymentScheduleEntry[];
     isLoading: boolean;
     lastUpdated: Date | null;
     stickyTop?: number;
     parcelNumber: string;
     onRefresh?: () => void;
-    taxYears?: number[];
 }
 
-function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh, taxYears: _taxYears }: TaxPaymentsTableProps) {
-    const [sorting, setSorting] = useState<SortingState>([{ id: 'paymentDate', desc: true }]);
+function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh }: PaymentScheduleTableProps) {    const [sorting, setSorting] = useState<SortingState>([{ id: 'dueDate', desc: false }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [yearFilter, setYearFilter] = useState('all');
-    const [typeFilter, setTypeFilter] = useState('all');
 
     const uniqueYears = useMemo(
-        () => [...new Set(payments.map((p) => p.taxYear))].sort((a, b) => b - a),
-        [payments],
+        () => [...new Set(entries.map((e) => e.taxYear))].sort((a, b) => b - a),
+        [entries],
     );
 
     function handleYearChange(val: string) {
@@ -47,32 +43,21 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
         });
     }
 
-    function handleTypeChange(val: string) {
-        setTypeFilter(val);
-        setColumnFilters((prev) => {
-            const next = prev.filter((f) => f.id !== 'paymentTypeDescription');
-            if (val !== 'all') next.push({ id: 'paymentTypeDescription', value: val });
-            return next;
-        });
-    }
-
-    const hasActiveFilters = globalFilter !== '' || yearFilter !== 'all' || typeFilter !== 'all';
+    const hasActiveFilters = globalFilter !== '' || yearFilter !== 'all';
 
     function clearFilters() {
         setGlobalFilter('');
         setYearFilter('all');
-        setTypeFilter('all');
         setColumnFilters([]);
     }
 
     const table = useReactTable({
-        data: payments,
-        columns: taxPaymentsColumns,
+        data: entries,
+        columns: paymentScheduleColumns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
         getPaginationRowModel: getPaginationRowModel(),
-        getExpandedRowModel: getExpandedRowModel(),
         onSortingChange: setSorting,
         onGlobalFilterChange: setGlobalFilter,
         onColumnFiltersChange: setColumnFilters,
@@ -90,30 +75,19 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
                 ...uniqueYears.map((y) => ({ value: String(y), label: String(y) })),
             ],
         },
-        {
-            value: typeFilter,
-            onChange: handleTypeChange,
-            placeholder: 'All Types',
-            options: [
-                { value: 'all', label: 'All Types' },
-                { value: 'Tax', label: 'Tax' },
-                { value: 'Redemption', label: 'Redemption' },
-                { value: 'Lottery Credit', label: 'Lottery Credit' },
-            ],
-        },
     ];
 
     return (
         <div>
         <TabLayout
             stickyTop={stickyTop}
-            title='Tax Payments'
+            title="Payment Plan Schedule"
             parcelNumber={parcelNumber}
+            description="Scheduled tax installment due dates, charges, and payment for each delinquent tax year on this parcel."
+            icon="/images/icons/payment-plan-schedule-icon.png"
             isCatalisData={true}
-            icon={<Receipt className='h-8 w-8' />}
             lastUpdated={lastUpdated}
-            description='View parcel tax payment activity, charges, adjustments, and payment allocations by tax year.'
-            searchPlaceholder='Search payments...'
+            searchPlaceholder="Search schedule..."
             globalFilter={globalFilter}
             onGlobalFilterChange={setGlobalFilter}
             filters={filters}
@@ -123,12 +97,6 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
-            allowView
-            allowEdit
-            allowDelete
-            onView={(row) => console.log('view', row)}
-            onEdit={(row) => console.log('edit', row)}
-            onDelete={(row) => console.log('delete', row)}
         />
         </div>
     );
@@ -136,14 +104,23 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
 
 // ─── Tab entry point ──────────────────────────────────────────────────────────
 
-interface TaxPaymentsTabProps {
+interface PaymentScheduleTabProps {
     parcelNumber: string;
     stickyTop?: number;
     taxYears?: number[];
 }
 
-export function TaxPaymentsTab({ parcelNumber, stickyTop, taxYears }: TaxPaymentsTabProps) {
-    const { payments, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber, taxYears);
+export function PaymentScheduleTab({ parcelNumber, stickyTop, taxYears }: PaymentScheduleTabProps) {
+    const { plan, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber, taxYears);
 
-    return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} taxYears={taxYears} />;
+    return (
+        <PaymentScheduleTable
+            entries={plan?.paymentSchedule ?? []}
+            isLoading={isRefreshing}
+            lastUpdated={lastUpdated}
+            stickyTop={stickyTop}
+            parcelNumber={parcelNumber}
+            onRefresh={refetch}
+        />
+    );
 }

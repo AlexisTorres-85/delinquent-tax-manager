@@ -1,7 +1,73 @@
-import { type CSSProperties, type ReactNode, useState } from 'react';
-import { PanelLeftClose, PanelLeftOpen, PanelRightClose, PanelRightOpen } from 'lucide-react';
+import { type CSSProperties, type ReactNode, useEffect, useState } from 'react';
+import {
+  PanelLeftClose,
+  PanelLeftOpen,
+  PanelRightClose,
+  PanelRightOpen,
+} from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { PageToolbar, type BreadcrumbCrumb } from '@/components/ui/page-toolbar';
+import { Skeleton } from '@/components/ui/skeleton';
+import { TAB_TRANSITION_MS } from '@/config/general.config';
+
+function MainPanelSkeleton() {
+  return (
+    <div className="flex h-full min-h-0 flex-col bg-white">
+      {/* Header skeleton */}
+      <div className="relative shrink-0 border-b border-divider bg-section-header">
+        <div className="absolute left-0 top-0 h-1 w-full overflow-hidden bg-section-header">
+          <div
+            className="h-full animate-[progress-indeterminate_1.4s_ease-in-out_infinite] bg-[var(--color-app-primary-from)]"
+            style={{ width: '40%' }}
+          />
+        </div>
+
+        <div className="flex items-center gap-3 px-6 py-6">
+          <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
+
+          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+            <Skeleton className="h-5 w-48 rounded-md" />
+            <Skeleton className="h-3 w-64 rounded-md" />
+          </div>
+
+          <div className="ml-auto flex shrink-0 items-center gap-2">
+            <Skeleton className="h-8 w-24 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
+            <Skeleton className="h-8 w-8 rounded-md" />
+          </div>
+        </div>
+      </div>
+
+      {/* Body skeleton */}
+      <div className="min-h-0 flex-1 overflow-hidden p-6">
+        <div className="flex flex-col gap-6">
+          <div className="flex justify-between border-b border-divider pb-4">
+            <div className="flex flex-col gap-2">
+              <Skeleton className="h-6 w-48 rounded-md" />
+              <Skeleton className="h-4 w-64 rounded-md" />
+            </div>
+
+            <Skeleton className="h-6 w-20 rounded-full" />
+          </div>
+
+          <div className="grid grid-cols-5 gap-6">
+            {Array.from({ length: 8 }).map((_, i) => (
+              <div
+                key={i}
+                className="flex flex-col gap-1.5"
+                style={{ opacity: 1 - i * 0.06 }}
+              >
+                <Skeleton className="h-3 w-20 rounded-md" />
+                <Skeleton className="h-4 w-28 rounded-md" />
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 export interface SectionHeader {
   icon?: ReactNode;
@@ -23,6 +89,7 @@ interface ContentWrapperProps {
   rightClassName?: string;
   crumbs?: BreadcrumbCrumb[];
   actions?: ReactNode;
+  isLoading?: boolean;
   leftHeader?: SectionHeader;
   mainHeader?: SectionHeader;
   rightHeader?: SectionHeader;
@@ -69,9 +136,37 @@ export function ContentWrapper({
   rightHeader,
   allowCollapseLeft = false,
   allowCollapseRight = false,
+  isLoading = false,
 }: ContentWrapperProps) {
   const [leftCollapsed, setLeftCollapsed] = useState(false);
   const [rightCollapsed, setRightCollapsed] = useState(false);
+
+  const [renderSkeleton, setRenderSkeleton] = useState(isLoading);
+  const [renderContent, setRenderContent] = useState(!isLoading);
+  const [contentVisible, setContentVisible] = useState(!isLoading);
+
+  useEffect(() => {
+    if (!isLoading) {
+      setRenderContent(true);
+
+      const raf = requestAnimationFrame(() => {
+        setContentVisible(true);
+      });
+
+      const timeout = setTimeout(() => {
+        setRenderSkeleton(false);
+      }, TAB_TRANSITION_MS);
+
+      return () => {
+        cancelAnimationFrame(raf);
+        clearTimeout(timeout);
+      };
+    }
+
+    setRenderSkeleton(true);
+    setRenderContent(false);
+    setContentVisible(false);
+  }, [isLoading]);
 
   const hasLeft = left !== undefined;
   const hasRight = right !== undefined;
@@ -85,167 +180,262 @@ export function ContentWrapper({
       {crumbs && crumbs.length > 0 && (
         <PageToolbar crumbs={crumbs} actions={actions} />
       )}
-      <div className={cn('flex min-h-0 flex-1 min-w-0 overflow-hidden bg-white', className)}>
+
+      <div
+        className={cn(
+          'flex min-h-0 min-w-0 flex-1 overflow-hidden bg-white',
+          className,
+        )}
+      >
         {hasLeft ? (
           <aside
             className={cn(
-              'h-full min-h-0 bg-white flex flex-col transition-all duration-200 border-r border-l-2 border-divider-dark',
-              leftCollapsed ? 'overflow-hidden bg-section-header' : 'overflow-x-auto overflow-y-auto',
+              'flex h-full min-h-0 flex-col border-l-2 border-r border-divider-dark bg-white transition-all duration-200',
+              leftCollapsed
+                ? 'overflow-hidden bg-section-header'
+                : 'overflow-x-auto overflow-y-auto',
               leftClassName,
             )}
-            style={leftCollapsed
-              ? { width: '40px', flexBasis: '40px', flexGrow: 0, flexShrink: 0 }
-              : createPanelStyle(resolvedLeftWidth)}
+            style={
+              leftCollapsed
+                ? {
+                    width: '40px',
+                    flexBasis: '40px',
+                    flexGrow: 0,
+                    flexShrink: 0,
+                  }
+                : createPanelStyle(resolvedLeftWidth)
+            }
           >
-            {/* Collapsed strip */}
             {leftCollapsed && allowCollapseLeft && (
-              <div className="flex flex-col items-center gap-3 pt-3 pb-3 h-full">
+              <div className="flex h-full flex-col items-center gap-3 py-3">
                 <button
                   onClick={() => setLeftCollapsed(false)}
-                  className="shrink-0 p-1 rounded hover:bg-black/5 text-muted-foreground"
+                  className="shrink-0 rounded p-1 text-muted-foreground hover:bg-black/5"
                   title="Expand panel"
+                  type="button"
                 >
                   <PanelLeftOpen className="h-6 w-6" />
                 </button>
+
                 {leftHeader && (
-                  <div className="flex-1 flex items-center justify-center overflow-hidden">
+                  <div className="flex flex-1 items-center justify-center overflow-hidden">
                     <span
-                      className="font-medium text-muted-foreground whitespace-nowrap"
-                      style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                      className="whitespace-nowrap font-medium text-muted-foreground"
+                      style={{
+                        writingMode: 'vertical-rl',
+                        transform: 'rotate(180deg)',
+                      }}
                     >
                       {leftHeader.title}
                     </span>
                   </div>
                 )}
+
                 {leftHeader?.icon && (
-                  <div className="shrink-0 text-muted-foreground [&_svg]:size-6">{leftHeader.icon}</div>
+                  <div className="shrink-0 text-muted-foreground [&_svg]:size-6">
+                    {leftHeader.icon}
+                  </div>
                 )}
               </div>
             )}
 
-            {/* Expanded content */}
             {!leftCollapsed && (
               <>
                 {leftHeader && (
-                  <div
-                    className="flex items-center gap-2 shrink-0 pl-6 pr-4 pt-4 pb-4 border-b border-divider bg-section-header"
-                  >
-                    {leftHeader.icon && <div className="text-muted-foreground [&_svg]:size-8">{leftHeader.icon}</div>}
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-base font-semibold text-foreground">{leftHeader.title}</span>
+                  <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header py-4 pl-6 pr-4">
+                    {leftHeader.icon && (
+                      <div className="text-muted-foreground [&_svg]:size-8">
+                        {leftHeader.icon}
+                      </div>
+                    )}
+
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="text-base font-semibold text-foreground">
+                        {leftHeader.title}
+                      </span>
+
                       {leftHeader.subtitle && (
-                        <span className="text-xs text-muted-foreground -mt-0.5">{leftHeader.subtitle}</span>
+                        <span className="-mt-0.5 text-xs text-muted-foreground">
+                          {leftHeader.subtitle}
+                        </span>
                       )}
                     </div>
+
                     {allowCollapseLeft && (
                       <button
                         onClick={() => setLeftCollapsed(true)}
-                        className="shrink-0 p-1 rounded hover:bg-black/5 text-muted-foreground"
+                        className="shrink-0 rounded p-1 text-muted-foreground hover:bg-black/5"
                         title="Collapse panel"
+                        type="button"
                       >
                         <PanelLeftClose className="h-6 w-6" />
                       </button>
                     )}
                   </div>
                 )}
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  {left}
-                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto">{left}</div>
               </>
             )}
           </aside>
         ) : null}
 
         <main
-          className={cn('h-full min-h-0 min-w-0 overflow-x-auto overflow-y-auto bg-white flex flex-col', !hasLeft && 'border-l-2 border-divider-dark', mainClassName)}
-          style={(leftCollapsed || rightCollapsed) ? { flex: '1 1 0', minWidth: 0 } : createPanelStyle(resolvedMainWidth)}
+          className={cn(
+            'relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white',
+            !hasLeft && 'border-l-2 border-divider-dark',
+            mainClassName,
+          )}
+          style={
+            leftCollapsed || rightCollapsed
+              ? { flex: '1 1 0', minWidth: 0 }
+              : createPanelStyle(resolvedMainWidth)
+          }
         >
-          {mainHeader && (
+          {renderSkeleton && (
             <div
-              className="flex items-center gap-2 shrink-0 pl-6 pr-6 pt-6 pb-6 border-b border-divider bg-section-header"
+              className="absolute inset-0 z-10 bg-white"
+              style={{
+                opacity: isLoading ? 1 : 0,
+                transition: `opacity ${TAB_TRANSITION_MS}ms ease`,
+                pointerEvents: isLoading ? 'auto' : 'none',
+              }}
             >
-              {mainHeader.icon && <div className="text-muted-foreground [&_svg]:size-8">{mainHeader.icon}</div>}
-              <div className="flex flex-col flex-1 min-w-0">
-                <span className="text-base font-semibold text-foreground">{mainHeader.title}</span>
-                {mainHeader.subtitle && (
-                  <span className="text-xs text-muted-foreground -mt-0.5">{mainHeader.subtitle}</span>
-                )}
-              </div>
-              {mainHeader.actions && (
-                <div className="flex items-center gap-2 ml-auto shrink-0">{mainHeader.actions}</div>
-              )}
+              <MainPanelSkeleton />
             </div>
           )}
-          <div className="flex-1 min-h-0 overflow-y-auto">
-            {main}
-          </div>
+
+          {renderContent && (
+            <div
+              className="flex h-full min-h-0 flex-col"
+              style={{
+                opacity: contentVisible ? 1 : 0,
+                transition: `opacity ${TAB_TRANSITION_MS}ms ease`,
+              }}
+            >
+              {mainHeader && (
+                <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header px-6 py-6">
+                  {mainHeader.icon && (
+                    <div className="text-muted-foreground [&_svg]:size-8">
+                      {mainHeader.icon}
+                    </div>
+                  )}
+
+                  <div className="flex min-w-0 flex-1 flex-col">
+                    <span className="text-base font-semibold text-foreground">
+                      {mainHeader.title}
+                    </span>
+
+                    {mainHeader.subtitle && (
+                      <span className="-mt-0.5 text-xs text-muted-foreground">
+                        {mainHeader.subtitle}
+                      </span>
+                    )}
+                  </div>
+
+                  {mainHeader.actions && (
+                    <div className="ml-auto flex shrink-0 items-center gap-2">
+                      {mainHeader.actions}
+                    </div>
+                  )}
+                </div>
+              )}
+
+              <div className="min-h-0 flex-1 overflow-y-auto">{main}</div>
+            </div>
+          )}
         </main>
 
         {hasRight ? (
           <aside
             className={cn(
-              'h-full min-h-0 bg-white flex flex-col transition-all duration-200 border-l border-divider',
-              rightCollapsed ? 'overflow-hidden' : 'overflow-x-auto overflow-y-auto',
+              'flex h-full min-h-0 flex-col border-l border-divider bg-white transition-all duration-200',
+              rightCollapsed
+                ? 'overflow-hidden'
+                : 'overflow-x-auto overflow-y-auto',
               rightClassName,
             )}
-            style={rightCollapsed
-              ? { width: '40px', flexBasis: '40px', flexGrow: 0, flexShrink: 0 }
-              : createPanelStyle(resolvedRightWidth)}
+            style={
+              rightCollapsed
+                ? {
+                    width: '40px',
+                    flexBasis: '40px',
+                    flexGrow: 0,
+                    flexShrink: 0,
+                  }
+                : createPanelStyle(resolvedRightWidth)
+            }
           >
-            {/* Collapsed strip */}
             {rightCollapsed && allowCollapseRight && (
-              <div className="flex flex-col items-center gap-3 pt-3 pb-3 h-full">
+              <div className="flex h-full flex-col items-center gap-3 py-3">
                 <button
                   onClick={() => setRightCollapsed(false)}
-                  className="shrink-0 p-1 rounded hover:bg-black/5 text-muted-foreground"
+                  className="shrink-0 rounded p-1 text-muted-foreground hover:bg-black/5"
                   title="Expand panel"
+                  type="button"
                 >
                   <PanelRightOpen className="h-4 w-4" />
                 </button>
+
                 {rightHeader && (
-                  <div className="flex-1 flex items-center justify-center overflow-hidden">
+                  <div className="flex flex-1 items-center justify-center overflow-hidden">
                     <span
-                      className="font-medium text-muted-foreground whitespace-nowrap"
-                      style={{ writingMode: 'vertical-rl', transform: 'rotate(180deg)' }}
+                      className="whitespace-nowrap font-medium text-muted-foreground"
+                      style={{
+                        writingMode: 'vertical-rl',
+                        transform: 'rotate(180deg)',
+                      }}
                     >
                       {rightHeader.title}
                     </span>
                   </div>
                 )}
+
                 {rightHeader?.icon && (
-                  <div className="shrink-0 text-muted-foreground [&_svg]:size-6">{rightHeader.icon}</div>
+                  <div className="shrink-0 text-muted-foreground [&_svg]:size-6">
+                    {rightHeader.icon}
+                  </div>
                 )}
               </div>
             )}
 
-            {/* Expanded content */}
             {!rightCollapsed && (
               <>
                 {rightHeader && (
-                  <div
-                    className="flex items-center gap-2 shrink-0 pl-4 pr-6 pt-4 pb-4 border-b border-divider bg-section-header"
-                  >
+                  <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header py-4 pl-4 pr-6">
                     {allowCollapseRight && (
                       <button
                         onClick={() => setRightCollapsed(true)}
-                        className="shrink-0 p-1 rounded hover:bg-black/5 text-muted-foreground"
+                        className="shrink-0 rounded p-1 text-muted-foreground hover:bg-black/5"
                         title="Collapse panel"
+                        type="button"
                       >
                         <PanelRightClose className="h-4 w-4" />
                       </button>
                     )}
-                    {rightHeader.icon && <div className="text-muted-foreground [&_svg]:size-8">{rightHeader.icon}</div>}
-                    <div className="flex flex-col flex-1 min-w-0">
-                      <span className="text-base font-semibold text-foreground">{rightHeader.title}</span>
+
+                    {rightHeader.icon && (
+                      <div className="text-muted-foreground [&_svg]:size-8">
+                        {rightHeader.icon}
+                      </div>
+                    )}
+
+                    <div className="flex min-w-0 flex-1 flex-col">
+                      <span className="text-base font-semibold text-foreground">
+                        {rightHeader.title}
+                      </span>
+
                       {rightHeader.subtitle && (
-                        <span className="text-xs text-muted-foreground -mt-0.5">{rightHeader.subtitle}</span>
+                        <span className="-mt-0.5 text-xs text-muted-foreground">
+                          {rightHeader.subtitle}
+                        </span>
                       )}
                     </div>
                   </div>
                 )}
-                <div className="flex-1 min-h-0 overflow-y-auto">
-                  {right}
-                </div>
+
+                <div className="min-h-0 flex-1 overflow-y-auto">{right}</div>
               </>
             )}
           </aside>

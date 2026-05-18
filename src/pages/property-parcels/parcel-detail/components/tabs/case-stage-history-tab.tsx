@@ -1,4 +1,4 @@
-import { useState, useMemo, useRef, useEffect } from 'react';
+import { useState, useMemo, useCallback } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -8,13 +8,12 @@ import {
     type SortingState,
     type ColumnFiltersState,
 } from '@tanstack/react-table';
-import { History, ChevronDown } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { ChevronDown } from 'lucide-react';
 import { useCaseStageHistory } from '@/data/cases/case-stage-history/hooks/use-case-stage-history';
 import type { ParcelCaseStageHistory, CaseStatus } from '@/data/cases/case-stage-history/types';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { createCaseStageHistoryColumns } from '../table-columns/case-stage-history.columns';
-import { MoveToNextStageModal } from './move-to-next-stage-modal';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { createCaseStageHistoryColumns } from '../../table-columns/case-stage-history.columns';
+import { MoveToNextStageDialog } from '../dialogs/move-to-next-stage-dialog';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
 import { Badge } from '@/components/ui/badge';
 
@@ -135,7 +134,7 @@ function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, par
                 title="Case Stage History"
                 parcelNumber={parcelNumber}
                 description="Full audit trail of status changes, stage transitions, and actions taken on this parcel."
-                icon={<History className="h-8 w-8" />}
+                icon="/images/icons/contacts-icon.png"
                 lastUpdated={lastUpdated}
                 searchPlaceholder="Search history..."
                 globalFilter={globalFilter}
@@ -151,7 +150,7 @@ function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, par
                 hideHeader={hideHeader}
             />
             {modalEntry && (
-                <MoveToNextStageModal
+                <MoveToNextStageDialog
                     open={!!modalEntry}
                     onOpenChange={(open) => { if (!open) setModalEntry(null); }}
                     entry={modalEntry}
@@ -181,17 +180,8 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
     const isLoading = initialEntries ? false : hookLoading;
     const isRefreshing = initialEntries ? false : hookRefreshing;
 
-    const sharedHeaderRef = useRef<HTMLDivElement>(null);
-    const [sharedHeaderHeight, setSharedHeaderHeight] = useState(0);
-
-    useEffect(() => {
-        const el = sharedHeaderRef.current;
-        if (!el) return;
-        setSharedHeaderHeight(el.offsetHeight);
-        const obs = new ResizeObserver(() => setSharedHeaderHeight(el.offsetHeight));
-        obs.observe(el);
-        return () => obs.disconnect();
-    }, []);
+    const [outerHeaderHeight, setOuterHeaderHeight] = useState(0);
+    const handleHeaderHeightChange = useCallback((h: number) => setOuterHeaderHeight(h), []);
 
     // Cases for this parcel — provided directly from the parcel API
     const cases = useMemo(
@@ -229,46 +219,18 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
     }
 
     return (
-        <div>
-            {/* Section header shared by all workflows */}
-            <div ref={sharedHeaderRef} className="bg-app-primary-toolbar-header pl-6 pr-6 pt-4 pb-4 h-20 flex border-b border-divider items-center gap-2 sticky z-10" style={{ top: stickyTop }}>
-                <div className="shrink-0 text-muted-foreground">
-                    {isRefreshing
-                        ? <img src='/images/loading.gif' className='h-8 w-8 object-contain' alt='Loading' />
-                        : <History className="h-8 w-8" />}
-                </div>
-                <div className="flex flex-col">
-                    <h2 className="text-lg font-semibold text-neutral-900">
-                        {isRefreshing ? 'Loading Case Stage History...' : 'Case Stage History'}
-                    </h2>
-                    <p className="text-sm -mt-1 text-muted-foreground">Full audit trail of status changes, stage transitions, and actions taken on this parcel.</p>
-                </div>
-            </div>
-
-            {isLoading ? (
-                // Skeleton accordion items shown during initial load
-                <div>
-                    {cases.length > 0 ? cases.map((c) => (
-                        <div key={c.caseId} className="border-b border-border">
-                            <div className="flex items-center gap-3 px-6 py-4">
-                                <Skeleton className="h-4 w-4 rounded" />
-                                <Skeleton className="h-4 w-36" />
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-5 w-14 rounded-md" />
-                            </div>
-                        </div>
-                    )) : Array.from({ length: 2 }).map((_, i) => (
-                        <div key={i} className="border-b border-border">
-                            <div className="flex items-center gap-3 px-6 py-4">
-                                <Skeleton className="h-4 w-4 rounded" />
-                                <Skeleton className="h-4 w-36" />
-                                <Skeleton className="h-4 w-24" />
-                                <Skeleton className="h-5 w-14 rounded-md" />
-                            </div>
-                        </div>
-                    ))}
-                </div>
-            ) : (
+        <TabLayout
+            stickyTop={stickyTop}
+            title="Case Stage History"
+            parcelNumber={parcelNumber}
+            headerClassName='border-b border-divider'
+            description="Full audit trail of status changes, stage transitions, and actions taken on this parcel."
+            icon="/images/icons/case-stages-icon.png"
+            lastUpdated={lastUpdated}
+            onRefresh={refetch}
+            isLoading={isLoading || isRefreshing}
+            onHeaderHeightChange={handleHeaderHeightChange}
+        >
             <Accordion type="single" collapsible defaultValue={defaultOpen} indicator="none">
                 {cases.map((parcelCase) => {
                     const caseEntries = entriesByCaseId[parcelCase.caseId] ?? [];
@@ -289,11 +251,11 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
                             <AccordionContent className="p-0">
                                 <CaseStageHistoryTable
                                     entries={caseEntries}
-                                    isLoading={isRefreshing}
+                                    isLoading={isLoading || isRefreshing}
                                     lastUpdated={lastUpdated}
                                     onRefresh={refetch}
                                     parcelNumber={parcelNumber}
-                                    stickyTop={stickyTop + sharedHeaderHeight}
+                                    stickyTop={stickyTop + outerHeaderHeight}
                                     hideHeader
                                 />
                             </AccordionContent>
@@ -301,7 +263,6 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
                     );
                 })}
             </Accordion>
-            )}
-        </div>
+        </TabLayout>
     );
 }

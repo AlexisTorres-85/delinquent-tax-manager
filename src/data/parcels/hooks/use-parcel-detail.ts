@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query';
-import { API_BASE, unwrapApiResponse } from '@/lib/api';
+import { API_BASE, apiFetch } from '@/lib/api';
 import type { ApiParcelData, CatalisParcelInformation } from '../api-types';
 import type { Parcel } from '../types';
 import type { ParcelCaseStageHistory, ParcelCase } from '@/data/cases/case-stage-history/types';
@@ -205,8 +205,7 @@ export function mapApiParcelToParcel(raw: ApiParcelData, base?: Parcel): Parcel 
 
 async function fetchParcelByNumber(parcelNumber: string): Promise<ApiParcelData> {
   const url = `${API_BASE}/api/parcels/by-number/${encodeURIComponent(parcelNumber)}?includeCatalisData=true`;
-  const res = await fetch(url);
-  return unwrapApiResponse<ApiParcelData>(res);
+  return apiFetch<ApiParcelData>(url);
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

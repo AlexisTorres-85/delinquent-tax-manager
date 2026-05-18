@@ -1,32 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { caseStageHistoryService } from '../services/case-stage-history.service';
-import type { ParcelCaseStageHistory } from '../types';
+
+export const CASE_STAGE_HISTORY_QUERY_KEY = (parcelNumber: string) =>
+  ['case-stage-history', 'by-parcel', parcelNumber] as const;
 
 export function useCaseStageHistory(parcelNumber: string) {
-  const [entries, setEntries] = useState<ParcelCaseStageHistory[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    if (!parcelNumber) return;
-    setIsFetching(true);
-    caseStageHistoryService.getByParcelNumber(parcelNumber).then((data) => {
-      hasLoadedRef.current = true;
-      setEntries(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-  }, [parcelNumber, refreshKey]);
+  const query = useQuery({
+    queryKey: CASE_STAGE_HISTORY_QUERY_KEY(parcelNumber),
+    queryFn: () => caseStageHistoryService.getByParcelNumber(parcelNumber),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    entries,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    entries: query.data ?? [],
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }

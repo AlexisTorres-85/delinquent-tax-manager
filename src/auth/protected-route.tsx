@@ -3,6 +3,7 @@ import { useMsalAuthentication } from '@azure/msal-react';
 import { InteractionStatus, InteractionType } from '@azure/msal-browser';
 import { useAuth } from './use-auth';
 import { loginRequest } from './msal-config';
+import { DtmAccessProvider } from './dtm-access-context';
 
 interface ProtectedRouteProps {
   children: ReactNode;
@@ -21,7 +22,7 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
   // actually triggers the redirect when the user is unauthenticated.
   useMsalAuthentication(InteractionType.Redirect, loginRequest);
 
-  const { isAuthenticated, inProgress } = useAuth();
+  const { isAuthenticated, inProgress, objectId } = useAuth();
 
   // MSAL is actively doing something (handling redirect response, acquiring token, etc.)
   if (inProgress !== InteractionStatus.None) {
@@ -41,5 +42,9 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     );
   }
 
-  return <>{children}</>;
+  return (
+    <DtmAccessProvider objectId={objectId}>
+      {children}
+    </DtmAccessProvider>
+  );
 }

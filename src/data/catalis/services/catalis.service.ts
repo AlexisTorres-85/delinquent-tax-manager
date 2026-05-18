@@ -8,6 +8,7 @@
 
 import type { CatalisParcel, CatalisSearchParams } from '../types';
 import { CATALIS_DUMMY_PARCELS } from '../data/catalis-dummy-data';
+import { fakeDelay } from '@/lib/api';
 
 function normalize(s: string) {
   return s.toLowerCase().trim();
@@ -37,7 +38,7 @@ function matchesQuery(parcel: CatalisParcel, query: string, field: CatalisSearch
 
 async function search(params: CatalisSearchParams): Promise<CatalisParcel[]> {
   // Simulate async network latency
-  await new Promise((resolve) => setTimeout(resolve, 400));
+  await fakeDelay();
 
   let results = CATALIS_DUMMY_PARCELS;
 

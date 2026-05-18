@@ -1,32 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { documentsService } from '../services/documents.service';
-import type { ParcelDocument } from '../types';
+
+export const DOCUMENTS_QUERY_KEY = (parcelNumber: string) =>
+  ['documents', 'by-parcel', parcelNumber] as const;
 
 export function useDocuments(parcelNumber: string) {
-  const [documents, setDocuments] = useState<ParcelDocument[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    if (!parcelNumber) return;
-    setIsFetching(true);
-    documentsService.getByParcelNumber(parcelNumber).then((data) => {
-      hasLoadedRef.current = true;
-      setDocuments(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-  }, [parcelNumber, refreshKey]);
+  const query = useQuery({
+    queryKey: DOCUMENTS_QUERY_KEY(parcelNumber),
+    queryFn: () => documentsService.getByParcelNumber(parcelNumber),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    documents,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    documents: query.data ?? [],
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }

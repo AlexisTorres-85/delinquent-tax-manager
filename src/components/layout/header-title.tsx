@@ -26,7 +26,7 @@ function getInitials(name: string): string {
 
 export function HeaderTitle() {
 	const { isMobile } = useLayout();
-	const { displayName } = useAuth();
+	const { displayName, objectId, logout } = useAuth();
 	const initials = getInitials(displayName || 'Guest User');
 
 	return (
@@ -46,7 +46,14 @@ export function HeaderTitle() {
 							)}
 						</Button>
 					</DropdownMenuTrigger>
-					<DropdownMenuContent className="w-50 bg-white/95" side="bottom" align="start" sideOffset={10} alignOffset={6}>
+						<DropdownMenuContent className="w-56 bg-white/95" side="bottom" align="start" sideOffset={10} alignOffset={6}>
+							{objectId && (
+								<div className="px-2 py-1.5">
+									<p className="text-xs font-medium text-foreground">{displayName || 'Guest User'}</p>
+									<p className="text-[10px] text-muted-foreground font-mono truncate">{objectId}</p>
+								</div>
+							)}
+							<DropdownMenuSeparator />
 						<DropdownMenuGroup>
 							<DropdownMenuItem>
 								<User className="size-4" />
@@ -57,7 +64,7 @@ export function HeaderTitle() {
 								<span>Settings</span>
 							</DropdownMenuItem>
 							<DropdownMenuSeparator />
-							<DropdownMenuItem>
+							<DropdownMenuItem onClick={logout}>
 								<LogOut className="size-4" />
 								<span>Logout</span>
 							</DropdownMenuItem>

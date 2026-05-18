@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { UserPlus, Users } from 'lucide-react';
 import { useContacts } from '@/data/contacts/hooks/use-contacts';
 import type { ContactStatus } from '@/data/contacts/types';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { contactColumns } from '../table-columns/contacts.columns';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { contactColumns } from '../../table-columns/contacts.columns';
 
 // ─── All contact statuses ─────────────────────────────────────────────────────
 
@@ -106,7 +106,7 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
             title="Contacts"
             parcelNumber={parcelNumber}
             description="Owners, attorneys, lien holders, and other parties associated with this parcel."
-            icon={<Users className="h-8 w-8" />}
+            icon="/images/icons/contacts-icon.png"
             lastUpdated={lastUpdated}
             searchPlaceholder="Search contacts..."
             globalFilter={globalFilter}

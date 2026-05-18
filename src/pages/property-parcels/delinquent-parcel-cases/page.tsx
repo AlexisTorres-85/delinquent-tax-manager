@@ -124,6 +124,7 @@ export function ParcelsPage() {
         subtitle: 'Access parcel records and account details',
       }}
       mainClassName="p-0"
+      isLoading={isLoading}
       main={
         <div className="h-full">
           {isError && (

@@ -1,12 +1,11 @@
 import { FileText, History, Map, ScrollText, BookOpen, CheckCircle, MapPin, Info, ExternalLink, Scale, MapIcon, FileSearch, LandmarkIcon, GitCompare, Printer, FileDown, Copy, StickyNote, MessageSquare, RefreshCw, AlertTriangle, ChevronDown } from 'lucide-react';
 import { useState } from 'react';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { TabLayout } from './tab-layout';
+import { TabLayout } from '@/components/ui/tab-layout';
 import { useLegalReview } from '@/data/legal-review/hooks/use-legal-review';
-import { ChangeLegalDescriptionDialog } from './change-legal-description-dialog';
+import { ChangeLegalDescriptionDialog } from '../dialogs/change-legal-description-dialog';
 import type { Parcel } from '@/data/parcels/types';
 
 // ─── Field display helpers ────────────────────────────────────────────────────
@@ -37,14 +36,6 @@ function Field({ label, value, mono = false }: { label: string; value?: string; 
     );
 }
 
-function FieldSkeleton({ wide = false }: { wide?: boolean }) {
-    return (
-        <div className="flex flex-col gap-1.5">
-            <Skeleton className="h-2.5 w-16" />
-            <Skeleton className={`h-4 ${wide ? 'w-full' : 'w-32'}`} />
-        </div>
-    );
-}
 
 // ─── Tab component ────────────────────────────────────────────────────────────
 
@@ -137,32 +128,9 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
 
     const reviewLoading = isLoading || isReviewLoading;
 
-    const banner = (
+    const reviewBanner = !reviewLoading ? (
         <div className="flex items-center gap-6 px-6 py-3 border-b h-20 border-divider bg-muted text-sm">
-            {reviewLoading ? (
-                <>
-                <div className="flex flex-col gap-0.5">
-                        <Skeleton className="h-2.5 w-16 mb-1" />
-                        <Skeleton className="h-5 w-28" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <Skeleton className="h-2.5 w-16 mb-1" />
-                        <Skeleton className="h-5 w-28" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <Skeleton className="h-2.5 w-16 mb-1" />
-                        <Skeleton className="h-5 w-24" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <Skeleton className="h-2.5 w-16 mb-1" />
-                        <Skeleton className="h-5 w-20" />
-                    </div>
-                    <div className="flex flex-col gap-0.5">
-                        <Skeleton className="h-2.5 w-16 mb-1" />
-                        <Skeleton className="h-5 w-36" />
-                    </div>
-                </>
-            ) : activeReview ? (
+            {activeReview ? (
                 <>
                 <div className="flex flex-col gap-0.5">
                         <span className="text-[10px] uppercase tracking-wide text-muted-foreground font-medium">Review Status</span>
@@ -216,17 +184,15 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                 </>
             )}
             <div className="ml-auto">
-                {reviewLoading
-                    ? <Skeleton className="h-4 w-20" />
-                    : activeReview
-                        ? <a href="#" className="text-sm text-primary hover:underline inline-flex items-center gap-1">
-                            Open Review
-                            <ExternalLink className="size-3 shrink-0" />
-                        </a>
-                        : null}
+                {activeReview
+                    ? <a href="#" className="text-sm text-primary hover:underline inline-flex items-center gap-1">
+                        Open Review
+                        <ExternalLink className="size-3 shrink-0" />
+                    </a>
+                    : null}
             </div>
         </div>
-    );
+    ) : undefined;
 
     return (
         <>
@@ -235,58 +201,34 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
             title="Legal Description"
             headerClassName='border-b border-divider'
             description="Official legal description, lot and section identifiers, and approved legal text for this parcel."
-            icon={<FileText className="h-8 w-8" />}
+            icon="/images/icons/legal-description-icon.png"
             isLoading={isLoading}
             headerActions={headerActions}
-            banner={banner}
+            banner={reviewBanner}
         >
             <div className="px-6 py-6 flex gap-8 h-[1000px]">
 
                 <div className="w-80 shrink-0 flex flex-col gap-4">
                     <div className="flex flex-col gap-1">
-                        {isLoading ? <Skeleton className="h-4 w-36" /> : (
-                            <div className="flex items-center gap-1.5">
-                                <MapPin className="size-4 text-muted-foreground shrink-0" />
-                                <FieldLabel>Location Identifiers</FieldLabel>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                            <MapPin className="size-4 text-muted-foreground shrink-0" />
+                            <FieldLabel>Location Identifiers</FieldLabel>
+                        </div>
                         <div className="rounded-lg border border-divider bg-muted p-5 flex flex-col gap-0">
-                            {isLoading ? (
-                                <div className="flex flex-col divide-y divide-divider">
-                                    <div className="pb-4"><FieldSkeleton /></div>
-                                    <div className="py-4"><FieldSkeleton /></div>
-                                    <div className="py-4"><FieldSkeleton /></div>
-                                    <div className="pt-4"><FieldSkeleton /></div>
-                                </div>
-                            ) : (
-                                <>
-                                    <div className="flex flex-col divide-y divide-divider">
-                                        <div className="pb-2"><Field label="Town Range" value={parcel?.townRange} /></div>
-                                        <div className="py-2"><Field label="Section" value={parcel?.section} /></div>
-                                        <div className="py-2"><Field label="Block" value={parcel?.block} /></div>
-                                        <div className="pt-2"><Field label="Lot" value={parcel?.lot} /></div>
-                                    </div>
-                                </>
-                            )}
+                            <div className="flex flex-col divide-y divide-divider">
+                                <div className="pb-2"><Field label="Town Range" value={parcel?.townRange} /></div>
+                                <div className="py-2"><Field label="Section" value={parcel?.section} /></div>
+                                <div className="py-2"><Field label="Block" value={parcel?.block} /></div>
+                                <div className="pt-2"><Field label="Lot" value={parcel?.lot} /></div>
+                            </div>
                         </div>
                     </div>
                     <div className="flex flex-col gap-1">
-                        {isLoading ? <Skeleton className="h-4 w-40" /> : (
-                            <div className="flex items-center gap-1.5">
-                                <Info className="size-4 text-muted-foreground shrink-0" />
-                                <FieldLabel>Additional Information</FieldLabel>
-                            </div>
-                        )}
+                        <div className="flex items-center gap-1.5">
+                            <Info className="size-4 text-muted-foreground shrink-0" />
+                            <FieldLabel>Additional Information</FieldLabel>
+                        </div>
                         <div className="rounded-lg border border-divider bg-muted p-5 flex flex-col gap-0">
-                            {isLoading ? (
-                                <div className="flex flex-col divide-y divide-divider pb-2">
-                                    <div className="pb-4"><FieldSkeleton /></div>
-                                    <div className="py-4"><FieldSkeleton /></div>
-                                    <div className="py-4"><FieldSkeleton /></div>
-                                    <div className="pt-4"><FieldSkeleton /></div>
-                                </div>
-                            ) : (
-                                <>
                                     <div className="flex flex-col divide-y divide-divider pb-2">
                                         <div className="pb-2"><Field label="Legal Last Updated" value="03/14/2025" /></div>
                                         <div className="py-2"><Field label="Updated By" value="R. Halvorsen, PLS" /></div>
@@ -325,58 +267,41 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                                             </a>
                                         </div>
                                     </div>
-                                </>
-                            )}
                         </div>
                     </div>
 
                 </div>
 
                 <div className="flex-1 min-w-0 flex flex-col gap-5">
-                    {isLoading ? (
-                        <>
-                            {[...Array(3)].map((_, i) => (
-                                <div key={i} className="flex flex-col gap-1.5">
-                                    <Skeleton className="h-4 w-28" />
-                                    <Skeleton className="h-80 w-full rounded-md" />
-                                </div>
-                            ))}
-                        </>
-                    ) : (
-                        <>
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex items-center gap-1.5">
-                                    <ScrollText className="size-4 text-muted-foreground shrink-0" />
-                                    <FieldLabel>Current Legal</FieldLabel>
-                                </div>
-                                <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
-                                    <FieldValue value={parcel?.gcsLegal} mono />
-                                </div>
-                            </div>
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1.5">
+                            <ScrollText className="size-4 text-muted-foreground shrink-0" />
+                            <FieldLabel>Current Legal</FieldLabel>
+                        </div>
+                        <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
+                            <FieldValue value={parcel?.gcsLegal} mono />
+                        </div>
+                    </div>
 
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex items-center gap-1.5">
-                                    <BookOpen className="size-4 text-muted-foreground shrink-0" />
-                                    <FieldLabel>Research Legal</FieldLabel>
-                                </div>
-                                <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
-                                    <FieldValue value={parcel?.researchLegal} />
-                                </div>
-                            </div>
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1.5">
+                            <BookOpen className="size-4 text-muted-foreground shrink-0" />
+                            <FieldLabel>Research Legal</FieldLabel>
+                        </div>
+                        <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
+                            <FieldValue value={parcel?.researchLegal} />
+                        </div>
+                    </div>
 
-                            <div className="flex flex-col gap-1.5">
-                                <div className="flex items-center gap-1.5">
-                                    <CheckCircle className="size-4 text-muted-foreground shrink-0" />
-                                    <FieldLabel>Approved Legal</FieldLabel>
-                                </div>
-                                <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
-                                    <FieldValue value={parcel?.approvedLegal} />
-                                </div>
-                            </div>
-
-
-                        </>
-                    )}
+                    <div className="flex flex-col gap-1.5">
+                        <div className="flex items-center gap-1.5">
+                            <CheckCircle className="size-4 text-muted-foreground shrink-0" />
+                            <FieldLabel>Approved Legal</FieldLabel>
+                        </div>
+                        <div className="rounded-md border border-divider bg-muted px-4 py-3 h-80 overflow-y-auto">
+                            <FieldValue value={parcel?.approvedLegal} />
+                        </div>
+                    </div>
                 </div>
             </div>
         </TabLayout>

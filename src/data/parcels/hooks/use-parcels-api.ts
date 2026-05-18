@@ -1,5 +1,5 @@
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { API_BASE, unwrapApiResponse } from '@/lib/api';
+import { API_BASE, apiFetch } from '@/lib/api';
 import type { ApiParcelListItem, ApiParcelPage } from '../api-types';
 import type { Parcel, ParcelStatus, ParcelStage } from '../types';
 import type { ParcelCaseStageHistory } from '@/data/cases/case-stage-history/types';
@@ -104,8 +104,7 @@ async function fetchParcels(params: ParcelsListParams): Promise<ApiParcelPage> {
   if (params.municipalityCode) url.searchParams.set('municipalityCode', params.municipalityCode);
   if (params.isInPaymentPlan !== undefined) url.searchParams.set('isInPaymentPlan', String(params.isInPaymentPlan));
   if (params.delinquentTaxYears) url.searchParams.set('delinquentTaxYears', `${params.delinquentTaxYears[0]}-${params.delinquentTaxYears[1]}`);
-  const res = await fetch(url.toString());
-  return unwrapApiResponse<ApiParcelPage>(res);
+  return apiFetch<ApiParcelPage>(url.toString());
 }
 
 // ─── Hook ─────────────────────────────────────────────────────────────────────

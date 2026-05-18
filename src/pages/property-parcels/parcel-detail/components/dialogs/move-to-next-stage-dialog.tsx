@@ -39,14 +39,14 @@ const ALL_STATUSES: ParcelStatus[] = [
     'Complete',
 ];
 
-interface MoveToNextStageModalProps {
+interface MoveToNextStageDialogProps {
     open: boolean;
     onOpenChange: (open: boolean) => void;
     entry: ParcelCaseStageHistory;
     parcelNumber: string;
 }
 
-export function MoveToNextStageModal({ open, onOpenChange, entry, parcelNumber }: MoveToNextStageModalProps) {
+export function MoveToNextStageDialog({ open, onOpenChange, entry, parcelNumber }: MoveToNextStageDialogProps) {
     const [newStatus, setNewStatus] = useState<ParcelStatus | ''>('');
     const [newStage, setNewStage] = useState<ParcelStage | ''>('');
     const [actionTaken, setActionTaken] = useState('');

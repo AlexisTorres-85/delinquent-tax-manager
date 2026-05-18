@@ -12,8 +12,8 @@ import { Receipt, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useExpenses } from '@/data/expenses/hooks/use-expenses';
 import type { ExpenseDepartment, ExpenseType } from '@/data/expenses/types';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { expensesColumns } from '../table-columns/expenses.columns';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { expensesColumns } from '../../table-columns/expenses.columns';
 
 // ─── Filter options ───────────────────────────────────────────────────────────
 
@@ -134,7 +134,7 @@ export function ExpensesTab({ parcelNumber, stickyTop = 0 }: ExpensesTabProps) {
             title="Expenses"
             parcelNumber={parcelNumber}
             description="All recorded expenses, invoices, and cost items associated with this parcel."
-            icon={<Receipt className="h-8 w-8" />}
+            icon="/images/icons/expenses-icon.png"
             lastUpdated={lastUpdated}
             searchPlaceholder="Search expenses..."
             globalFilter={globalFilter}

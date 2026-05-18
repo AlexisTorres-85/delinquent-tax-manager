@@ -8,6 +8,7 @@
 
 import { CASE_STATUS_DEFINITIONS } from '@/data/cases/case-status-definitions';
 import type { CaseStatusRecord } from '@/data/cases/case-status-definitions';
+import { fakeDelay } from '@/lib/api';
 
 export const caseService = {
   /**
@@ -15,6 +16,7 @@ export const caseService = {
    * TODO: replace with → return fetch('/api/cases/statuses').then(r => r.json())
    */
   async getStatuses(): Promise<CaseStatusRecord[]> {
+    await fakeDelay();
     return Promise.resolve([...CASE_STATUS_DEFINITIONS] as CaseStatusRecord[]);
   },
 };

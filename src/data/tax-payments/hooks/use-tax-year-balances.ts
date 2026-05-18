@@ -1,45 +1,21 @@
-import { useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { taxPaymentService } from '../services/tax-payment.service';
-import type { TaxYearBalance } from '../types';
 
-type UseTaxYearBalancesResult = {
-  balances: TaxYearBalance[];
-  totalDue: number;
-  isLoading: boolean;
-  isError: boolean;
-};
+export const TAX_YEAR_BALANCES_QUERY_KEY = (parcelNumber: string, taxYears?: number[]) =>
+  ['tax-payments', 'balances', parcelNumber, taxYears ?? []] as const;
 
-export function useTaxYearBalances(parcelNumber: string, taxYears?: number[]): UseTaxYearBalancesResult {
-  const [balances, setBalances] = useState<TaxYearBalance[]>([]);
-  const [totalDue, setTotalDue] = useState(0);
-  const [isFetching, setIsFetching] = useState(true);
-  const [isError, setIsError] = useState(false);
-  const hasLoadedRef = useRef(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    setIsFetching(true);
-    setIsError(false);
-    taxPaymentService.getYearBalancesByParcelNumber(parcelNumber, taxYears).then((result) => {
-      if (cancelled) return;
-      hasLoadedRef.current = true;
-      setBalances(result.balances);
-      setTotalDue(result.totalDue);
-      setIsFetching(false);
-    }).catch(() => {
-      if (cancelled) return;
-      hasLoadedRef.current = true;
-      setIsError(true);
-      setIsFetching(false);
-    });
-    return () => { cancelled = true; };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [parcelNumber, taxYears?.join(',')]);
+export function useTaxYearBalances(parcelNumber: string, taxYears?: number[]) {
+  const query = useQuery({
+    queryKey: TAX_YEAR_BALANCES_QUERY_KEY(parcelNumber, taxYears),
+    queryFn: () => taxPaymentService.getYearBalancesByParcelNumber(parcelNumber, taxYears),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    balances,
-    totalDue,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isError,
+    balances: query.data?.balances ?? [],
+    totalDue: query.data?.totalDue ?? 0,
+    isLoading: query.isLoading,
+    isError: query.isError,
   };
 }

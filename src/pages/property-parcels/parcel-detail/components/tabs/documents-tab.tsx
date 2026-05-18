@@ -12,8 +12,8 @@ import { Button } from '@/components/ui/button';
 import { FilePlus, ScanLine, FileText } from 'lucide-react';
 import { useDocuments } from '@/data/documents/hooks/use-documents';
 import type { ParcelDocument, DocumentType } from '@/data/documents/types';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { documentColumns } from '../table-columns/documents.columns';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { documentColumns } from '../../table-columns/documents.columns';
 
 // ─── Document types list ──────────────────────────────────────────────────────
 
@@ -116,7 +116,7 @@ function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNu
             title="Documents"
             parcelNumber={parcelNumber}
             description="Uploaded documents and scanned records associated with this parcel."
-            icon={<FileText className="h-8 w-8" />}
+            icon="/images/icons/documents-icon.png"
             lastUpdated={lastUpdated}
             hideSearch={true}
             globalFilter=""

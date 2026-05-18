@@ -13,8 +13,8 @@ import {
 import { StickyNote } from 'lucide-react';
 import { useNotes } from '@/data/notes/hooks/use-notes';
 import type { NoteMessageType } from '@/data/notes/types';
-import { TabLayout, type FilterConfig } from './tab-layout';
-import { notesColumns } from '../table-columns/notes.columns';
+import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import { notesColumns } from '../../table-columns/notes.columns';
 
 // ─── All message types ────────────────────────────────────────────────────────
 
@@ -105,7 +105,7 @@ export function NotesTab({ parcelNumber, stickyTop = 0 }: NotesTabProps) {
             title="Notes"
             parcelNumber={parcelNumber}
             description="All case notes, call logs, and communications recorded on this parcel."
-            icon={<StickyNote className="h-8 w-8" />}
+            icon="/images/icons/notes-icon.png"
             lastUpdated={lastUpdated}
             searchPlaceholder="Search notes..."
             globalFilter={globalFilter}

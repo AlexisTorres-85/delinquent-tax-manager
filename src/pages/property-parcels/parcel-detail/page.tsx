@@ -2,131 +2,23 @@ import { useState, useRef, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router';
 import { ContentWrapper } from '@/components/layout/content-wrapper';
 import { Button } from '@/components/ui/button';
-import { Skeleton } from '@/components/ui/skeleton';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useParcelDetail } from '@/data/parcels/hooks/use-parcel-detail';
 import { useCase } from '@/data/parcels/hooks/use-case';
-import { ArrowLeft, Flag, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info, UserCircle2 } from 'lucide-react';
-import type { Parcel, ParcelFlags, ParcelStatus } from '@/data/parcels/types';
-import { UpdateStatusForm, CURRENT_YEAR } from './components/update-status-form';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogBody, DialogFooter } from '@/components/ui/dialog';
-import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
+import { ArrowLeft, LandPlotIcon, Printer, Download, Mail, RefreshCw, Info } from 'lucide-react';
+import type { Parcel, ParcelStatus } from '@/data/parcels/types';
 import { LifecycleHelpDrawer } from './components/lifecycle-help-drawer';
-import { TaxPaymentsTab } from './components/tax-payments-tab';
-import { PaymentScheduleTab } from './components/payment-schedule-tab';
-import { DocumentsTab } from './components/documents-tab';
-import { ContactsTab } from './components/contacts-tab';
-import { CaseStageHistoryTab } from './components/case-stage-history-tab';
-import { NotesTab } from './components/notes-tab';
-import { ExpensesTab } from './components/expenses-tab';
-import { LegalDescriptionTab } from './components/legal-description-tab';
-import { TaxYearBreakdown } from './components/tax-year-breakdown';
-import { PaymentPlanSection } from './components/payment-plan-section';
-import { PageSection } from '@/components/layout/page-section';
-import { useTaxYearBalances } from '@/data/tax-payments/hooks/use-tax-year-balances';
-
-const ALL_FLAGS: { key: keyof ParcelFlags; label: string; description: string }[] = [
-  {
-    key: 'isBankruptcy',
-    label: 'Bankruptcy',
-    description: 'The property owner has an active or pending bankruptcy filing, which may impose an automatic stay on collection actions and require court approval before proceeding.',
-  },
-  {
-    key: 'isFloodPlain',
-    label: 'Flood Plain',
-    description: 'The parcel is located within a FEMA-designated flood plain zone. Special flood insurance requirements and development restrictions may apply.',
-  },
-  {
-    key: 'isInRem',
-    label: 'In Rem',
-    description: 'An in rem tax foreclosure action has been initiated against this property. The proceeding is directed at the property itself rather than a specific individual.',
-  },
-  {
-    key: 'isOutlot',
-    label: 'Outlot',
-    description: 'The parcel is classified as an outlot — a reserved or residual land parcel that is not part of a standard lot subdivision, often used for common areas or future development.',
-  },
-  {
-    key: 'isContaminated',
-    label: 'Contaminated',
-    description: 'The property has confirmed environmental contamination such as hazardous materials, chemicals, or pollutants on-site. Remediation may be required before transfer or redevelopment.',
-  },
-  {
-    key: 'hasHistoricalContamination',
-    label: 'Historical Contamination',
-    description: 'There is a documented history of environmental contamination on this property. The site may have been remediated, but historical records indicate prior pollution events.',
-  },
-  {
-    key: 'isDeeded',
-    label: 'Deeded',
-    description: 'The property has been formally transferred via deed through the tax foreclosure process. Ownership has been conveyed to the acquiring entity.',
-  },
-  {
-    key: 'isEnvironmentalIssue',
-    label: 'Environmental Issue',
-    description: 'An active environmental concern or regulatory issue has been flagged for this property. This may include open violations, ongoing investigations, or pending remediation orders.',
-  },
-  {
-    key: 'isRazingOrder',
-    label: 'Razing Order',
-    description: 'A municipal or court-issued order requires the demolition of structures on this property due to safety hazards, code violations, or structural instability.',
-  },
-];
-
-function FlagsInfoModal({ open, onOpenChange }: { open: boolean; onOpenChange: (v: boolean) => void }) {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl">
-        <DialogHeader
-          icon={<Flag />}
-          subtitle="Reference guide for all parcel condition flags used in the system."
-        >
-          <DialogTitle>Parcel Flag Definitions</DialogTitle>
-        </DialogHeader>
-        <DialogBody className='p-6'>
-          <div className="divide-y divide-divider">
-            {ALL_FLAGS.map(({ key, label, description }) => (
-              <div key={key} className="py-3 first:pt-0 last:pb-0">
-                <p className="text-sm font-semibold mb-0.5">{label}</p>
-                <p className="text-sm text-muted-foreground">{description}</p>
-              </div>
-            ))}
-            <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>  <br />
-            <p className="text-xs text-muted-foreground italic">
-              Note: This guide provides general definitions for each flag. Specific criteria for when flags are applied may vary based on local policies and case circumstances.
-            </p>
-          </div>
-        </DialogBody>
-        <DialogFooter>
-          <Button variant="outline" size="sm" onClick={() => onOpenChange(false)}>Close</Button>
-          <Button size="sm">Download PDF</Button>
-        </DialogFooter>
-      </DialogContent>
-    </Dialog>
-  );
-}
+import { TaxPaymentsTab } from './components/tabs/tax-payments-tab';
+import { PaymentScheduleTab } from './components/tabs/payment-schedule-tab';
+import { DocumentsTab } from './components/tabs/documents-tab';
+import { ContactsTab } from './components/tabs/contacts-tab';
+import { CaseStageHistoryTab } from './components/tabs/case-stage-history-tab';
+import { NotesTab } from './components/tabs/notes-tab';
+import { ExpensesTab } from './components/tabs/expenses-tab';
+import { LegalDescriptionTab } from './components/tabs/legal-description-tab';
+import { OverviewTab } from './components/tabs/overview-tab';
+import { UpdateStatusForm, CURRENT_YEAR } from './components/update-status-form';
 
 function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   const isNewCase = !parcel.activeCase;
@@ -206,189 +98,6 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
   );
 }
 
-function InfoCard({ label, value }: { label: string; value: React.ReactNode }) {
-  return (
-    <div className="flex flex-col">
-      <span className="text-xs text-muted-foreground uppercase tracking-widest font-semibold">{label}</span>
-      <span className="text-sm font-semibold leading-tight">{value}</span>
-    </div>
-  );
-}
-
-function VDivider() {
-  return <div className="self-stretch w-px mx-4 shrink-0 bg-divider" />;
-}
-
-function ParcelHeader({ parcel, onTabChange }: { parcel: Parcel; onTabChange: (tab: Tab) => void }) {
-  const [flagsInfoOpen, setFlagsInfoOpen] = useState(false);
-  const taxYears = parcel.caseTaxYears.join(', ');
-  const { totalDue, isLoading: totalDueLoading } = useTaxYearBalances(parcel.parcelNumber, parcel.caseTaxYears.length > 0 ? parcel.caseTaxYears : undefined);
-
-  return (
-    <div>
-      <section className="bg-app-primary-toolbar-header px-6 pt-6 border-b border-divider">
-        <div className="flex items-start justify-between gap-4 mb-6">
-          <div className="flex items-center gap-3">
-            <div className="flex items-center justify-center rounded-full bg-black/10 p-2 shrink-0">
-              <UserCircle2 className="size-6 text-muted-foreground" />
-            </div>
-            <div>
-              <h2 className="text-lg font-semibold leading-tight">
-                {parcel.ownerName}
-              </h2>
-
-              <p className="text-sm text-muted-foreground mt-0.5">
-                {parcel.propertyAddress}
-              </p>
-            </div>
-          </div>
-          <div className="flex items-center gap-2 shrink-0">
-            {parcel.activeCase ? (
-              <>
-                <span className="text-sm font-semibold">Status:</span>
-                <StatusBadge status={parcel.activeCase.status} />
-                <div className="w-px h-4 shrink-0 bg-divider" />
-                <span className="text-sm font-semibold">Stage:</span>
-                <StageBadge stage={parcel.activeCase.stage} />
-              </>
-            ) : (
-              <span className="text-xs text-muted-foreground italic">No Case detected</span>
-            )}
-          </div>
-        </div>
-
-        <div className="flex items-stretch pb-6 overflow-x-auto">
-          <InfoCard label="Municipality" value={parcel.municipality} />
-
-          <VDivider />
-
-          <InfoCard label="Current Workflow Tax Years" value={taxYears || '—'} />
-
-          <VDivider />
-
-          <InfoCard
-            label="Total Due"
-            value={
-              totalDueLoading
-                ? <span className="text-muted-foreground text-sm">—</span>
-                : <span className="text-destructive font-semibold">
-                  ${totalDue.toLocaleString('en-US', { minimumFractionDigits: 2 })}
-                </span>
-            }
-          />
-
-          <VDivider />
-
-          <InfoCard
-            label="Current Assessed Value"
-            value={`$${parcel.assessedValue.toLocaleString()}`}
-          />
-
-          <VDivider />
-
-          <InfoCard
-            label="Current Payment Plan"
-            value={
-              parcel.paymentPlan
-                ? (
-                  <button
-                    type="button"
-                    onClick={() => onTabChange('Payment Plan Schedule')}
-                    className="text-sm font-semibold text-primary hover:underline underline-offset-2 text-left leading-tight"
-                  >
-                    {parcel.paymentPlan.paymentPlanDescription}
-                  </button>
-                )
-                : <span className="text-muted-foreground text-sm">—</span>
-            }
-          />
-        </div>
-      </section>
-
-      <section className='px-6 mb-10'>
-
-        <div className="flex items-stretch gap-0 pt-6">
-          {/* Left: Flags + Property Details */}
-          <section className="flex flex-col gap-2 w-[40%] shrink-0 min-w-0">
-            <PageSection
-              icon={<Flag className="size-5 text-muted-foreground" />}
-              title="Flags"
-              subtitle="parcel conditions and review indicators"
-              onHelperClick={() => setFlagsInfoOpen(true)}
-              action={
-                <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                  Edit Flags
-                </Button>
-              }
-            >
-              <div className="grid grid-cols-4 gap-x-3 gap-y-2.5">
-                {ALL_FLAGS.map(({ key, label }) => {
-                  const active = parcel.flags[key];
-
-                  return (
-                    <div key={key} className="flex items-center gap-2">
-                      <div
-                        className={`flex items-center justify-center rounded-full px-2.5 h-6 text-[10px] font-bold shrink-0 min-w-[34px] transition-colors ${active
-                          ? 'bg-[var(--color-warning-accent,var(--color-yellow-500))] text-white'
-                          : 'bg-muted text-muted-foreground'
-                          }`}
-                      >
-                        {active ? 'On' : 'Off'}
-                      </div>
-                      <span className="text-xs font-medium text-foreground truncate leading-tight">{label}</span>
-                    </div>
-                  );
-                })}
-              </div>
-            </PageSection>
-
-            <FlagsInfoModal open={flagsInfoOpen} onOpenChange={setFlagsInfoOpen} />
-
-            <div className="my-1" />
-
-            <PageSection
-              icon={<LandPlotIcon className="size-5 text-muted-foreground" />}
-              title="Property Details"
-              subtitle="physical and plat information"
-              className=""
-              action={
-                <Button variant="outline" size="sm" className="h-7 text-xs px-2.5">
-                  View Property Details
-                </Button>
-              }
-            >
-              <div className="flex flex-col">
-                <div className="flex pb-2">
-                  <div className="flex flex-col gap-0.5 flex-1 border-b border-r border-divider pb-2 pr-4">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Block</span>
-                    <span className="text-sm font-medium">{parcel.block ?? '—'}</span>
-                  </div>
-                  <div className="flex flex-col gap-0.5 flex-1 border-b border-divider pb-2 pl-4">
-                    <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Lot</span>
-                    <span className="text-sm font-medium">{parcel.lot ?? '—'}</span>
-                  </div>
-                </div>
-                <div className="flex flex-col gap-0.5 pt-2">
-                  <span className="text-[10px] text-muted-foreground uppercase tracking-widest font-semibold">Plat Description</span>
-                  <span className="text-sm font-medium">{parcel.platDescription ?? '—'}</span>
-                </div>
-              </div>
-            </PageSection>
-          </section>
-
-          <div className="mx-3" />
-
-          <section className="flex-1 min-w-0 flex flex-col gap-6">
-            {parcel.paymentPlan && <PaymentPlanSection paymentPlan={parcel.paymentPlan} />}
-            <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.caseTaxYears} className="flex-1" />
-          </section>
-        </div>
-      </section>
-
-    </div>
-  );
-}
-
 const TABS = [
   'Overview',
   'Tax Payments',
@@ -419,7 +128,7 @@ const SLUG_TO_TAB: Record<string, Tab> = Object.fromEntries(
   Object.entries(TAB_TO_SLUG).map(([tab, slug]) => [slug, tab as Tab]),
 );
 
-function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parcel; activeTab: Tab; onTabChange: (tab: Tab) => void }) {
+function ParcelDetailContent({ parcel, isError, error, parcelNumber, activeTab, onTabChange }: { parcel: Parcel | null | undefined; isError: boolean; error: unknown; parcelNumber: string; activeTab: Tab; onTabChange: (tab: Tab) => void }) {
   const tabsBarRef = useRef<HTMLDivElement>(null);
   const [stickyTop, setStickyTop] = useState(0);
 
@@ -431,6 +140,24 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
     obs.observe(el);
     return () => obs.disconnect();
   }, []);
+
+  if (isError) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
+        <p className="text-sm font-medium text-destructive">Failed to load parcel data from API.</p>
+        <p className="text-xs">{error instanceof Error ? error.message : 'An unexpected error occurred.'}</p>
+      </div>
+    );
+  }
+
+  if (!parcel) {
+    return (
+      <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
+        <p className="text-sm font-medium">Parcel not found.</p>
+        <p className="text-xs">No record exists for &quot;{parcelNumber}&quot;.</p>
+      </div>
+    );
+  }
 
   return (
     <Tabs value={activeTab} onValueChange={(v) => onTabChange(v as Tab)} className="flex flex-col">
@@ -445,7 +172,7 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
       </div>
 
       <TabsContent value="Overview" className="mt-0">
-        <ParcelHeader parcel={parcel} onTabChange={onTabChange} />
+        <OverviewTab parcel={parcel} onTabChange={onTabChange as (tab: string) => void} />
       </TabsContent>
 
       <TabsContent value="Tax Payments" className="mt-0">
@@ -493,28 +220,6 @@ function ParcelDetailContent({ parcel, activeTab, onTabChange }: { parcel: Parce
         </TabsContent>
       ))}
     </Tabs>
-  );
-}
-
-function LoadingSkeleton() {
-  return (
-    <div className="p-6 flex flex-col gap-6">
-      <div className="flex justify-between pb-4 border-b border-divider">
-        <div className="flex flex-col gap-2">
-          <Skeleton className="h-6 w-48" />
-          <Skeleton className="h-4 w-64" />
-        </div>
-        <Skeleton className="h-6 w-20 rounded-full" />
-      </div>
-      <div className="grid grid-cols-5 gap-6">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="flex flex-col gap-1.5">
-            <Skeleton className="h-3 w-20" />
-            <Skeleton className="h-4 w-28" />
-          </div>
-        ))}
-      </div>
-    </div>
   );
 }
 
@@ -582,22 +287,16 @@ export function ParcelDetailPage() {
         ),
       }}
       mainClassName="p-0"
+      isLoading={isLoading}
       main={
-        isLoading ? (
-          <LoadingSkeleton />
-        ) : apiError ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
-            <p className="text-sm font-medium text-destructive">Failed to load parcel data from API.</p>
-            <p className="text-xs">{apiErr instanceof Error ? apiErr.message : 'An unexpected error occurred.'}</p>
-          </div>
-        ) : !parcel ? (
-          <div className="flex flex-col items-center justify-center h-64 gap-2 text-muted-foreground">
-            <p className="text-sm font-medium">Parcel not found.</p>
-            <p className="text-xs">No record exists for &quot;{parcelNumber}&quot;.</p>
-          </div>
-        ) : (
-          <ParcelDetailContent parcel={parcel} activeTab={activeTab} onTabChange={handleTabChange} />
-        )
+        <ParcelDetailContent
+          parcel={parcel}
+          isError={apiError}
+          error={apiErr}
+          parcelNumber={parcelNumber ?? ''}
+          activeTab={activeTab}
+          onTabChange={handleTabChange}
+        />
       }
     />
   );

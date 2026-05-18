@@ -24,9 +24,18 @@ export function useAuth() {
   }, [instance]);
 
   const logout = useCallback(() => {
+    const clearAndReload = () => {
+      sessionStorage.clear();
+      localStorage.clear();
+      window.location.href = window.location.origin;
+    };
+
     instance.logoutPopup({
       postLogoutRedirectUri: window.location.origin,
-    }).catch(console.error);
+    }).then(clearAndReload).catch(() => {
+      // Popup blocked or failed — still clear the local session
+      clearAndReload();
+    });
   }, [instance]);
 
   return {
@@ -39,6 +48,8 @@ export function useAuth() {
     displayName: account?.name ?? account?.username ?? '',
     /** Primary email / UPN */
     email: account?.username ?? '',
+    /** Azure AD object ID */
+    objectId: account?.localAccountId ?? '',
   };
 }
 

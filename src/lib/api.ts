@@ -1,4 +1,5 @@
 import { toast } from 'sonner';
+import { FAKE_API_DELAY_MS } from '@/config/general.config';
 
 /**
  * Generic API response wrapper — matches the shape returned by all endpoints.
@@ -70,6 +71,9 @@ export async function unwrapApiResponse<T>(res: Response): Promise<T> {
 /** Base URL — override via VITE_API_BASE_URL env var */
 export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined) ?? 'https://localhost:7189';
 
+/** Simulated network delay — applied to every apiFetch call. Set FAKE_API_DELAY_MS to 0 in production. */
+export const fakeDelay = () => new Promise<void>((resolve) => setTimeout(resolve, FAKE_API_DELAY_MS));
+
 /**
  * Drop-in replacement for `fetch` + `unwrapApiResponse`.
  * Automatically shows a Sonner toast whenever the request fails —
@@ -81,6 +85,7 @@ export const API_BASE = (import.meta.env.VITE_API_BASE_URL as string | undefined
  */
 export async function apiFetch<T>(url: string, options?: RequestInit): Promise<T> {
   try {
+    await fakeDelay();
     const res = await fetch(url, options);
     return await unwrapApiResponse<T>(res);
   } catch (err) {

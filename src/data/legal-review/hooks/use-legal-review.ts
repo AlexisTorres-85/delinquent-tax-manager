@@ -1,32 +1,22 @@
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useQuery } from '@tanstack/react-query';
 import { legalReviewService } from '../services/legal-review.service';
-import type { LegalReview } from '../types';
+
+export const LEGAL_REVIEW_QUERY_KEY = (parcelNumber: string) =>
+  ['legal-review', 'by-parcel', parcelNumber] as const;
 
 export function useLegalReview(parcelNumber: string) {
-  const [reviews, setReviews] = useState<LegalReview[]>([]);
-  const [isFetching, setIsFetching] = useState(true);
-  const [lastUpdated, setLastUpdated] = useState<Date | null>(null);
-  const [refreshKey, setRefreshKey] = useState(0);
-  const hasLoadedRef = useRef(false);
-
-  const refetch = useCallback(() => setRefreshKey((k) => k + 1), []);
-
-  useEffect(() => {
-    if (!parcelNumber) return;
-    setIsFetching(true);
-    legalReviewService.getByParcelNumber(parcelNumber).then((data) => {
-      hasLoadedRef.current = true;
-      setReviews(data);
-      setLastUpdated(new Date());
-      setIsFetching(false);
-    });
-  }, [parcelNumber, refreshKey]);
+  const query = useQuery({
+    queryKey: LEGAL_REVIEW_QUERY_KEY(parcelNumber),
+    queryFn: () => legalReviewService.getByParcelNumber(parcelNumber),
+    enabled: !!parcelNumber,
+    staleTime: 1000 * 60 * 5,
+  });
 
   return {
-    reviews,
-    isLoading: isFetching && !hasLoadedRef.current,
-    isRefreshing: isFetching,
-    lastUpdated,
-    refetch,
+    reviews: query.data ?? [],
+    isLoading: query.isLoading,
+    isRefreshing: query.isFetching,
+    lastUpdated: query.dataUpdatedAt ? new Date(query.dataUpdatedAt) : null,
+    refetch: query.refetch,
   };
 }
