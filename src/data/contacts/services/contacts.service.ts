@@ -1,11 +1,28 @@
-import { CONTACTS_DUMMY_DATA } from '../data/contacts-dummy-data';
-import type { ParcelContact } from '../types';
-import { fakeDelay } from '@/lib/api';
+import { API_BASE, apiFetch } from '@/lib/api';
+import type { ParcelContact, CreateContactPayload, UpdateContactPayload } from '../types';
 
 export const contactsService = {
-  async getByParcelNumber(parcelNumber: string): Promise<ParcelContact[]> {
-    await fakeDelay();
-    const entry = CONTACTS_DUMMY_DATA.find((p) => p.parcelNumber === parcelNumber);
-    return entry?.contacts ?? [];
+  async getByParcelId(parcelId: number): Promise<ParcelContact[]> {
+    return apiFetch<ParcelContact[]>(`${API_BASE}/api/Contacts/parcel/${parcelId}`);
+  },
+
+  async getById(id: number): Promise<ParcelContact> {
+    return apiFetch<ParcelContact>(`${API_BASE}/api/Contacts/${id}`);
+  },
+
+  async create(payload: CreateContactPayload): Promise<ParcelContact> {
+    return apiFetch<ParcelContact>(`${API_BASE}/api/Contacts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
+  },
+
+  async update(id: number, payload: UpdateContactPayload): Promise<ParcelContact> {
+    return apiFetch<ParcelContact>(`${API_BASE}/api/Contacts/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload),
+    });
   },
 };

@@ -18,6 +18,8 @@ export type UpdateStatusFormProps = {
     availableStages: ReadonlyArray<CaseStageRecord>;
     workflowLoading: boolean;
     statuses: CaseStatusRecord[];
+    originalStatus?: ParcelStatus | '';
+    originalStage?: string;
     onStatusChange: (status: ParcelStatus) => void;
     onStageChange: (stage: string) => void;
     onNoteChange: (note: string) => void;
@@ -35,6 +37,8 @@ export function UpdateStatusForm({
     availableStages,
     workflowLoading,
     statuses,
+    originalStatus,
+    originalStage,
     onStatusChange,
     onStageChange,
     onNoteChange,
@@ -42,6 +46,7 @@ export function UpdateStatusForm({
     onCancel,
     onSave,
 }: UpdateStatusFormProps) {
+    const isUnchanged = !isNewWorkflow && status === originalStatus && stage === originalStage;
     return (
         <>
             <div className='border-b border-divider pl-4 pr-4 pt-4'>
@@ -139,8 +144,8 @@ export function UpdateStatusForm({
                 </div>
                 <div className="flex justify-end gap-2 pt-1">
                     <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
-                    <Button size="sm" onClick={onSave} disabled={isNewWorkflow && selectedYears.length === 0}>
-                        {isNewWorkflow ? 'Confirm' : 'Save'}
+                    <Button size="sm" onClick={onSave} disabled={workflowLoading || (isNewWorkflow && selectedYears.length === 0) || isUnchanged}>
+                        {isNewWorkflow ? (workflowLoading ? 'Starting…' : 'Confirm') : 'Save'}
                     </Button>
                 </div>
             </div>

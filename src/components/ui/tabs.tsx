@@ -4,6 +4,7 @@ import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
 import { Tabs as TabsPrimitive } from 'radix-ui';
+import { TAB_TRANSITION_MS } from '@/config/general.config';
 
 
 // Variants for TabsList
@@ -196,12 +197,21 @@ function TabsTrigger({ className, ...props }: React.ComponentProps<typeof TabsPr
 function TabsContent({
   className,
   variant,
+  style,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content> & VariantProps<typeof tabsContentVariants>) {
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    const raf = requestAnimationFrame(() => setVisible(true));
+    return () => cancelAnimationFrame(raf);
+  }, []);
+
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"
       className={cn(tabsContentVariants({ variant }), className)}
+      style={{ opacity: visible ? 1 : 0, transition: `opacity ${TAB_TRANSITION_MS}ms ease`, ...style }}
       {...props}
     />
   );

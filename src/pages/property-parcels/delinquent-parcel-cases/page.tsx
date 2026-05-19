@@ -7,7 +7,6 @@ import { GridControls } from './components/grid-controls';
 import { useParcelFilters } from '@/data/parcels/hooks/use-parcel-filters';
 import type { PaymentPlanFilter } from '@/data/parcels/hooks/use-parcel-filters';
 import { useParcelsApi } from '@/data/parcels/hooks/use-parcels-api';
-import { useMemo } from 'react';
 
 export function ParcelsPage() {
   const {
@@ -56,48 +55,6 @@ export function ParcelsPage() {
     delinquentTaxYears: delinquentYearRange ?? undefined,
   });
 
-  // Baseline call (no year filter, pageSize=1) — provides total counts for chart breakdown
-  const { totalCount: baselineTotal, delinquentInScope: baselineDelinquent } = useParcelsApi({
-    pageNumber: 1,
-    pageSize: 1,
-    ...sharedParams,
-  });
-
-  // Chart breakdown counts
-  const chartInRange = delinquentInScope;
-  const chartOutsideRange = Math.max(0, baselineDelinquent - chartInRange);
-  const chartNoDelinquency = Math.max(0, baselineTotal - baselineDelinquent);
-
-  // Municipality breakdown for current page — all municipalities, no truncation
-  const municipalityBreakdown = useMemo(() => {
-    const map = new Map<string, number>();
-    for (const p of parcels) {
-      const key = p.municipality || 'Unknown';
-      map.set(key, (map.get(key) ?? 0) + 1);
-    }
-    return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
-  }, [parcels]);
-
-  const inPaymentPlanCount = useMemo(
-    () => parcels.filter((p) => p.isInPaymentPlan).length,
-    [parcels]
-  );
-
-  // Unique calendar years from delinquentYears strings, sorted ascending
-  const availableDelinquentYears = useMemo(() => {
-    const yearSet = new Set<number>();
-    for (const p of parcels) {
-      if (p.delinquentYears) {
-        p.delinquentYears.split(',').forEach((y) => {
-          const n = parseInt(y.trim(), 10);
-          if (!isNaN(n)) yearSet.add(n);
-        });
-      }
-    }
-    return Array.from(yearSet).sort((a, b) => a - b);
-  }, [parcels]);
-
-  // Client-side filter by delinquent year range — removed; API now handles delinquentTaxYears param
 
   return (
     <ContentWrapper
@@ -145,15 +102,6 @@ export function ParcelsPage() {
             onColumnVisibilityChange={setColumnVisibility}
             paymentPlanFilter={paymentPlanFilter}
             onPaymentPlanFilterChange={setPaymentPlanFilter}
-            availableDelinquentYears={availableDelinquentYears}
-            delinquentYearRange={delinquentYearRange}
-            onDelinquentYearRangeChange={setDelinquentYearRange}
-            chartInRange={chartInRange}
-            chartOutsideRange={chartOutsideRange}
-            chartNoDelinquency={chartNoDelinquency}
-            municipalityBreakdown={municipalityBreakdown}
-            inPaymentPlanCount={inPaymentPlanCount}
-            pageParcelsCount={parcels.length}
             onReset={reset}
           />
           <ScopeSnapshot
@@ -162,8 +110,8 @@ export function ParcelsPage() {
             inRemCount={inRemCount}
             bankruptcyCount={bankruptcyCount}
           />
-          <div className='border-t border-divider bg-table-header'>
-            <div className={`h-1 bg-table-header overflow-hidden transition-opacity duration-200 ${isFetching || isLoading ? 'opacity-100' : 'opacity-0'}`}>
+          <div className='border-t border-divider bg-muted'>
+            <div className={`h-1 bg-muted overflow-hidden transition-opacity duration-200 ${isFetching || isLoading ? 'opacity-100' : 'opacity-0'}`}>
               <div className="h-full w-2/5 bg-[var(--color-app-primary-from)] animate-[progress-indeterminate_1.4s_ease-in-out_infinite]" />
             </div>
           </div>

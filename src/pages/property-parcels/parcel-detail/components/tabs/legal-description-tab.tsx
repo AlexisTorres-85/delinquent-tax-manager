@@ -228,23 +228,7 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                             <Info className="size-4 text-muted-foreground shrink-0" />
                             <FieldLabel>Additional Information</FieldLabel>
                         </div>
-                        <div className="rounded-lg border border-divider bg-muted p-5 flex flex-col gap-0">
-                                    <div className="flex flex-col divide-y divide-divider pb-2">
-                                        <div className="pb-2"><Field label="Legal Last Updated" value="03/14/2025" /></div>
-                                        <div className="py-2"><Field label="Updated By" value="R. Halvorsen, PLS" /></div>
-                                        <div className="py-2">
-                                            <div className="flex flex-col gap-1">
-                                                <span className="text-sm font-semibold text-foreground">Review Status</span>
-                                                <Badge variant="success" appearance="light" className="text-xs w-fit">
-                                                    <CheckCircle className="size-3 mr-1" />
-                                                    Approved
-                                                </Badge>
-                                            </div>
-                                        </div>
-                                        <div className="pt-2"><Field label="Next Review Date" value="03/14/2027" /></div>
-                                    </div>
-
-                                    <div className="border-t border-divider pt-4 flex flex-col gap-4">
+                        <div className="rounded-lg border border-divider bg-muted p-5 flex flex-col gap-4">
                                         <div className="flex flex-col gap-1">
                                             <div className="flex items-center gap-1.5 text-sm font-semibold text-foreground">
                                                 <History className="size-3.5 shrink-0" />
@@ -266,7 +250,6 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
                                                 <ExternalLink className="size-3 shrink-0" />
                                             </a>
                                         </div>
-                                    </div>
                         </div>
                     </div>
 

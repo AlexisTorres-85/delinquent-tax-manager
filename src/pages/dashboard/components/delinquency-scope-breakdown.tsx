@@ -35,7 +35,7 @@ function calcTicks(min: number, max: number): number[] {
     return ticks;
 }
 
-export function DelinquencyRangeSummary({
+export function DelinquencyScopeBreakdown({
     from,
     to,
     inRange = 0,
@@ -160,7 +160,7 @@ export function DelinquencyRangeSummary({
     );
 
     return (
-        <div className="border-t border-divider p-6 flex flex-col border-r">
+        <div className="px-6 py-4 flex flex-col">
             <PageSection
                 icon={<PieChart className="size-4 text-muted-foreground" />}
                 title="Delinquency Scope Breakdown"

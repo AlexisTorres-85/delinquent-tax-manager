@@ -153,7 +153,7 @@
   --btn-secondary-to: var(--color-app-secondary-stop-2);
   --btn-secondary-border: var(--color-app-secondary-border);
 
-  --color-app-gradient-stop-0: #2F5954;        /* Spectra */
+  --color-app-gradient-stop-0: #3A847B;        /* Spectra */
   --color-app-gradient-stop-1: #294744;        /* Plantation */
   --color-app-gradient-stop-2: #223B38;        /* Te Papa Green */
   --color-app-gradient: linear-gradient(

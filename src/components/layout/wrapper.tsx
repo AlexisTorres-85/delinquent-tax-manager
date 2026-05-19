@@ -35,7 +35,7 @@ export function Wrapper() {
               <div className={`min-h-0 grow overflow-hidden ${isDashboard ? '' : 'bg-white'}`}>
                 <Outlet />
               </div>
-              <Footer />
+              {!isDashboard && <Footer />}
             </main>
           </div>
         </div>

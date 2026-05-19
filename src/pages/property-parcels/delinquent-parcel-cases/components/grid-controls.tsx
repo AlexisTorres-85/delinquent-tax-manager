@@ -10,8 +10,6 @@ import { PARCEL_COLUMN_LABELS, PAGE_SIZE_OPTIONS } from '@/data/parcels/types';
 import { Columns3, Info, RotateCcw, X } from 'lucide-react';
 import type { LegalStatus, PaymentPlanFilter } from '@/data/parcels/hooks/use-parcel-filters';
 import { useMunicipalities } from '@/data/lookup/use-municipalities';
-import { DelinquencyRangeSummary } from './delinquency-range-summary';
-import { DelinquencyInsights } from './delinquency-insights';
 import { PaymentPlanFilterDropdown } from './payment-plan-filter';
 
 const LEGAL_STATUS_OPTIONS = [
@@ -35,15 +33,6 @@ interface GridControlsProps {
     onColumnVisibilityChange: (value: VisibilityState) => void;
     paymentPlanFilter: PaymentPlanFilter;
     onPaymentPlanFilterChange: (value: PaymentPlanFilter) => void;
-    availableDelinquentYears: number[];
-    delinquentYearRange: [number, number] | null;
-    onDelinquentYearRangeChange: (value: [number, number] | null) => void;
-    chartInRange: number;
-    chartOutsideRange: number;
-    chartNoDelinquency: number;
-    municipalityBreakdown: { label: string; count: number }[];
-    inPaymentPlanCount: number;
-    pageParcelsCount: number;
     onReset: () => void;
 }
 
@@ -60,15 +49,6 @@ export function GridControls({
     onColumnVisibilityChange,
     paymentPlanFilter,
     onPaymentPlanFilterChange,
-    availableDelinquentYears,
-    delinquentYearRange,
-    onDelinquentYearRangeChange,
-    chartInRange,
-    chartOutsideRange,
-    chartNoDelinquency,
-    municipalityBreakdown,
-    inPaymentPlanCount,
-    pageParcelsCount,
     onReset,
 }: GridControlsProps) {
     const { municipalities } = useMunicipalities();
@@ -148,6 +128,7 @@ export function GridControls({
                     <Combobox
                         label="Legal Status"
                         labelVariant="primary"
+                        size="sm"
                         value={legalStatus}
                         onValueChange={(value) => onLegalStatusChange((value || 'all') as LegalStatus)}
                         placeholder="All statuses"
@@ -161,6 +142,7 @@ export function GridControls({
                     <Combobox
                         label="Municipality"
                         labelVariant="primary"
+                        size="sm"
                         value={municipalityCode}
                         onValueChange={(value) => onMunicipalityCodeChange(value || '')}
                         placeholder="All municipalities"
@@ -171,7 +153,7 @@ export function GridControls({
 
                 {/* Rows per page */}
                 <div className="w-32">
-                    <SelectField
+                    <SelectField size='sm'
                         label="Rows"
                         labelVariant="primary"
                         value={String(pageSize)}
@@ -193,12 +175,12 @@ export function GridControls({
                     <span className="text-sm leading-none invisible select-none">&nbsp;</span>
                     <Popover>
                         <PopoverTrigger asChild>
-                            <Button variant="outline" size="sm" className="gap-1.5">
-                                <Columns3 className="h-3.5 w-3.5" />
+                            <Button variant="outline" size="md">
+                                <Columns3 />
                                 Columns
                             </Button>
                         </PopoverTrigger>
-                        <PopoverContent align="end" className="w-56 p-3">
+                        <PopoverContent align="end" className="w-56 p-4">
                             <p className="text-xs font-semibold uppercase tracking-widest text-muted-foreground mb-2">
                                 Visible Columns
                             </p>
@@ -229,27 +211,6 @@ export function GridControls({
                         Reset
                     </Button>
                 </div>
-            </div>
-
-            <div
-  className="grid grid-cols-[40%_60%] "
->
-                <DelinquencyRangeSummary
-                    from={delinquentYearRange?.[0] ?? (availableDelinquentYears.length ? Math.min(...availableDelinquentYears) : 0)}
-                    to={delinquentYearRange?.[1] ?? (availableDelinquentYears.length ? Math.max(...availableDelinquentYears) : 0)}
-                    inRange={chartInRange}
-                    outsideRange={chartOutsideRange}
-                    noDelinquency={chartNoDelinquency}
-                    availableDelinquentYears={availableDelinquentYears}
-                    delinquentYearRange={delinquentYearRange}
-                    onDelinquentYearRangeChange={onDelinquentYearRangeChange}
-                />
-                <DelinquencyInsights
-                    municipalityBreakdown={municipalityBreakdown}
-                    inPaymentPlanCount={inPaymentPlanCount}
-                    pageParcelsCount={pageParcelsCount}
-                    selectedMunicipalityCode={municipalityCode}
-                />
             </div>
         </div>
     );

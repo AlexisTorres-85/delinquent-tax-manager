@@ -9,7 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Search, X, Download, Printer, Maximize2, Minimize2, RefreshCw } from 'lucide-react';
-import { Skeleton } from '@/components/ui/skeleton';
+import { DataLoader } from '@/components/ui/data-loader';
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -190,40 +190,7 @@ function useElapsedLabel(lastUpdated: Date | null | undefined): string {
 // ─── Tab skeleton ─────────────────────────────────────────────────────────────
 
 function TabSkeleton() {
-    return (
-        <div className="flex flex-col">
-            {/* Top Header */}
-
-            <div
-                className="bg-app-primary-toolbar-header z-10 flex items-center justify-between gap-6 px-6 py-5">
-                <div className="flex min-w-0 flex-1 items-center  gap-2">
-                    <Skeleton className="h-13 w-13 rounded-md" />
-
-                    <div className="flex min-w-0 flex-col gap-1.5">
-                        <Skeleton className="h-5 w-80 rounded-md" />
-                        <Skeleton className="h-5 w-40 rounded-md" />
-                    </div>
-                </div>
-
-                <div className="ml-auto flex shrink-0 items-center justify-end gap-4">
-                    <div className="flex flex-col items-end gap-2">
-                        <Skeleton className="h-6 w-50 rounded-md" />
-                        <Skeleton className="h-4 w-28 rounded-md" />
-                    </div>
-                </div>
-            </div>
-
-            <div className="h-1.5 overflow-hidden bg-muted">
-                <div className="h-full bg-[var(--color-app-primary-from)] animate-[progress-indeterminate_1.4s_ease-in-out_infinite]" style={{ width: '40%' }} />
-            </div>
-
-            <div className='pl-6 pr-6 py-4'>
-                <Skeleton className="h-100 w-full rounded-md" />
-            </div>
-
-            
-        </div>
-    );
+  return <DataLoader />;
 }
 // ─── Component ────────────────────────────────────────────────────────────────
 

@@ -1,24 +1,48 @@
-export type ContactStatus =
-  | 'Current Owner'
-  | 'Former Owner'
-  | 'Co-Owner'
-  | 'Attorney'
-  | 'Lien Holder'
-  | 'Tenant'
-  | 'Estate Representative'
-  | 'Authorized Agent'
-  | 'Bankruptcy Trustee'
-  | 'Interest Party';
-
 export type ParcelContact = {
-  id: string;
-  fullName: string;
-  status: ContactStatus;
-  phone: string;
-  email: string;
+  id: number;
+  parcelId: number;
+  contactTypeId: number;
+  contactTypeName: string;
+  firstName: string;
+  lastName: string;
+  suffix: string | null;
+  companyName: string | null;
+  phoneNumber: string | null;
+  alternatePhoneNumber: string | null;
+  email: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  isPrimary: boolean;
+  notes: string | null;
+  otherInfo: string | null;
+  createdBy: string;
+  updatedBy: string;
+  createdDate: string;
+  updatedDate: string;
 };
 
-export type ParcelContactPlan = {
-  parcelNumber: string;
-  contacts: ParcelContact[];
+export type CreateContactPayload = {
+  parcelId: number;
+  contactTypeId: number;
+  firstName: string;
+  lastName: string;
+  suffix: string | null;
+  companyName: string | null;
+  phoneNumber: string | null;
+  alternatePhoneNumber: string | null;
+  email: string | null;
+  addressLine1: string | null;
+  addressLine2: string | null;
+  city: string | null;
+  state: string | null;
+  zipCode: string | null;
+  isPrimary: boolean;
+  notes: string | null;
+  otherInfo: string | null;
+  userObjectId: string;
 };
+
+export type UpdateContactPayload = Omit<CreateContactPayload, 'parcelId'> & { id: number };

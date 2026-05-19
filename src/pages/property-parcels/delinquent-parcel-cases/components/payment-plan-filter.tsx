@@ -96,7 +96,7 @@ export function PaymentPlanFilterDropdown({
                     variant="outline"
                     role="combobox"
                     aria-expanded={open}
-                    className="h-8.5 min-w-[180px] justify-between gap-1.5 font-normal px-3"
+                    className="h-8 min-w-[180px] justify-between gap-1.5 font-normal px-3"
                 >
                     <div className="truncate">{selected.label}</div>
                     <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

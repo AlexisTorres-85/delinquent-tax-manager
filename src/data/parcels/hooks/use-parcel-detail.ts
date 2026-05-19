@@ -26,6 +26,18 @@ function formatIsoDatetime(iso: string): string {
   return `${mm}/${dd}/${yyyy} ${String(h).padStart(2, '0')}:${min} ${meridiem}`;
 }
 
+/** Parse the section number from a Catalis legal description string (e.g. "... SEC 11 ..."). */
+function parseSectionFromLegal(legal: string): string | undefined {
+  const m = legal.match(/\bSEC(?:TION)?\s+(\d+)/i);
+  return m ? m[1] : undefined;
+}
+
+/** Parse the town-range from a Catalis legal description string (e.g. "... T1  R22 ..."). */
+function parseTownRangeFromLegal(legal: string): string | undefined {
+  const m = legal.match(/\b(T\d+[NSEW]?)\s+(R\d+[NSEW]?)\b/i);
+  return m ? `${m[1]} ${m[2]}` : undefined;
+}
+
 /** Build a formatted owner name from Catalis name fields. */
 function buildOwnerName(c: CatalisParcelInformation): string {
   const parts = [
@@ -125,6 +137,13 @@ export function mapApiParcelToParcel(raw: ApiParcelData, base?: Parcel): Parcel 
 
     // Legal description
     legalDescription: c ? clean(c.legalDescription) : base?.legalDescription ?? '',
+    gcsLegal: c ? clean(c.legalDescription) || undefined : base?.gcsLegal,
+    section: c ? parseSectionFromLegal(clean(c.legalDescription)) ?? base?.section : base?.section,
+    townRange: c ? parseTownRangeFromLegal(clean(c.legalDescription)) ?? base?.townRange : base?.townRange,
+
+    // Valuation
+    landValue: c?.landValue ?? base?.landValue,
+    improvementValue: c?.improvementValue ?? base?.improvementValue,
 
     // Carry-through defaults for non-API fields
     amountDue: base?.amountDue ?? 0,

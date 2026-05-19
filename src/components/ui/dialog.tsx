@@ -5,6 +5,7 @@ import { cn } from '@/lib/utils';
 import { cva, VariantProps } from 'class-variance-authority';
 import { X } from 'lucide-react';
 import { Dialog as DialogPrimitive } from 'radix-ui';
+import { LOADING_MODAL_CONTENT_TRANSITION } from '@/config/general.config';
 
 const dialogContentVariants = cva(
   'flex flex-col fixed outline-0 z-50 border border-border bg-background shadow-lg shadow-black/5 duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 sm:rounded-lg max-h-[90dvh] overflow-hidden',
@@ -37,12 +38,50 @@ function DialogClose({ ...props }: React.ComponentProps<typeof DialogPrimitive.C
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />;
 }
 
+// ── Internal loading overlay ──────────────────────────────────────────────────
+function DialogLoadingOverlay({ isLoading }: { isLoading: boolean }) {
+  const [rendered, setRendered] = React.useState(isLoading);
+  const [visible, setVisible] = React.useState(false);
+
+  React.useEffect(() => {
+    if (isLoading) {
+      setRendered(true);
+      const raf = requestAnimationFrame(() => setVisible(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setVisible(false);
+      const t = setTimeout(() => setRendered(false), LOADING_MODAL_CONTENT_TRANSITION);
+      return () => clearTimeout(t);
+    }
+  }, [isLoading]);
+
+  if (!rendered) return null;
+
+  return (
+    <div
+      className="absolute inset-0 z-20 overflow-hidden rounded-[inherit]"
+      style={{
+        opacity: visible ? 1 : 0,
+        backdropFilter: visible ? 'blur(3px)' : 'blur(0px)',
+        backgroundColor: visible ? 'hsl(var(--background) / 0.65)' : 'transparent',
+        transition: `opacity ${LOADING_MODAL_CONTENT_TRANSITION}ms ease, backdrop-filter ${LOADING_MODAL_CONTENT_TRANSITION}ms ease, background-color ${LOADING_MODAL_CONTENT_TRANSITION}ms ease`,
+        pointerEvents: visible ? 'auto' : 'none',
+      }}
+    >
+      <div className="flex items-center gap-3 px-6 py-5">
+        <div className="h-8 w-8 shrink-0 animate-spin rounded-full border-[3px] border-muted-foreground/30 border-t-muted-foreground" />
+        <span className="text-sm text-muted-foreground">Loading...</span>
+      </div>
+    </div>
+  );
+}
+
 function DialogOverlay({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
       className={cn(
-        'fixed inset-0 z-50 bg-black/30 [backdrop-filter:blur(4px)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
+        'fixed inset-0 z-50 bg-black/50 [backdrop-filter:blur(4px)] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0',
         className,
       )}
       {...props}
@@ -56,11 +95,13 @@ function DialogContent({
   showCloseButton = true,
   overlay = true,
   variant,
+  isLoading = false,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Content> &
   VariantProps<typeof dialogContentVariants> & {
     showCloseButton?: boolean;
     overlay?: boolean;
+    isLoading?: boolean;
   }) {
   return (
     <DialogPortal>
@@ -77,6 +118,7 @@ function DialogContent({
             <span className="sr-only">Close</span>
           </DialogClose>
         )}
+        <DialogLoadingOverlay isLoading={isLoading} />
       </DialogPrimitive.Content>
     </DialogPortal>
   );
@@ -142,14 +184,14 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
 }
 
 const DialogBody = ({ className, ...props }: React.HTMLAttributes<HTMLDivElement>) => (
-  <div data-slot="dialog-body" className={cn('overflow-y-auto p-6 bg-white', className)} {...props} />
+  <div data-slot="dialog-body" className={cn('overflow-y-auto px-6 bg-white', className)} {...props} />
 );
 
 function DialogDescription({ className, ...props }: React.ComponentProps<typeof DialogPrimitive.Description>) {
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"
-      className={cn('text-sm text-muted-foreground', className)}
+      className={cn('px-6 py-4 text-sm bg-muted border-b-1 border-divider mb-4', className)}
       {...props}
     />
   );

@@ -32,6 +32,7 @@ interface ComboboxProps {
   wrapperClassName?: string;
   className?: string;
   id?: string;
+  size?: 'sm' | 'md' | 'lg';
 }
 
 export function Combobox({
@@ -46,6 +47,7 @@ export function Combobox({
   wrapperClassName,
   className,
   id,
+  size = 'md',
 }: ComboboxProps) {
   const [open, setOpen] = React.useState(false);
   const generatedId = React.useId();
@@ -58,6 +60,7 @@ export function Combobox({
       <Button
         id={triggerId}
         variant="outline"
+        size={size}
         role="combobox"
         aria-expanded={open}
         className={cn('w-full justify-between font-normal', className)}

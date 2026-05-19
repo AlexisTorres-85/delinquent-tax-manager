@@ -268,7 +268,7 @@ export function ParcelsTable({
     <div className="w-full min-w-[980px]">
       <DataGridContainer>
         <div className={`transition-opacity duration-200 ${isFetching && !isLoading ? 'opacity-50 pointer-events-none' : 'opacity-100'}`}>
-          <DataGrid tableLayout={{ keepColumnsLeft: true }}
+          <DataGrid
             table={table}
             recordCount={totalCount}
             isLoading={isLoading}

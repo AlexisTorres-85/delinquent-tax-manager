@@ -20,24 +20,8 @@ import {
     SelectValue,
 } from '@/components/ui/select';
 import { StatusBadge, StageBadge } from '@/components/ui/parcel-badges';
-import { STAGES_BY_STATUS } from '@/data/parcels/types';
-import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
+import { useCase } from '@/data/parcels/hooks/use-case';
 import type { ParcelCaseStageHistory } from '@/data/cases/case-stage-history/types';
-
-const ALL_STATUSES: ParcelStatus[] = [
-    'Delinquent',
-    'Payment Plan',
-    'Early Enforcement',
-    'Tax Deed Preparation',
-    'Advertisement / Waiting',
-    'Auction / Sale',
-    'Post-Deed Processing',
-    'Financial Processing',
-    'On Hold',
-    'Review',
-    'Legal',
-    'Complete',
-];
 
 interface MoveToNextStageDialogProps {
     open: boolean;
@@ -47,18 +31,19 @@ interface MoveToNextStageDialogProps {
 }
 
 export function MoveToNextStageDialog({ open, onOpenChange, entry, parcelNumber }: MoveToNextStageDialogProps) {
-    const [newStatus, setNewStatus] = useState<ParcelStatus | ''>('');
-    const [newStage, setNewStage] = useState<ParcelStage | ''>('');
+    const { statuses } = useCase();
+    const [newStatus, setNewStatus] = useState('');
+    const [newStage, setNewStage] = useState('');
     const [actionTaken, setActionTaken] = useState('');
     const [notes, setNotes] = useState('');
     const [files, setFiles] = useState<File[]>([]);
     const [isDragging, setIsDragging] = useState(false);
     const fileInputRef = useRef<HTMLInputElement>(null);
 
-    const stageOptions: ParcelStage[] = newStatus ? STAGES_BY_STATUS[newStatus] ?? [] : [];
+    const stageOptions = newStatus ? (statuses.find((s) => s.name === newStatus)?.stages ?? []) : [];
 
     function handleStatusChange(val: string) {
-        setNewStatus(val as ParcelStatus);
+        setNewStatus(val);
         setNewStage(''); // reset stage when status changes
     }
 
@@ -134,8 +119,8 @@ export function MoveToNextStageDialog({ open, onOpenChange, entry, parcelNumber 
                                     <SelectValue placeholder="Select status" />
                                 </SelectTrigger>
                                 <SelectContent>
-                                    {ALL_STATUSES.map((s) => (
-                                        <SelectItem key={s} value={s}>{s}</SelectItem>
+                                    {statuses.map((s) => (
+                                        <SelectItem key={s.id} value={s.name}>{s.name}</SelectItem>
                                     ))}
                                 </SelectContent>
                             </Select>
@@ -146,7 +131,7 @@ export function MoveToNextStageDialog({ open, onOpenChange, entry, parcelNumber 
                             </Label>
                             <Select
                                 value={newStage}
-                                onValueChange={(v) => setNewStage(v as ParcelStage)}
+                                onValueChange={(v) => setNewStage(v)}
                                 disabled={!newStatus}
                             >
                                 <SelectTrigger>

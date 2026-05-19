@@ -14,9 +14,6 @@ import { LoginPage } from '@/pages/auth/login';
 
 // Dashboard
 import { DashboardPage } from '@/pages/dashboard/page';
-import { TodayActivityPage } from '@/pages/dashboard/today';
-import { AlertsPage } from '@/pages/dashboard/alerts';
-import { PerformanceKpisPage } from '@/pages/dashboard/kpis';
 
 // Parcels
 import { ParcelsPage } from '@/pages/property-parcels/delinquent-parcel-cases/page';
@@ -76,10 +73,6 @@ export function AppRoutingSetup() {
       >
         {/* Dashboard */}
         <Route path="/" element={<DashboardPage />} />
-        <Route path="/today" element={<TodayActivityPage />} />
-        <Route path="/alerts" element={<AlertsPage />} />
-        <Route path="/kpis" element={<PerformanceKpisPage />} />
-
         {/* Parcels */}
         <Route path="/property-parcels/delinquent-parcel-cases" element={<ParcelsPage />} />
         <Route path="/property-parcels/catalis-parcel-search" element={<CatalisParcelSearchPage />} />

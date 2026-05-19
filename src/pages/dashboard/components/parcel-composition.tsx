@@ -20,7 +20,7 @@ interface DelinquencyInsightsProps {
     selectedMunicipalityCode: string;
 }
 
-export function DelinquencyInsights({
+export function ParcelComposition({
     municipalityBreakdown,
     inPaymentPlanCount,
     pageParcelsCount,
@@ -136,7 +136,7 @@ export function DelinquencyInsights({
 
     return (
         <div
-  className="border-t border-divider p-6 flex flex-col border-divider"
+  className="px-6 py-4 flex flex-col"
 >
             <PageSection
                 icon={<Building2 className="size-4 text-muted-foreground" />}

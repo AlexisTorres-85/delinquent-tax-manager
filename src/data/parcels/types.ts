@@ -1,5 +1,5 @@
 import type { ParcelStatus, ParcelStage } from '@/data/cases/case-status-definitions';
-export { STAGES_BY_STATUS, type ParcelStatus, type ParcelStage } from '@/data/cases/case-status-definitions';
+export { type ParcelStatus, type ParcelStage } from '@/data/cases/case-status-definitions';
 export type { ParcelCaseStageHistory as ParcelActiveCase } from '@/data/cases/case-stage-history/types';
 export type { ParcelCase } from '@/data/cases/case-stage-history/types';
 

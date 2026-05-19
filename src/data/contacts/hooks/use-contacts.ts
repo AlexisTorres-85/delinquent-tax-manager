@@ -1,14 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { contactsService } from '../services/contacts.service';
 
-export const CONTACTS_QUERY_KEY = (parcelNumber: string) =>
-  ['contacts', 'by-parcel', parcelNumber] as const;
+export const CONTACTS_QUERY_KEY = (parcelId: number) =>
+  ['contacts', 'by-parcel', parcelId] as const;
 
-export function useContacts(parcelNumber: string) {
+export function useContacts(parcelId: number) {
   const query = useQuery({
-    queryKey: CONTACTS_QUERY_KEY(parcelNumber),
-    queryFn: () => contactsService.getByParcelNumber(parcelNumber),
-    enabled: !!parcelNumber,
+    queryKey: CONTACTS_QUERY_KEY(parcelId),
+    queryFn: () => contactsService.getByParcelId(parcelId),
+    enabled: !!parcelId,
     staleTime: 1000 * 60 * 5,
   });
 

@@ -1,22 +1,12 @@
-/**
- * Case Service
- *
- * Fetches the list of valid parcel statuses and their associated stages.
- * When connecting to a real API, replace the implementations below —
- * the hooks and components above this layer need no changes.
- */
-
-import { CASE_STATUS_DEFINITIONS } from '@/data/cases/case-status-definitions';
+import { apiFetch, API_BASE } from '@/lib/api';
 import type { CaseStatusRecord } from '@/data/cases/case-status-definitions';
-import { fakeDelay } from '@/lib/api';
 
 export const caseService = {
   /**
-   * Fetch all statuses (each includes its ordered stages).
-   * TODO: replace with → return fetch('/api/cases/statuses').then(r => r.json())
+   * Fetches all case statuses with their ordered stages from the lookup API.
+   * Results are cached for 30 minutes via React Query — only one call per session.
    */
   async getStatuses(): Promise<CaseStatusRecord[]> {
-    await fakeDelay();
-    return Promise.resolve([...CASE_STATUS_DEFINITIONS] as CaseStatusRecord[]);
+    return apiFetch<CaseStatusRecord[]>(`${API_BASE}/api/lookup/case-statuses`);
   },
 };

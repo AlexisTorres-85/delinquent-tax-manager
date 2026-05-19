@@ -14,10 +14,11 @@ export const layoutDimensions = {
 };
 
 /** Simulated API delay for dummy data services (ms). Set to 0 in production. */
-export const FAKE_API_DELAY_MS = 500;
+export const FAKE_API_DELAY_MS = 0;
 
 /** Fade-in / fade-out duration for skeleton → content transitions (ms). */
-export const TAB_TRANSITION_MS = 100;
+export const TAB_TRANSITION_MS = 500;
+export const LOADING_MODAL_CONTENT_TRANSITION = 500;
 
 /** How often active queries are refetched in the background to stay fresh (ms). */
 export const QUERY_REFETCH_INTERVAL_MS = 1000 * 60 * 60 * 3; // 3 hours

@@ -1,201 +1,200 @@
-﻿import { useMemo } from 'react';
-import ReactApexChart from 'react-apexcharts';
-import type { ApexOptions } from 'apexcharts';
-import { CountingNumber } from '@/components/ui/counting-number';
+﻿import { useState, useCallback, useMemo } from 'react';
+import { RefreshCw, CalendarDays } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useAuth } from '@/auth/use-auth';
+import { useMunicipalities } from '@/data/lookup/use-municipalities';
+import { useParcelsApi } from '@/data/parcels/hooks/use-parcels-api';
+import { DashboardMainStats } from './components/dashboard-main-stats';
+import { DashboardHeader } from './components/dashboard-header';
+import { MyAssignedTasks } from './components/my-assigned-tasks';
+import { DelinquencyScopeBreakdown } from './components/delinquency-scope-breakdown';
+import { ParcelComposition } from './components/parcel-composition';
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/ui/tabs';
 
-type StatCard = {
-  title: string;
-  value: number;
-  previousLabel: string;
-  change: string;
-  trend: 'up' | 'down';
-  chartLabels: string[];
-  chartData: number[];
-  chartColors: string[];
-};
+const CURRENT_YEAR = new Date().getFullYear();
+const TAX_YEARS = Array.from({ length: 7 }, (_, i) => CURRENT_YEAR - i); // last 7 years
 
 export function DashboardPage() {
-  const stats = useMemo<StatCard[]>(
-    () => [
-      {
-        title: 'Delinquent Parcels',
-        value: 718,
-        previousLabel: 'by delinquency age',
-        change: '3.46%',
-        trend: 'up',
-        chartLabels: ['1 Year', '2 Years', '3+ Years'],
-        chartData: [316, 247, 155],
-        chartColors: ['#93c5fd', '#facc15', '#fb7185'],
-      },
-      {
-        title: 'Tax Deed Eligible',
-        value: 156,
-        previousLabel: 'by workflow status',
-        change: '9.09%',
-        trend: 'up',
-        chartLabels: ['Final Notice', 'Title Search', 'Legal Review'],
-        chartData: [64, 52, 40],
-        chartColors: ['#86efac', '#60a5fa', '#c084fc'],
-      },
-      {
-        title: 'In Rem Active',
-        value: 42,
-        previousLabel: 'by process step',
-        change: '10.64%',
-        trend: 'down',
-        chartLabels: ['Petition', 'Publication', 'Hearing'],
-        chartData: [18, 14, 10],
-        chartColors: ['#38bdf8', '#fbbf24', '#f87171'],
-      },
-    ],
-    []
-  );
+  const { displayName } = useAuth();
+  const firstName = displayName.split(' ')[0] || displayName;
 
-  const getDonutOptions = (
-    labels: string[],
-    colors: string[]
-  ): ApexOptions => ({
-    chart: {
-      type: 'donut',
-      sparkline: {
-        enabled: true,
-      },
-    },
-    labels,
-    colors,
-    stroke: {
-      width: 1,
-      colors: ['rgba(255,255,255,0.35)'],
-    },
-    dataLabels: {
-      enabled: false,
-    },
-    legend: {
-      show: false,
-    },
-    tooltip: {
-      enabled: true,
-      theme: 'dark',
-      y: {
-        formatter: (value) => `${value} parcels`,
-      },
-    },
-    plotOptions: {
-      pie: {
-        donut: {
-          size: '68%',
-        },
-      },
-    },
+  const [municipalityCode, setMunicipalityCode] = useState('');
+  const [taxYear, setTaxYear] = useState<number | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
+  const [delinquentYearRange, setDelinquentYearRange] = useState<[number, number] | null>(null);
+
+  const { municipalities } = useMunicipalities();
+
+  const handleRefresh = useCallback(() => setRefreshKey((k) => k + 1), []);
+
+  const sharedParams = {
+    municipalityCode: municipalityCode || undefined,
+    delinquentTaxYears: taxYear ? ([taxYear, taxYear] as [number, number]) : undefined,
+  };
+
+  const { parcels, delinquentInScope } = useParcelsApi({
+    pageNumber: 1,
+    pageSize: 500,
+    ...sharedParams,
   });
 
+  const { totalCount: baselineTotal, delinquentInScope: baselineDelinquent } = useParcelsApi({
+    pageNumber: 1,
+    pageSize: 1,
+    municipalityCode: municipalityCode || undefined,
+  });
+
+  const chartInRange = delinquentInScope;
+  const chartOutsideRange = Math.max(0, baselineDelinquent - chartInRange);
+  const chartNoDelinquency = Math.max(0, baselineTotal - baselineDelinquent);
+
+  const municipalityBreakdown = useMemo(() => {
+    const map = new Map<string, number>();
+    for (const p of parcels) {
+      const key = p.municipality || 'Unknown';
+      map.set(key, (map.get(key) ?? 0) + 1);
+    }
+    return Array.from(map.entries()).map(([label, count]) => ({ label, count }));
+  }, [parcels]);
+
+  const inPaymentPlanCount = useMemo(
+    () => parcels.filter((p) => p.isInPaymentPlan).length,
+    [parcels],
+  );
+
+  const availableDelinquentYears = useMemo(() => {
+    const yearSet = new Set<number>();
+    for (const p of parcels) {
+      if (p.delinquentYears) {
+        p.delinquentYears.split(',').forEach((y) => {
+          const n = parseInt(y.trim(), 10);
+          if (!isNaN(n)) yearSet.add(n);
+        });
+      }
+    }
+    return Array.from(yearSet).sort((a, b) => a - b);
+  }, [parcels]);
+
+  const fromYear =
+    delinquentYearRange?.[0] ??
+    (availableDelinquentYears.length ? Math.min(...availableDelinquentYears) : 0);
+  const toYear =
+    delinquentYearRange?.[1] ??
+    (availableDelinquentYears.length ? Math.max(...availableDelinquentYears) : 0);
+
+  const actions = (
+    <>
+      {/* Municipality filter */}
+      <Select
+        variant="glass"
+        value={municipalityCode || 'all'}
+        onValueChange={(v) => setMunicipalityCode(v === 'all' ? '' : v)}
+      >
+        <SelectTrigger size="sm" className="w-auto min-w-[160px]">
+          <SelectValue placeholder="All Municipalities" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Municipalities</SelectItem>
+          {municipalities.map((m) => (
+            <SelectItem key={m.code} value={m.code}>{m.description}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Tax year filter */}
+      <Select
+        variant="glass"
+        value={taxYear != null ? String(taxYear) : 'all'}
+        onValueChange={(v) => setTaxYear(v === 'all' ? null : Number(v))}
+      >
+        <SelectTrigger size="sm" className="w-auto min-w-[120px]">
+          <CalendarDays className="size-3.5 shrink-0 opacity-60" />
+          <SelectValue placeholder="All Tax Years" />
+        </SelectTrigger>
+        <SelectContent>
+          <SelectItem value="all">All Tax Years</SelectItem>
+          {TAX_YEARS.map((y) => (
+            <SelectItem key={y} value={String(y)}>{y}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+
+      {/* Refresh */}
+      <Button
+        variant="outline"
+        size="sm"
+        className="border-white/20 bg-white/10 text-white/80 hover:bg-white/20 hover:text-white"
+        onClick={handleRefresh}
+      >
+        <RefreshCw className="size-3.5" />
+        Refresh
+      </Button>
+    </>
+  );
+
   return (
-    <div className="min-h-screen px-6 py-4 text-white">
-      <div className="mb-5 flex items-end justify-between">
-        <div>
-          <h1 className="text-xl font-semibold tracking-wide">
-            Welcome Alexis
-          </h1>
-          <span className="mt-1 block text-sm text-white/75">
-            Here's what's happening with your parcels today.
-          </span>
-        </div>
+    <div className="flex h-full flex-col text-white ml-4 mr-6">
+      <div className="pt-3">
+        <DashboardHeader
+          title={`Welcome ${firstName}`}
+          subtitle="Here's what's happening with your parcels today."
+          actions={actions}
+        />
+        <DashboardMainStats
+          key={refreshKey}
+          municipalityCode={municipalityCode}
+          taxYear={taxYear}
+        />
       </div>
 
-      <div>
-        <dl className="grid grid-cols-1 overflow-hidden rounded-lg border border-white/20 bg-white/15 shadow-sm backdrop-blur-md md:grid-cols-3 md:divide-x md:divide-white/50">
-          {stats.map((stat) => (
-            <div
-              key={stat.title}
-              className="flex items-center gap-4 bg-white/10 px-4 py-5 backdrop-blur-sm sm:p-6"
-            >
-              <div className="flex w-[86px] shrink-0 items-center justify-center">
-                <ReactApexChart
-                  options={getDonutOptions(stat.chartLabels, stat.chartColors)}
-                  series={stat.chartData}
-                  type="donut"
-                  height={78}
-                  width={78}
+      <div className="flex-1 mt-8 overflow-y-auto border-t-6 border-app-secondary rounded-t-xl px-6 bg-white/85 text-foreground">
+        <div className="grid h-full grid-cols-2">
+          {/* Left: My Assigned Tasks */}
+          <div className='pt-4 pr-8'>
+            <MyAssignedTasks />
+          </div>
+
+          {/* Right: Tabbed charts */}
+          <div className="flex flex-col">
+            <Tabs defaultValue="scope" className="flex h-full flex-col">
+              <div className="px-6 pt-5">
+                <TabsList variant="line" size="lg">
+                  <TabsTrigger value="scope">Delinquency Scope Breakdown</TabsTrigger>
+                  <TabsTrigger value="composition">Parcel Composition</TabsTrigger>
+                </TabsList>
+              </div>
+
+              <TabsContent value="scope" className="mt-0 flex-1">
+                <DelinquencyScopeBreakdown
+                  from={fromYear}
+                  to={toYear}
+                  inRange={chartInRange}
+                  outsideRange={chartOutsideRange}
+                  noDelinquency={chartNoDelinquency}
+                  availableDelinquentYears={availableDelinquentYears}
+                  delinquentYearRange={delinquentYearRange}
+                  onDelinquentYearRangeChange={setDelinquentYearRange}
                 />
-              </div>
+              </TabsContent>
 
-              <div className="min-w-0 flex-1">
-                <dt className="text-base font-normal text-white/85">
-                  {stat.title}
-                </dt>
-
-                <dd className="mt-1 flex items-baseline justify-between md:block lg:flex">
-                  <div className="flex items-baseline text-2xl font-semibold text-white">
-                    <CountingNumber  />
-
-                    <span className="ml-2 text-sm font-medium text-white/65">
-                      {stat.previousLabel}
-                    </span>
-                  </div>
-
-                  <div
-                    className={`inline-flex items-baseline rounded-full bg-white/15 px-2.5 py-0.5 text-sm font-medium backdrop-blur-sm md:mt-2 lg:mt-0 ${
-                      stat.trend === 'up' ? 'text-green-100' : 'text-red-100'
-                    }`}
-                  >
-                    {stat.trend === 'up' ? (
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        data-slot="icon"
-                        aria-hidden="true"
-                        className="-ml-1 mr-0.5 size-5 shrink-0 self-center text-green-300"
-                      >
-                        <path
-                          d="M10 17a.75.75 0 0 1-.75-.75V5.612L5.29 9.77a.75.75 0 0 1-1.08-1.04l5.25-5.5a.75.75 0 0 1 1.08 0l5.25 5.5a.75.75 0 1 1-1.08 1.04l-3.96-4.158V16.25A.75.75 0 0 1 10 17Z"
-                          clipRule="evenodd"
-                          fillRule="evenodd"
-                        />
-                      </svg>
-                    ) : (
-                      <svg
-                        viewBox="0 0 20 20"
-                        fill="currentColor"
-                        data-slot="icon"
-                        aria-hidden="true"
-                        className="-ml-1 mr-0.5 size-5 shrink-0 self-center text-red-300"
-                      >
-                        <path
-                          d="M10 3a.75.75 0 0 1 .75.75v10.638l3.96-4.158a.75.75 0 1 1 1.08 1.04l-5.25 5.5a.75.75 0 0 1-1.08 0l-5.25-5.5a.75.75 0 1 1 1.08-1.04l3.96 4.158V3.75A.75.75 0 0 1 10 3Z"
-                          clipRule="evenodd"
-                          fillRule="evenodd"
-                        />
-                      </svg>
-                    )}
-
-                    <span className="sr-only">
-                      {stat.trend === 'up' ? 'Increased by' : 'Decreased by'}
-                    </span>
-
-                    {stat.change}
-                  </div>
-                </dd>
-
-                <div className="mt-3 flex flex-wrap gap-x-3 gap-y-1">
-                  {stat.chartLabels.map((label, index) => (
-                    <div
-                      key={label}
-                      className="flex items-center gap-1.5 text-[11px] font-medium text-white/65"
-                    >
-                      <span
-                        className="h-2 w-2 rounded-full"
-                        style={{ backgroundColor: stat.chartColors[index] }}
-                      />
-                      <span>
-                        {label}: {stat.chartData[index]}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            </div>
-          ))}
-        </dl>
+              <TabsContent value="composition" className="mt-0 flex-1">
+                <ParcelComposition
+                  municipalityBreakdown={municipalityBreakdown}
+                  inPaymentPlanCount={inPaymentPlanCount}
+                  pageParcelsCount={parcels.length}
+                  selectedMunicipalityCode={municipalityCode}
+                />
+              </TabsContent>
+            </Tabs>
+          </div>
+        </div>
       </div>
     </div>
   );

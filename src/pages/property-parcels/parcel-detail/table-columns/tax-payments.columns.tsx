@@ -64,9 +64,9 @@ function TaxPaymentDetail({ row }: { row: TaxPayment }) {
 export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     {
         id: 'expand',
-        size: 20,
-        minSize: 20,
-        maxSize: 20,
+        size: 10,
+        minSize: 10,
+        maxSize: 10,
         enableResizing: false,
         enableSorting: false,
         cell: ({ row }) => (
@@ -80,20 +80,20 @@ export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
             </button>
         ),
         meta: {
-            headerClassName: '!pl-6 !pr-6 !w-10',
-            cellClassName: '!pl-6 !pr-6 !w-10',
             expandedContent: (row: TaxPayment) => <TaxPaymentDetail row={row} />,
             skeleton: <Skeleton className="h-4 w-4" />,
+            headerClassName: '!pr-0',
+            cellClassName: '!pr-0',
         },
     },
     {
         accessorKey: 'taxYear',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Tax Year" />,
-        size: 100,
+        size: 50,
         filterFn: 'equals',
         meta: {
-            headerClassName: '!pl-6',
-            cellClassName: '!pl-6',
+            headerClassName: '!pl-0',
+            cellClassName: '!pl-0',
             skeleton: <Skeleton className="h-4 w-12" />,
         },
     },

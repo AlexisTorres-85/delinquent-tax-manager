@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useMemo } from 'react';
 import {
     useReactTable,
     getCoreRowModel,
@@ -9,64 +9,68 @@ import {
     type ColumnFiltersState,
 } from '@tanstack/react-table';
 import { Button } from '@/components/ui/button';
-import { UserPlus, Users } from 'lucide-react';
+import { UserPlus } from 'lucide-react';
 import { useContacts } from '@/data/contacts/hooks/use-contacts';
-import type { ContactStatus } from '@/data/contacts/types';
+import { useContactTypes } from '@/data/lookup/use-contact-types';
+import type { ParcelContact } from '@/data/contacts/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
-import { contactColumns } from '../../table-columns/contacts.columns';
-
-// ─── All contact statuses ─────────────────────────────────────────────────────
-
-const CONTACT_STATUSES: ContactStatus[] = [
-    'Current Owner',
-    'Co-Owner',
-    'Former Owner',
-    'Attorney',
-    'Lien Holder',
-    'Tenant',
-    'Estate Representative',
-    'Authorized Agent',
-    'Bankruptcy Trustee',
-    'Interest Party',
-];
+import { createContactColumns } from '../../table-columns/contacts.columns';
+import { ContactDialog } from '../dialogs/add-contact-dialog';
 
 // ─── Inner table component ────────────────────────────────────────────────────
 
 interface ContactsTableProps {
-    contacts: import('@/data/contacts/types').ParcelContact[];
+    contacts: ParcelContact[];
     isLoading: boolean;
     lastUpdated: Date | null;
     onRefresh?: () => void;
+    parcelId: number;
     parcelNumber: string;
     stickyTop?: number;
 }
 
-function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0 }: ContactsTableProps) {
+function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelId, parcelNumber, stickyTop = 0 }: ContactsTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'fullName', desc: false }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
-    const [statusFilter, setStatusFilter] = useState('all');
+    const [typeFilter, setTypeFilter] = useState('all');
+    const [dialogOpen, setDialogOpen] = useState(false);
+    const [editContact, setEditContact] = useState<ParcelContact | null>(null);
 
-    function handleStatusChange(val: string) {
-        setStatusFilter(val);
+    const { contactTypes } = useContactTypes();
+
+    function handleEdit(contact: ParcelContact) {
+        setEditContact(contact);
+        setDialogOpen(true);
+    }
+
+    function handleAddNew() {
+        setEditContact(null);
+        setDialogOpen(true);
+    }
+
+    function handleTypeChange(val: string) {
+        setTypeFilter(val);
         setColumnFilters((prev) => {
-            const next = prev.filter((f) => f.id !== 'status');
-            if (val !== 'all') next.push({ id: 'status', value: val });
+            const next = prev.filter((f) => f.id !== 'contactTypeName');
+            if (val !== 'all') next.push({ id: 'contactTypeName', value: val });
             return next;
         });
     }
 
-    const hasActiveFilters = globalFilter !== '' || statusFilter !== 'all';
+    const hasActiveFilters = globalFilter !== '' || typeFilter !== 'all';
 
     function clearFilters() {
         setGlobalFilter('');
-        setStatusFilter('all');
+        setTypeFilter('all');
         setColumnFilters([]);
     }
 
+    const columns = useMemo(() => createContactColumns(handleEdit), []);
+
     const table = useReactTable({
         data: contacts,
-        columns: contactColumns,
+        columns,
         getCoreRowModel: getCoreRowModel(),
         getFilteredRowModel: getFilteredRowModel(),
         getSortedRowModel: getSortedRowModel(),
@@ -80,12 +84,12 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
 
     const filters: FilterConfig[] = [
         {
-            value: statusFilter,
-            onChange: handleStatusChange,
-            placeholder: 'All Statuses',
+            value: typeFilter,
+            onChange: handleTypeChange,
+            placeholder: 'All Types',
             options: [
-                { value: 'all', label: 'All Statuses' },
-                ...CONTACT_STATUSES.map((s) => ({ value: s, label: s })),
+                { value: 'all', label: 'All Types' },
+                ...contactTypes.map((t) => ({ value: t.name, label: t.name })),
             ],
         },
     ];
@@ -93,7 +97,7 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
     const extraToolbarButtons = (
         <>
             <div className='h-5 w-px bg-divider shrink-0 mx-2' />
-            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isLoading}>
+            <Button variant='outline' size='sm' className='gap-1.5 shrink-0' disabled={isLoading} onClick={handleAddNew}>
                 <UserPlus className='h-3.5 w-3.5' />
                 <span className='text-xs'>Add Contact</span>
             </Button>
@@ -101,6 +105,7 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
     );
 
     return (
+        <>
         <TabLayout
             stickyTop={stickyTop}
             title="Contacts"
@@ -120,27 +125,38 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelNumb
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
         />
+        <ContactDialog
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            parcelId={parcelId}
+            parcelNumber={parcelNumber}
+            editContact={editContact}
+        />
+        </>
     );
 }
 
 // ─── Tab entry point ──────────────────────────────────────────────────────────
 
 interface ContactsTabProps {
+    parcelId: number;
     parcelNumber: string;
     stickyTop?: number;
 }
 
-export function ContactsTab({ parcelNumber, stickyTop }: ContactsTabProps) {
-    const { contacts, isRefreshing, lastUpdated, refetch } = useContacts(parcelNumber);
+export function ContactsTab({ parcelId, parcelNumber, stickyTop }: ContactsTabProps) {
+    const { contacts, isLoading, lastUpdated, refetch } = useContacts(parcelId);
 
     return (
         <ContactsTable
             contacts={contacts}
-            isLoading={isRefreshing}
+            isLoading={isLoading}
             lastUpdated={lastUpdated}
             onRefresh={refetch}
+            parcelId={parcelId}
             parcelNumber={parcelNumber}
             stickyTop={stickyTop}
         />
     );
 }
+

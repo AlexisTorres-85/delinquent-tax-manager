@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { cn } from '@/lib/utils';
 import { cva, type VariantProps } from 'class-variance-authority';
+import { Label } from '@/components/ui/label';
 
 // Define input size variants
 const textareaVariants = cva(
@@ -29,9 +30,42 @@ const textareaVariants = cva(
 function Textarea({
   className,
   variant,
+  label,
+  labelVariant,
+  id,
   ...props
-}: React.ComponentProps<'textarea'> & VariantProps<typeof textareaVariants>) {
-  return <textarea data-slot="textarea" className={cn(textareaVariants({ variant }), className)} {...props} />;
+}: React.ComponentProps<'textarea'> & VariantProps<typeof textareaVariants> & {
+  label?: string;
+  labelVariant?: 'primary' | 'secondary';
+}) {
+  const generatedId = React.useId();
+  const textareaId = id ?? (label ? generatedId : undefined);
+
+  if (label) {
+    return (
+      <div className="flex flex-col gap-1.5">
+        <Label htmlFor={textareaId} variant={labelVariant}>
+          {label}
+          {props.required && <span className="text-destructive"> *</span>}
+        </Label>
+        <textarea
+          data-slot="textarea"
+          id={textareaId}
+          className={cn(textareaVariants({ variant }), className)}
+          {...props}
+        />
+      </div>
+    );
+  }
+
+  return (
+    <textarea
+      data-slot="textarea"
+      id={textareaId}
+      className={cn(textareaVariants({ variant }), className)}
+      {...props}
+    />
+  );
 }
 
 export { Textarea, textareaVariants };

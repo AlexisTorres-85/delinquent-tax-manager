@@ -8,7 +8,7 @@ export function useTaxYearBalances(parcelNumber: string, taxYears?: number[]) {
   const query = useQuery({
     queryKey: TAX_YEAR_BALANCES_QUERY_KEY(parcelNumber, taxYears),
     queryFn: () => taxPaymentService.getYearBalancesByParcelNumber(parcelNumber, taxYears),
-    enabled: !!parcelNumber,
+    enabled: !!parcelNumber && !!taxYears?.length,
     staleTime: 1000 * 60 * 5,
   });
 

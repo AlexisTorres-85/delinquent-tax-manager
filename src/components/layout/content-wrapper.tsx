@@ -9,62 +9,12 @@ import { cn } from '@/lib/utils';
 import { PageToolbar, type BreadcrumbCrumb } from '@/components/ui/page-toolbar';
 import { Skeleton } from '@/components/ui/skeleton';
 import { TAB_TRANSITION_MS } from '@/config/general.config';
+import { DataLoader } from '../ui/data-loader';
 
 function MainPanelSkeleton() {
   return (
     <div className="flex h-full min-h-0 flex-col bg-white">
-      {/* Header skeleton */}
-      <div className="relative shrink-0 border-b border-divider bg-section-header">
-        <div className="absolute left-0 top-0 h-1 w-full overflow-hidden bg-section-header">
-          <div
-            className="h-full animate-[progress-indeterminate_1.4s_ease-in-out_infinite] bg-[var(--color-app-primary-from)]"
-            style={{ width: '40%' }}
-          />
-        </div>
-
-        <div className="flex items-center gap-3 px-6 py-6">
-          <Skeleton className="h-8 w-8 shrink-0 rounded-md" />
-
-          <div className="flex min-w-0 flex-1 flex-col gap-1.5">
-            <Skeleton className="h-5 w-48 rounded-md" />
-            <Skeleton className="h-3 w-64 rounded-md" />
-          </div>
-
-          <div className="ml-auto flex shrink-0 items-center gap-2">
-            <Skeleton className="h-8 w-24 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-            <Skeleton className="h-8 w-8 rounded-md" />
-          </div>
-        </div>
-      </div>
-
-      {/* Body skeleton */}
-      <div className="min-h-0 flex-1 overflow-hidden p-6">
-        <div className="flex flex-col gap-6">
-          <div className="flex justify-between border-b border-divider pb-4">
-            <div className="flex flex-col gap-2">
-              <Skeleton className="h-6 w-48 rounded-md" />
-              <Skeleton className="h-4 w-64 rounded-md" />
-            </div>
-
-            <Skeleton className="h-6 w-20 rounded-full" />
-          </div>
-
-          <div className="grid grid-cols-5 gap-6">
-            {Array.from({ length: 8 }).map((_, i) => (
-              <div
-                key={i}
-                className="flex flex-col gap-1.5"
-                style={{ opacity: 1 - i * 0.06 }}
-              >
-                <Skeleton className="h-3 w-20 rounded-md" />
-                <Skeleton className="h-4 w-28 rounded-md" />
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
+      <DataLoader loading />
     </div>
   );
 }

@@ -180,7 +180,7 @@ export function OverviewTab({ parcel, onTabChange }: OverviewTabProps) {
 
           <VDivider />
 
-          <InfoCard label="Current Workflow Tax Years" value={taxYears || '—'} />
+          <InfoCard label="Case Tax Years" value={taxYears || '—'} />
 
           <VDivider />
 
@@ -304,8 +304,24 @@ export function OverviewTab({ parcel, onTabChange }: OverviewTabProps) {
           <div className="mx-3" />
 
           <section className="flex-1 min-w-0 flex flex-col gap-6">
-            {parcel.paymentPlan && <PaymentPlanSection paymentPlan={parcel.paymentPlan} />}
-            <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.caseTaxYears} className="flex-1" />
+            {parcel.activeCase === null ? (
+              <div className="flex flex-col items-center justify-center rounded-xl border border-dashed border-divider bg-muted/40 px-6 py-14 text-center gap-3">
+                <div className="flex size-11 items-center justify-center rounded-full bg-muted">
+                  <LandPlotIcon className="size-5 text-muted-foreground/60" />
+                </div>
+                <div>
+                  <p className="text-sm font-medium text-foreground">No case data available</p>
+                  <p className="mt-1 text-xs text-muted-foreground max-w-xs">
+                    Start a delinquency process and select the applicable tax years to view the breakdown and payment plan information.
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <>
+                {parcel.paymentPlan && <PaymentPlanSection paymentPlan={parcel.paymentPlan} />}
+                <TaxYearBreakdown parcelNumber={parcel.parcelNumber} taxYears={parcel.caseTaxYears} className="flex-1" />
+              </>
+            )}
           </section>
         </div>
       </section>

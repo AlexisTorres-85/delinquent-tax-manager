@@ -90,7 +90,7 @@ export function ChangeLegalDescriptionDialog({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-7xl">
+      <DialogContent className="max-w-7xl" isLoading={depsLoading}>
         <DialogHeader
           icon={<Scale />}
           subtitle="Submit a request to change the legal description for this parcel."
@@ -116,7 +116,7 @@ export function ChangeLegalDescriptionDialog({
             </div>
           </div>
 
-          {/* Row 1 */}
+
           <div className="grid grid-cols-2 gap-4 mb-4">
             <Input
               label="Requested By"

@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { X, ChevronRight, BookOpen } from 'lucide-react';
-import { STAGES_BY_STATUS } from '@/data/parcels/types';
+import { useCase } from '@/data/parcels/hooks/use-case';
 import { Drawer as DrawerPrimitive } from 'vaul';
 
 const HELP_TABS = [
@@ -583,7 +583,7 @@ export function LifecycleHelpDrawer({ open, onClose }: { open: boolean; onClose:
                 <h2 className="text-base font-bold">Stage Reference Guide</h2>
                 <p className="text-xs text-muted-foreground leading-relaxed">Stages are the specific workflow steps within each Status. Each stage includes a plain-language explanation and a real-world example to help you understand exactly what the work involves.</p>
               </div>
-              {(Object.entries(STAGES_BY_STATUS) as [string, string[]][]).map(([statusName, stages]) => (
+              {statuses.map(({ name: statusName, stages }) => (
                 <div key={statusName} className="space-y-3">
                   <div className="flex items-center gap-2">
                     <div className="h-px flex-1 bg-border" />
@@ -591,17 +591,17 @@ export function LifecycleHelpDrawer({ open, onClose }: { open: boolean; onClose:
                     <div className="h-px flex-1 bg-border" />
                   </div>
                   <div className="space-y-3 pl-1">
-                    {stages.map((stageName, idx) => {
-                      const detail = STAGE_DETAILS[stageName];
+                    {stages.map((stage, idx) => {
+                      const detail = STAGE_DETAILS[stage.name];
                       if (!detail) return null;
                       return (
-                        <div key={stageName} className="border rounded-xl p-3 space-y-2.5 hover:bg-muted/20 transition-colors">
+                        <div key={stage.name} className="border rounded-xl p-3 space-y-2.5 hover:bg-muted/20 transition-colors">
                           <div className="flex items-start gap-2.5">
                             <span className="flex-shrink-0 mt-0.5 w-5 h-5 rounded-full bg-muted border flex items-center justify-center text-[10px] font-bold text-muted-foreground">
                               {idx + 1}
                             </span>
                             <div className="flex-1 min-w-0">
-                              <p className="text-sm font-semibold leading-tight">{stageName}</p>
+                              <p className="text-sm font-semibold leading-tight">{stage.name}</p>
                               <p className="text-[10px] text-muted-foreground mt-0.5">Responsible: {detail.responsible}</p>
                             </div>
                           </div>
