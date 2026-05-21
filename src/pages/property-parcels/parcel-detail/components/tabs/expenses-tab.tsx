@@ -13,6 +13,7 @@ import { Button } from '@/components/ui/button';
 import { useExpenses } from '@/data/expenses/hooks/use-expenses';
 import type { ExpenseDepartment, ExpenseType } from '@/data/expenses/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { expensesColumns } from '../../table-columns/expenses.columns';
 
 // ─── Filter options ───────────────────────────────────────────────────────────
@@ -46,9 +47,11 @@ const EXPENSE_TYPES: ExpenseType[] = [
 interface ExpensesTabProps {
     parcelNumber: string;
     stickyTop?: number;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function ExpensesTab({ parcelNumber, stickyTop = 0 }: ExpensesTabProps) {
+export function ExpensesTab({ parcelNumber, stickyTop = 0, currentStatus, currentStage }: ExpensesTabProps) {
     const { expenses, isRefreshing, lastUpdated, refetch } = useExpenses(parcelNumber);
 
     const [sorting, setSorting] = useState<SortingState>([{ id: 'createdDate', desc: true }]);
@@ -147,6 +150,8 @@ export function ExpensesTab({ parcelNumber, stickyTop = 0 }: ExpensesTabProps) {
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isRefreshing}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }

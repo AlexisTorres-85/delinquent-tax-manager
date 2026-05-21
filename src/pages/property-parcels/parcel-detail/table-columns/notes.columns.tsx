@@ -3,32 +3,29 @@ import { DataGridColumnHeader } from '@/components/ui/data-grid-column-header';
 import { Badge } from '@/components/ui/badge';
 import { Skeleton } from '@/components/ui/skeleton';
 import { ChevronDown, ChevronRight } from 'lucide-react';
-import type { ParcelNote, NoteMessageType } from '@/data/notes/types';
+import type { InternalNote } from '@/data/notes/types';
 
-// ─── Message type badge config ────────────────────────────────────────────────
+// ─── Helpers ──────────────────────────────────────────────────────────────────
 
-type BadgeVariant = 'destructive' | 'warning' | 'info' | 'secondary' | 'primary' | 'outline' | 'success';
-
-const MESSAGE_TYPE_VARIANT: Record<NoteMessageType, BadgeVariant> = {
-    'Payment Problems':        'destructive',
-    'Call':                    'secondary',
-    'Tax Deeded Note':         'warning',
-    'Bankruptcy Note':         'destructive',
-    'Legal Note':              'info',
-    'General Note':            'secondary',
-    'Status Update':           'primary',
-    'Owner Contact':           'success',
-    'Attorney Communication':  'outline',
-};
+function formatIsoDate(iso: string): string {
+    const d = new Date(iso);
+    return d.toLocaleDateString('en-US', { year: 'numeric', month: '2-digit', day: '2-digit' });
+}
 
 // ─── Expanded note panel ──────────────────────────────────────────────────────
 
-function NoteExpandedContent({ row }: { row: ParcelNote }) {
+function NoteExpandedContent({ row }: { row: InternalNote }) {
+    const actionTaken = row.caseInfo?.caseStageHistory?.actionTaken;
     return (
         <div className="px-16 py-5 border-t border-border">
-            <div className="flex flex-col gap-1.5">
+            <div className="flex flex-col gap-2.5">
                 <span className="text-[10px] uppercase tracking-widest font-semibold text-muted-foreground">Note</span>
-                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{row.note}</p>
+                <p className="text-sm text-foreground leading-relaxed whitespace-pre-wrap">{row.noteText}</p>
+                {actionTaken && (
+                    <Badge variant="secondary" appearance="light" className="text-xs w-fit">
+                        {actionTaken}
+                    </Badge>
+                )}
             </div>
         </div>
     );
@@ -36,21 +33,18 @@ function NoteExpandedContent({ row }: { row: ParcelNote }) {
 
 // ─── Column definitions ───────────────────────────────────────────────────────
 
-export const notesColumns: ColumnDef<ParcelNote>[] = [
+export const notesColumns: ColumnDef<InternalNote>[] = [
     {
         id: 'expand',
-        header: () => null,
-        size: 48,
-        minSize: 48,
-        maxSize: 48,
+        size: 20,
+        minSize: 20,
+        maxSize: 20,
         enableResizing: false,
         enableSorting: false,
-        enableGlobalFilter: false,
         cell: ({ row }) => (
             <button
                 onClick={(e) => { e.stopPropagation(); row.toggleExpanded(); }}
                 className="p-1 rounded hover:bg-black/5 text-muted-foreground transition-colors"
-                title={row.getIsExpanded() ? 'Collapse note' : 'Expand note'}
             >
                 {row.getIsExpanded()
                     ? <ChevronDown className="size-4" />
@@ -58,58 +52,71 @@ export const notesColumns: ColumnDef<ParcelNote>[] = [
             </button>
         ),
         meta: {
-            headerClassName: '!pl-6 !pr-2 !w-12',
-            cellClassName: '!pl-6 !pr-2 !w-12',
-            expandedContent: (row: ParcelNote) => <NoteExpandedContent row={row} />,
+            expandedContent: (row: InternalNote) => <NoteExpandedContent row={row} />,
             skeleton: <Skeleton className="h-4 w-4" />,
+            headerClassName: '!pr-0',
+            cellClassName: '!pr-0',
         },
     },
     {
-        accessorKey: 'createdDate',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Created Date" />,
-        cell: ({ getValue }) => <span className="text-sm tabular-nums">{getValue<string>()}</span>,
+        id: 'date',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Date" />,
+        accessorFn: (row) => row.caseInfo?.caseStageHistory?.dateTime ?? row.createdDate,
+        cell: ({ row }) => {
+            const iso = row.original.caseInfo?.caseStageHistory?.dateTime ?? row.original.createdDate;
+            return <span className="text-sm tabular-nums">{formatIsoDate(iso)}</span>;
+        },
         sortingFn: (a, b) => {
-            const parse = (d: string) => {
-                const [m, day, y] = d.split('/');
-                return new Date(`${y}-${m}-${day}`).getTime();
-            };
-            return parse(a.original.createdDate) - parse(b.original.createdDate);
+            const dateA = a.original.caseInfo?.caseStageHistory?.dateTime ?? a.original.createdDate;
+            const dateB = b.original.caseInfo?.caseStageHistory?.dateTime ?? b.original.createdDate;
+            return new Date(dateA).getTime() - new Date(dateB).getTime();
         },
-        meta: { skeleton: <Skeleton className="h-4 w-24" /> },
+        meta: {
+            headerClassName: '!pl-0',
+            cellClassName: '!pl-0',
+            skeleton: <Skeleton className="h-4 w-24" />,
+        },
     },
     {
-        accessorKey: 'createdBy',
+        accessorKey: 'createdByName',
         header: ({ column }) => <DataGridColumnHeader column={column} title="Created By" />,
         cell: ({ getValue }) => <span className="text-sm">{getValue<string>()}</span>,
-        meta: { skeleton: <Skeleton className="h-4 w-24" /> },
+        meta: { skeleton: <Skeleton className="h-4 w-28" /> },
     },
     {
-        accessorKey: 'taxYear',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Tax Year" />,
-        cell: ({ getValue }) => <span className="text-sm tabular-nums">{getValue<number>()}</span>,
+        accessorKey: 'caseId',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Case ID" />,
+        cell: ({ getValue }) => (
+            <span className="text-sm tabular-nums text-muted-foreground">#{getValue<number>()}</span>
+        ),
         meta: { skeleton: <Skeleton className="h-4 w-12" /> },
     },
     {
-        accessorKey: 'workflowId',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Workflow ID" />,
-        cell: ({ getValue }) => (
-            <span className="text-sm font-mono text-muted-foreground">{getValue<string>()}</span>
-        ),
-        meta: { skeleton: <Skeleton className="h-4 w-24" /> },
-    },
-    {
-        accessorKey: 'messageType',
-        header: ({ column }) => <DataGridColumnHeader column={column} title="Message Type" />,
-        cell: ({ getValue }) => {
-            const type = getValue<NoteMessageType>();
+        id: 'statusDefinition',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Status" />,
+        accessorFn: (row) => row.caseInfo?.caseStageHistory?.caseStatusDefinitionName ?? null,
+        cell: ({ row }) => {
+            const name = row.original.caseInfo?.caseStageHistory?.caseStatusDefinitionName;
+            if (!name) return <span className="text-xs text-muted-foreground">—</span>;
             return (
-                <Badge variant={MESSAGE_TYPE_VARIANT[type] ?? 'secondary'} appearance="light" className="text-xs whitespace-nowrap">
-                    {type}
+                <Badge variant="secondary" appearance="light" className="text-xs whitespace-nowrap w-fit">
+                    {name}
                 </Badge>
             );
         },
-        filterFn: (row, columnId, filterValue) =>
-            filterValue === 'all' || row.getValue(columnId) === filterValue,
-        meta: { skeleton: <Skeleton className="h-5 w-32" /> },
+        enableSorting: false,
+        meta: { skeleton: <Skeleton className="h-5 w-28" /> },
+    },
+    {
+        id: 'stageDefinition',
+        header: ({ column }) => <DataGridColumnHeader column={column} title="Stage" />,
+        accessorFn: (row) => row.caseInfo?.caseStageHistory?.caseStageDefinitionName ?? null,
+        cell: ({ row }) => {
+            const name = row.original.caseInfo?.caseStageHistory?.caseStageDefinitionName;
+            if (!name) return <span className="text-xs text-muted-foreground">—</span>;
+            return <span className="text-sm text-foreground">{name}</span>;
+        },
+        enableSorting: false,
+        meta: { skeleton: <Skeleton className="h-4 w-32" /> },
     },
 ];

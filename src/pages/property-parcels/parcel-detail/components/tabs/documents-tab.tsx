@@ -13,6 +13,7 @@ import { FilePlus, ScanLine, FileText } from 'lucide-react';
 import { useDocuments } from '@/data/documents/hooks/use-documents';
 import type { ParcelDocument, DocumentType } from '@/data/documents/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { documentColumns } from '../../table-columns/documents.columns';
 
 // ─── Document types list ──────────────────────────────────────────────────────
@@ -39,9 +40,11 @@ interface DocumentsTableProps {
     onRefresh?: () => void;
     parcelNumber: string;
     stickyTop?: number;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0 }: DocumentsTableProps) {
+function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0, currentStatus, currentStage }: DocumentsTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'createdDate', desc: true }]);
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [typeFilter, setTypeFilter] = useState('all');
@@ -129,6 +132,8 @@ function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNu
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }
@@ -138,9 +143,11 @@ function DocumentsTable({ documents, isLoading, lastUpdated, onRefresh, parcelNu
 interface DocumentsTabProps {
     parcelNumber: string;
     stickyTop?: number;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function DocumentsTab({ parcelNumber, stickyTop }: DocumentsTabProps) {
+export function DocumentsTab({ parcelNumber, stickyTop, currentStatus, currentStage }: DocumentsTabProps) {
     const { documents, isLoading, isRefreshing, lastUpdated, refetch } = useDocuments(parcelNumber);
 
     return (
@@ -151,6 +158,8 @@ export function DocumentsTab({ parcelNumber, stickyTop }: DocumentsTabProps) {
             onRefresh={refetch}
             parcelNumber={parcelNumber}
             stickyTop={stickyTop}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }

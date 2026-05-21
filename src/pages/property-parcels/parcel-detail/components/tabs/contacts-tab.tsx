@@ -14,6 +14,7 @@ import { useContacts } from '@/data/contacts/hooks/use-contacts';
 import { useContactTypes } from '@/data/lookup/use-contact-types';
 import type { ParcelContact } from '@/data/contacts/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { createContactColumns } from '../../table-columns/contacts.columns';
 import { ContactDialog } from '../dialogs/add-contact-dialog';
 
@@ -22,14 +23,17 @@ import { ContactDialog } from '../dialogs/add-contact-dialog';
 interface ContactsTableProps {
     contacts: ParcelContact[];
     isLoading: boolean;
+    isLoadingTable?: boolean;
     lastUpdated: Date | null;
     onRefresh?: () => void;
     parcelId: number;
     parcelNumber: string;
     stickyTop?: number;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelId, parcelNumber, stickyTop = 0 }: ContactsTableProps) {
+function ContactsTable({ contacts, isLoading, isLoadingTable, lastUpdated, onRefresh, parcelId, parcelNumber, stickyTop = 0, currentStatus, currentStage }: ContactsTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'fullName', desc: false }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -124,6 +128,9 @@ function ContactsTable({ contacts, isLoading, lastUpdated, onRefresh, parcelId, 
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
+            isLoadingTable={isLoadingTable}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
         <ContactDialog
             open={dialogOpen}
@@ -142,20 +149,25 @@ interface ContactsTabProps {
     parcelId: number;
     parcelNumber: string;
     stickyTop?: number;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function ContactsTab({ parcelId, parcelNumber, stickyTop }: ContactsTabProps) {
-    const { contacts, isLoading, lastUpdated, refetch } = useContacts(parcelId);
+export function ContactsTab({ parcelId, parcelNumber, stickyTop, currentStatus, currentStage }: ContactsTabProps) {
+    const { contacts, isLoading, isRefreshing, lastUpdated, refetch } = useContacts(parcelId);
 
     return (
         <ContactsTable
             contacts={contacts}
             isLoading={isLoading}
+            isLoadingTable={isRefreshing}
             lastUpdated={lastUpdated}
             onRefresh={refetch}
             parcelId={parcelId}
             parcelNumber={parcelNumber}
             stickyTop={stickyTop}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }

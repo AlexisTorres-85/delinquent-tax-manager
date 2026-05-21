@@ -11,6 +11,7 @@ import {
 import { usePaymentSchedule } from '@/data/payment-schedule/hooks/use-payment-schedule';
 import type { PaymentScheduleEntry } from '@/data/payment-schedule/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { paymentScheduleColumns } from '../../table-columns/payment-schedule.columns';
 
 // ─── Inner table component ────────────────────────────────────────────────────
@@ -22,9 +23,11 @@ interface PaymentScheduleTableProps {
     stickyTop?: number;
     parcelNumber: string;
     onRefresh?: () => void;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh }: PaymentScheduleTableProps) {    const [sorting, setSorting] = useState<SortingState>([{ id: 'dueDate', desc: false }]);
+function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh, currentStatus, currentStage }: PaymentScheduleTableProps) {    const [sorting, setSorting] = useState<SortingState>([{ id: 'dueDate', desc: false }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
     const [yearFilter, setYearFilter] = useState('all');
@@ -97,6 +100,8 @@ function PaymentScheduleTable({ entries, isLoading, lastUpdated, stickyTop = 0, 
             table={table}
             recordCount={table.getFilteredRowModel().rows.length}
             isLoading={isLoading}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
         </div>
     );
@@ -108,9 +113,11 @@ interface PaymentScheduleTabProps {
     parcelNumber: string;
     stickyTop?: number;
     taxYears?: number[];
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function PaymentScheduleTab({ parcelNumber, stickyTop, taxYears }: PaymentScheduleTabProps) {
+export function PaymentScheduleTab({ parcelNumber, stickyTop, taxYears, currentStatus, currentStage }: PaymentScheduleTabProps) {
     const { plan, isRefreshing, lastUpdated, refetch } = usePaymentSchedule(parcelNumber, taxYears);
 
     return (
@@ -121,6 +128,8 @@ export function PaymentScheduleTab({ parcelNumber, stickyTop, taxYears }: Paymen
             stickyTop={stickyTop}
             parcelNumber={parcelNumber}
             onRefresh={refetch}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }

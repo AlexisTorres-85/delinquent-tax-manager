@@ -64,9 +64,9 @@ function TaxPaymentDetail({ row }: { row: TaxPayment }) {
 export const taxPaymentsColumns: ColumnDef<TaxPayment>[] = [
     {
         id: 'expand',
-        size: 10,
-        minSize: 10,
-        maxSize: 10,
+        size: 20,
+        minSize: 20,
+        maxSize: 20,
         enableResizing: false,
         enableSorting: false,
         cell: ({ row }) => (

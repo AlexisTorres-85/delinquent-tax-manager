@@ -47,7 +47,7 @@ export function PageToolbar({ crumbs, actions, className }: PageToolbarProps) {
                 zIndex: index + 1,
                 height: ARROW_HEIGHT,
                 backgroundColor: isLast ? 'var(--color-breadcrumb-active)' : 'var(--color-breadcrumb-inactive)',
-                borderBottom: '2px solid var(--color-divider-dark)',
+                borderBottom: '1px solid var(--color-divider-dark)',
               }}
               onMouseEnter={!isLast ? (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-breadcrumb-hover)'; } : undefined}
               onMouseLeave={!isLast ? (e) => { (e.currentTarget as HTMLElement).style.backgroundColor = 'var(--color-breadcrumb-inactive)'; } : undefined}
@@ -67,7 +67,7 @@ export function PageToolbar({ crumbs, actions, className }: PageToolbarProps) {
       <div
         className="flex flex-1 items-center justify-end gap-2 px-6 self-stretch -ml-[10px]"
         style={{
-          backgroundColor: 'var(--color-breadcrumb-trail)',
+          background: 'var(--color-breadcrumb-trail)',
           clipPath: `polygon(0 0, 100% 0, 100% 100%, 0 100%, ${ARROW_DEPTH}px 50%)`,
           paddingLeft: `${ARROW_DEPTH + 16}px`,
         }}

@@ -1,6 +1,6 @@
 import { ContentWrapper } from '@/components/layout/content-wrapper';
 import { Button } from '@/components/ui/button';
-import { Download, FileText, LandPlotIcon } from 'lucide-react';
+import { ArrowLeft, Download, FileText, LandPlotIcon } from 'lucide-react';
 import { ParcelsTable } from './components/parcels-table';
 import { ScopeSnapshot } from './components/scope-snapshot';
 import { GridControls } from './components/grid-controls';
@@ -64,19 +64,13 @@ export function ParcelsPage() {
         { label: 'Cases' },
       ]}
       actions={
-        <>
-          <Button variant="secondary">
-            <Download className="h-4 w-4" />
-            Export
-          </Button>
-          <Button variant="primary">
-            <FileText className="h-4 w-4" />
-            Generate Report
-          </Button>
-        </>
+        <Button variant="ghost" size="sm">
+          <ArrowLeft className="h-4 w-4" />
+          Back to dashboard
+        </Button>
       }
       mainHeader={{
-        icon: <LandPlotIcon className="h-6 w-6" />,
+        icon: <img src="/images/icons/property-parcel.png" className="h-10 w-10 object-contain" />,
         title: 'Delinquent Parcel Cases',
         subtitle: 'Access parcel records and account details',
       }}
@@ -110,11 +104,6 @@ export function ParcelsPage() {
             inRemCount={inRemCount}
             bankruptcyCount={bankruptcyCount}
           />
-          <div className='border-t border-divider bg-muted'>
-            <div className={`h-1 bg-muted overflow-hidden transition-opacity duration-200 ${isFetching || isLoading ? 'opacity-100' : 'opacity-0'}`}>
-              <div className="h-full w-2/5 bg-[var(--color-app-primary-from)] animate-[progress-indeterminate_1.4s_ease-in-out_infinite]" />
-            </div>
-          </div>
           <div className='pb-20 overflow-x-auto'>
             <ParcelsTable
               data={parcels}

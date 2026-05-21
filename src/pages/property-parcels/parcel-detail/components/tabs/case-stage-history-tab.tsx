@@ -12,6 +12,7 @@ import { ChevronDown } from 'lucide-react';
 import { useCaseStageHistory } from '@/data/cases/case-stage-history/hooks/use-case-stage-history';
 import type { ParcelCaseStageHistory, CaseStatus } from '@/data/cases/case-stage-history/types';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { createCaseStageHistoryColumns } from '../../table-columns/case-stage-history.columns';
 import { MoveToNextStageDialog } from '../dialogs/move-to-next-stage-dialog';
 import { Accordion, AccordionItem, AccordionTrigger, AccordionContent } from '@/components/ui/accordion';
@@ -62,9 +63,11 @@ interface CaseStageHistoryTableProps {
     parcelNumber: string;
     stickyTop?: number;
     hideHeader?: boolean;
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0, hideHeader = false }: CaseStageHistoryTableProps) {
+function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, parcelNumber, stickyTop = 0, hideHeader = false, currentStatus, currentStage }: CaseStageHistoryTableProps) {
     // Default sort: active stage first, then most-recent date
     const [sorting, setSorting] = useState<SortingState>([{ id: 'dateTime', desc: true }]);
     const [globalFilter, setGlobalFilter] = useState('');
@@ -148,6 +151,8 @@ function CaseStageHistoryTable({ entries, isLoading, lastUpdated, onRefresh, par
                 isLoading={isLoading}
                 getRowClassName={getCaseRowClassName}
                 hideHeader={hideHeader}
+                currentStatus={currentStatus}
+                currentStage={currentStage}
             />
             {modalEntry && (
                 <MoveToNextStageDialog
@@ -169,9 +174,11 @@ interface CaseStageHistoryTabProps {
     stickyTop?: number;
     initialEntries?: import('@/data/cases/case-stage-history/types').ParcelCaseStageHistory[];
     initialCases?: import('@/data/cases/case-stage-history/types').ParcelCase[];
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntries, initialCases }: CaseStageHistoryTabProps) {
+export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntries, initialCases, currentStatus, currentStage }: CaseStageHistoryTabProps) {
     const { entries: fetchedEntries, isLoading: hookLoading, isRefreshing: hookRefreshing, lastUpdated, refetch } = useCaseStageHistory(
         initialEntries ? '' : parcelNumber,
     );
@@ -214,6 +221,8 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
                 onRefresh={refetch}
                 parcelNumber={parcelNumber}
                 stickyTop={stickyTop}
+                currentStatus={currentStatus}
+                currentStage={currentStage}
             />
         );
     }
@@ -230,6 +239,8 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
             onRefresh={refetch}
             isLoading={isLoading || isRefreshing}
             onHeaderHeightChange={handleHeaderHeightChange}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         >
             <Accordion type="single" collapsible defaultValue={defaultOpen} indicator="none">
                 {cases.map((parcelCase) => {
@@ -240,7 +251,7 @@ export function CaseStageHistoryTab({ parcelNumber, stickyTop = 0, initialEntrie
 
                     return (
                         <AccordionItem key={parcelCase.caseId} value={parcelCase.caseId}>
-                            <AccordionTrigger className="px-6 justify-start gap-3">
+                            <AccordionTrigger className="px-6 justify-start gap-3 border-b border-divider [&:has([data-state=open])]:bg-muted">
                                 <ChevronDown className="h-4 w-4 shrink-0 transition-transform duration-200" />
                                 <span className="font-semibold">{yearsLabel}</span>
                                 <span className="text-xs text-muted-foreground font-mono">{parcelCase.caseId}</span>

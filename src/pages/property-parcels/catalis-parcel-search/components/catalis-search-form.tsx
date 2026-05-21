@@ -115,9 +115,9 @@ export function CatalisSearchForm() {
         <div className="px-6 pt-4 pb-6 border-b border-divider">
           <div className="flex items-center justify-between mb-3">
             <img
-              src="/images/catalis-logo.png"
+              src="/images/catalis-logo.webp"
               alt="Catalis"
-              className="h-5 object-contain"
+              className="h-10 object-contain"
             />
           </div>
           <div className="border-t border-divider mb-3" />

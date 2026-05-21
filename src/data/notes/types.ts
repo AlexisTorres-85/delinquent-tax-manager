@@ -1,25 +1,37 @@
-export type NoteMessageType =
-  | 'Payment Problems'
-  | 'Call'
-  | 'Tax Deeded Note'
-  | 'Bankruptcy Note'
-  | 'Legal Note'
-  | 'General Note'
-  | 'Status Update'
-  | 'Owner Contact'
-  | 'Attorney Communication';
-
-export type ParcelNote = {
-  id: string;
-  workflowId: string;
-  taxYear: number;
-  createdDate: string; // MM/DD/YYYY
-  createdBy: string;
-  messageType: NoteMessageType;
-  note: string;
+export type CaseStageHistory = {
+  id: number;
+  caseId: number;
+  dateTime: string;
+  caseStatusDefinitionId: number;
+  caseStatusDefinitionName: string;
+  caseStageDefinitionId: number;
+  caseStageDefinitionName: string;
+  actionTaken: string;
+  isActive: boolean;
 };
 
-export type ParcelNoteRecord = {
-  parcelNumber: string;
-  notes: ParcelNote[];
+export type CaseInfo = {
+  id: number;
+  parcelId: number;
+  taxYears: string;
+  isActive: boolean;
+  createdBy: string;
+  createdDate: string;
+  updatedDate: string | null;
+  caseStageHistory: CaseStageHistory | null;
+};
+
+export type InternalNote = {
+  id: number;
+  parcelId: number;
+  caseId: number;
+  caseStageHistoryId: number | null;
+  noteText: string;
+  createdBy: string;
+  createdByName: string;
+  createdDate: string;
+  updatedBy: string | null;
+  updatedByName: string | null;
+  updatedDate: string | null;
+  caseInfo: CaseInfo | null;
 };

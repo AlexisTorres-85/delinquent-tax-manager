@@ -37,7 +37,7 @@ export function PageSection({
           <PopoverTrigger asChild>
             <button
               type="button"
-              className="flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+              className="flex items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
               aria-label={`About ${title}`}
             >
               <Info className="size-3.5" />
@@ -51,7 +51,7 @@ export function PageSection({
         <button
           type="button"
           onClick={onHelperClick}
-          className="flex items-center justify-center text-muted-foreground hover:text-foreground transition-colors"
+          className="flex items-center justify-center text-muted-foreground transition-colors hover:text-foreground"
           aria-label={`About ${title}`}
         >
           <Info className="size-3.5" />
@@ -61,30 +61,33 @@ export function PageSection({
   ) : null;
 
   return (
-    <div className={`flex flex-col ${isCard ? ' bg-white p-4 rounded-xl' : ''}${className ? ` ${className}` : ''}`}>
-      <div className="flex items-center gap-2 mb-4 border-b border-divider pb-4 shrink-0">
-        <div className="flex items-center justify-center rounded-lg bg-black/10 p-2 shrink-0">
+  <div className="flex flex-col bg-white shadow shadow-xs p-4 rounded-lg border border-black/20">
+    <div className="flex flex-col">
+      <div className="mb-4 flex shrink-0 items-center gap-2 border-b border-divider/70 pb-4">
+        <div className="flex shrink-0 items-center justify-center rounded-md bg-muted border border-divider/70 p-2 text-app-primary">
           {icon}
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex min-w-0 flex-col">
           <div className="flex items-center gap-2">
-            <span className="text-sm font-semibold">{title}</span>
+            <span className="truncate text-sm font-semibold text-foreground">
+              {title}
+            </span>
             {infoButton}
           </div>
+
           {subtitle && (
-            <span className="text-xs text-muted-foreground -mt-px">{subtitle}</span>
+            <span className="-mt-px truncate text-xs text-muted-foreground">
+              {subtitle}
+            </span>
           )}
         </div>
 
-        {action && (
-          <div className="ml-auto shrink-0">
-            {action}
-          </div>
-        )}
+        {action && <div className="ml-auto shrink-0">{action}</div>}
       </div>
 
       {children}
     </div>
-  );
+  </div>
+);
 }

@@ -13,7 +13,7 @@ export function Footer() {
 
   return (
     <footer
-      className="shrink-0 flex items-center justify-between gap-4 px-6 h-14 bg-white text-xs text-muted-foreground border-t border-l-2 border-divider-dark"
+      className="shrink-0 flex items-center justify-between gap-4 px-6 h-14 bg-white text-xs text-muted-foreground border-t border-l-[length:var(--border-divider-dark-width)] border-divider-dark"
 
     >
       <div className="flex items-center gap-3">

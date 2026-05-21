@@ -106,40 +106,73 @@
 
     /** App colors (from general.config.ts) **/
   --color-divider: #C7C7C7;   
-  --color-divider-dark: #B9B9B9;                       /* Tasman */
-  --color-section-header: #FFFFFF;             /* Linen */
-  --color-bg-menu-header: #D8E2DC;
-  --color-menu-rounded-right: #3FBC9F;                 /* Linen */
-  
-  --color-table-header: #D8E2DC;               /* pale sage */
+  --color-divider-dark: #DFDFDF;                       /* Tasman */
+  --border-divider-dark-width: 0px;
+  --color-section-header: linear-gradient(to right, #ffffff, #ffffff);  /* white → pale sage */
+
+  /* Parcel detail header — reuse anywhere with style={{ background: 'var(--parcel-header-background)' }} */
+  --parcel-header-background:
+    radial-gradient(circle at 12% 18%, rgba(199, 220, 204, 0.18) 0%, rgba(199, 220, 204, 0.08) 18%, transparent 34%),
+    radial-gradient(circle at 88% 12%, rgba(255, 255, 255, 0.18) 0%, rgba(255, 255, 255, 0.07) 20%, transparent 38%),
+    radial-gradient(circle at 75% 85%, rgba(199, 220, 204, 0.14) 0%, rgba(199, 220, 204, 0.05) 18%, transparent 36%),
+    linear-gradient(rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255, 255, 255, 0.045) 1px, transparent 1px),
+    linear-gradient(135deg, #092c25 0%, #315C52 48%, #337464 100%);
+
+  /* Parcel detail header texture overlay — use as backgroundImage with opacity-20 */
+  --parcel-header-texture: url("data:image/svg+xml,%3Csvg width='1200' height='320' viewBox='0 0 1200 320' xmlns='http://www.w3.org/2000/svg'%3E%3Cg%3E%3Cpolygon points='0,0 90,0 42,70' fill='%23ffffff' opacity='.22'/%3E%3Cpolygon points='90,0 160,58 42,70' fill='%23000000' opacity='.12'/%3E%3Cpolygon points='160,58 245,0 320,76' fill='%23ffffff' opacity='.16'/%3E%3Cpolygon points='245,0 390,0 320,76' fill='%23ffffff' opacity='.25'/%3E%3Cpolygon points='390,0 470,80 320,76' fill='%23000000' opacity='.11'/%3E%3Cpolygon points='470,80 570,0 660,90' fill='%23ffffff' opacity='.18'/%3E%3Cpolygon points='570,0 760,0 660,90' fill='%23ffffff' opacity='.28'/%3E%3Cpolygon points='760,0 865,85 660,90' fill='%23000000' opacity='.10'/%3E%3Cpolygon points='865,85 980,0 1090,82' fill='%23ffffff' opacity='.20'/%3E%3Cpolygon points='980,0 1200,0 1090,82' fill='%23ffffff' opacity='.30'/%3E%3Cpolygon points='0,0 42,70 0,150' fill='%23000000' opacity='.16'/%3E%3Cpolygon points='42,70 160,58 105,160' fill='%23ffffff' opacity='.13'/%3E%3Cpolygon points='42,70 105,160 0,150' fill='%23ffffff' opacity='.20'/%3E%3Cpolygon points='160,58 320,76 230,170' fill='%23000000' opacity='.09'/%3E%3Cpolygon points='160,58 230,170 105,160' fill='%23ffffff' opacity='.17'/%3E%3Cpolygon points='320,76 470,80 410,180' fill='%23ffffff' opacity='.21'/%3E%3Cpolygon points='320,76 410,180 230,170' fill='%23000000' opacity='.12'/%3E%3Cpolygon points='470,80 660,90 555,185' fill='%23ffffff' opacity='.14'/%3E%3Cpolygon points='470,80 555,185 410,180' fill='%23ffffff' opacity='.24'/%3E%3Cpolygon points='660,90 865,85 780,190' fill='%23000000' opacity='.11'/%3E%3Cpolygon points='660,90 780,190 555,185' fill='%23ffffff' opacity='.19'/%3E%3Cpolygon points='865,85 1090,82 1000,190' fill='%23ffffff' opacity='.25'/%3E%3Cpolygon points='865,85 1000,190 780,190' fill='%23000000' opacity='.08'/%3E%3Cpolygon points='1090,82 1200,0 1200,165' fill='%23ffffff' opacity='.18'/%3E%3Cpolygon points='1090,82 1200,165 1000,190' fill='%23ffffff' opacity='.27'/%3E%3Cpolygon points='0,150 105,160 60,320' fill='%23ffffff' opacity='.12'/%3E%3Cpolygon points='105,160 230,170 180,320' fill='%23000000' opacity='.10'/%3E%3Cpolygon points='230,170 410,180 335,320' fill='%23ffffff' opacity='.16'/%3E%3Cpolygon points='410,180 555,185 500,320' fill='%23ffffff' opacity='.24'/%3E%3Cpolygon points='555,185 780,190 690,320' fill='%23000000' opacity='.09'/%3E%3Cpolygon points='780,190 1000,190 890,320' fill='%23ffffff' opacity='.19'/%3E%3Cpolygon points='1000,190 1200,165 1200,320' fill='%23ffffff' opacity='.28'/%3E%3Cpolygon points='0,150 60,320 0,320' fill='%23000000' opacity='.15'/%3E%3Cpolygon points='60,320 105,160 180,320' fill='%23ffffff' opacity='.18'/%3E%3Cpolygon points='180,320 230,170 335,320' fill='%23ffffff' opacity='.11'/%3E%3Cpolygon points='335,320 410,180 500,320' fill='%23000000' opacity='.08'/%3E%3Cpolygon points='500,320 555,185 690,320' fill='%23ffffff' opacity='.15'/%3E%3Cpolygon points='690,320 780,190 890,320' fill='%23ffffff' opacity='.22'/%3E%3Cpolygon points='890,320 1000,190 1200,320' fill='%23000000' opacity='.07'/%3E%3C/g%3E%3C/svg%3E");
+
+
+  --color-breadcrumb-inactive: #ABB9B6; 
+  --color-bg-menu-header: #ABB9B6; /* pale sage */
+
+
+  --color-table-header: #F2F2F2;               /* pale sage */
   --color-table-row: #ffffff;
   --color-table-row-hover: #F4FDFC;
-  --color-table-separator: #E2E2E2;            /* Bone */
+  --color-table-header-divider: #C7C7C7;   
+  --color-table-row-divider: #E0E0E0;            /* Bone */
   --color-table-footer: #F2F2F2;
-  --color-table-expanded-content-bg: var(--bg-muted);  /* Linen */
+  --color-table-even: #F2F2F2;
+  --color-table-odd: #F2F2F2;
+  --color-table-expanded-content-bg: #F5F5F5;  /* Linen */
 
-  --color-menu-accent: #315C52;                /* app gold */
-  --color-sidebar-menu-from: #C9D9CD;          /* Tasman */
-  --color-sidebar-menu-to: #F8EEDA;            /* Linen */
+  /* SIDE BAR MENU icons */
+  --color-menu-accent: var(--color-app-primary);               /* app gold */
+  --color-selected-menu-line: var(--color-app-secondary);         /* selected menu indicator line — gold */
+  --width-selected-menu-line: 4px;  
+  
+    /* SIDEBAR */
+  --color-sidebar-active-bg: #FFFFFF;          /* active sidebar icon button background */
+  --color-sidebar-menu-from: #ffffff;          /* Tasman */
+  --color-sidebar-menu-to: #DEEBE9;   
 
-  --color-breadcrumb-inactive: #D8E2DC;        /* pale sage */
+  --color-app-sidebar-panel-from: #ABB9B6;
+--color-app-sidebar-panel-via: #ABB9B6;
+--color-app-sidebar-panel-to: #E1EDEA;
+
+  --color-menu-rounded-right: var(--color-app-secondary);            /* Linen */
+
+  --color-breadcrumb-bg: #D8E3E1;             /* breadcrumb bar background */
+         /* pale sage */
   --color-breadcrumb-hover: #C9D9CD;           /* Tasman */
-  --color-breadcrumb-active: #223B38;          /* Te Papa Green - stronger active */
-  --color-breadcrumb-trail: #B88B48;           /* Twine */
+  --color-breadcrumb-active: var(--color-app-primary);           /* Te Papa Green - stronger active */
+  --color-breadcrumb-trail: linear-gradient(to right, #ffffff, #ffffff);  /* app teal → Spectra */
 
   --color-app-primary: #223B38;                /* Te Papa Green */
-  --color-app-primary-fg: #ffffff;
+  --color-app-primary-fg: #F2F2F2;
   --color-app-primary-from: #2F5954;           /* Spectra */
   --color-app-primary-to: #1E2F2D;             /* deeper green */
   --color-app-primary-border: #151515;         /* Cod Gray */
 
-  --color-app-secondary: #C09F6D;              /* Twine */
-  --color-app-secondary-fg: #223B38;           /* Te Papa Green */
-  --color-app-secondary-stop-0: #E2D6BD;       /* Bone */
-  --color-app-secondary-stop-1: #C09F6D;       /* Twine */
-  --color-app-secondary-stop-2: #9F7D4D;       /* darker twine */
-  --color-app-secondary-border: #9F7D4D;       /* darker twine */
+--color-app-secondary: #F2A517;              /* Amber Gold */
+--color-app-secondary-fg: #573C07;           /* Dark green foreground */
 
+--color-app-secondary-stop-0: #F2A517;       /* soft amber cream */
+--color-app-secondary-stop-1: #FFFFFF;       /* main amber */
+--color-app-secondary-stop-2: #F9C255;       /* deep amber */
+
+--color-app-secondary-border: #D98F05;       /* amber border */
 
   /** Button theme vars — defined here so portals (dialogs, dropdowns) inherit them **/
   --btn-primary: var(--color-app-primary);
@@ -164,9 +197,9 @@
   );
  
   --color-app-primary-toolbar: #294744;        /* Plantation */
-  --color-app-primary-toolbar-header: #EFF4F3;
-  --color-app-primary-toolbar-fg: #EFF4F3;     /* Linen */
-   --color-app-tabs-selector: #EFF4F3;    
+  --color-app-primary-toolbar-header: #FFFFFF;
+  --color-app-primary-toolbar-fg: #F5F5F5;     /* Linen */
+   --color-app-tabs-selector: var(--color-app-secondary); /* Amber Gold */
   --color-active-workflow-highlight: #EFF7F2;  /* soft green tint */
   --color-active-workflow-side-line: #CCEC60;  /* Sulu accent */
   --color-modal-header-banner: #C9D9CD;        /* Tasman */

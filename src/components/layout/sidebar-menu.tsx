@@ -39,16 +39,22 @@ export function SidebarMenu() {
 
   return (
     <div
-      className="lg:fixed lg:z-10 lg:top-(--header-height) lg:bottom-0 flex flex-col items-stretch lg:w-(--sidebar-menu-width) overflow-hidden"
+      className="lg:fixed lg:z-10 lg:top-(--header-height)  lg:bottom-0 flex flex-col items-stretch lg:w-(--sidebar-menu-width) overflow-hidden"
       style={{ '--menu-accent': 'var(--color-menu-accent)' } as React.CSSProperties}
     >
 
-      <div className="lg:rounded-tl-2xl flex flex-col h-full" style={{ backgroundImage: 'linear-gradient(to bottom, var(--color-sidebar-menu-from), var(--color-sidebar-menu-to))' }}>
-        <div className="mb-3 px-1 flex-shrink-0 bg-bg-menu-header lg:rounded-tl-2xl h-[45px] pl-6 pt-3 border-b-2 border-divider-dark">
+      <div
+  className="flex h-full flex-col lg:rounded-tl-2xl shadow-[inset_-8px_0_40px_-12px_rgba(0,0,0,0.5)]"
+  style={{
+    backgroundImage:
+      'linear-gradient(to bottom, var(--color-app-sidebar-panel-from), var(--color-app-sidebar-panel-via), var(--color-app-sidebar-panel-to))',
+  }}
+>
+        <div className="mb-2 px-1 flex-shrink-0 lg:rounded-tl-2xl h-[45px] pl-6 pt-3 border-b-[length:var(--border-divider-dark-width)] border-divider-dark" style={{ background: 'var(--color-bg-menu-header)' }}>
           <span className="text-sm font-semibold text-black">{activeMenuItem?.title}</span>
         </div>
 
-        <ScrollArea className="flex-1 min-h-0 pr-4 [&_[data-slot=scroll-area-scrollbar]]:hidden">
+        <ScrollArea className="flex-1 min-h-0 pr-8 [&_[data-slot=scroll-area-scrollbar]]:hidden">
           <AccordionMenu
             selectedValue={pathname.toLowerCase()}
             matchPath={matchPath}

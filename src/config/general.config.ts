@@ -10,7 +10,7 @@ const generalSettings = {
 export const layoutDimensions = {
   headerHeight: '90px',
   sidebarWidth: '70px',
-  sidebarMenuWidth: '250px',
+  sidebarMenuWidth: '260px',
 };
 
 /** Simulated API delay for dummy data services (ms). Set to 0 in production. */

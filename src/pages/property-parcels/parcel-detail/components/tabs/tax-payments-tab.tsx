@@ -11,8 +11,8 @@ import {
 } from '@tanstack/react-table';
 import { useTaxPayments } from '@/data/tax-payments/hooks/use-tax-payments';
 import type { TaxPayment } from '@/data/tax-payments/types';
-import { Receipt } from 'lucide-react';
 import { TabLayout, type FilterConfig } from '@/components/ui/tab-layout';
+import type { ParcelStatus, ParcelStage } from '@/data/parcels/types';
 import { taxPaymentsColumns } from '../../table-columns/tax-payments.columns';
 
 
@@ -24,9 +24,11 @@ interface TaxPaymentsTableProps {
     parcelNumber: string;
     onRefresh?: () => void;
     taxYears?: number[];
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh, taxYears: _taxYears }: TaxPaymentsTableProps) {
+function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, parcelNumber, onRefresh, taxYears: _taxYears, currentStatus, currentStage }: TaxPaymentsTableProps) {
     const [sorting, setSorting] = useState<SortingState>([{ id: 'paymentDate', desc: true }]);
     const [globalFilter, setGlobalFilter] = useState('');
     const [columnFilters, setColumnFilters] = useState<ColumnFiltersState>([]);
@@ -128,6 +130,8 @@ function TaxPaymentsTable({ payments, isLoading, lastUpdated, stickyTop = 0, par
             onView={(row) => console.log('view', row)}
             onEdit={(row) => console.log('edit', row)}
             onDelete={(row) => console.log('delete', row)}
+            currentStatus={currentStatus}
+            currentStage={currentStage}
         />
     );
 }
@@ -138,10 +142,12 @@ interface TaxPaymentsTabProps {
     parcelNumber: string;
     stickyTop?: number;
     taxYears?: number[];
+    currentStatus?: ParcelStatus;
+    currentStage?: ParcelStage;
 }
 
-export function TaxPaymentsTab({ parcelNumber, stickyTop, taxYears }: TaxPaymentsTabProps) {
+export function TaxPaymentsTab({ parcelNumber, stickyTop, taxYears, currentStatus, currentStage }: TaxPaymentsTabProps) {
     const { payments, isRefreshing, lastUpdated, refetch } = useTaxPayments(parcelNumber, taxYears);
 
-    return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} taxYears={taxYears} />;
+    return <TaxPaymentsTable payments={payments} isLoading={isRefreshing} lastUpdated={lastUpdated} stickyTop={stickyTop} parcelNumber={parcelNumber} onRefresh={refetch} taxYears={taxYears} currentStatus={currentStatus} currentStage={currentStage} />;
 }

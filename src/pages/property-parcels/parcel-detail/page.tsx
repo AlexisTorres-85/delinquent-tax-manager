@@ -126,18 +126,18 @@ function UpdateStatusPopover({ parcel }: { parcel: Parcel }) {
     <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         {isNewCase ? (
-          <Button variant="primary" size="sm">
+          <Button variant="secondary" size="sm">
             <RefreshCw className="h-4 w-4" />
             Start Delinquent Process
           </Button>
         ) : (
-          <Button variant="outline" size="sm">
+          <Button variant="outline_secondary" size="sm">
             <RefreshCw className="h-4 w-4" />
             Update Case Status
           </Button>
         )}
       </PopoverTrigger>
-      <PopoverContent className="w-100 p-0 rounded-xl border-r-4 border-r-app-secondary/50 overflow-hidden shadow-xl shadow-black/15" align="end">
+      <PopoverContent className="w-100 p-0 rounded-lg border-0 overflow-hidden shadow-xl shadow-black/50" align="end">
         <UpdateStatusForm
           isNewWorkflow={isNewCase}
           status={status}
@@ -244,19 +244,19 @@ function ParcelDetailContent({ parcel, isError, error, parcelNumber, activeTab, 
       </TabsContent>
 
       <TabsContent value="Tax Payments" className="mt-0">
-        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} />
+        <TaxPaymentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Payment Plan Schedule" className="mt-0">
-        <PaymentScheduleTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} />
+        <PaymentScheduleTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} taxYears={parcel.caseTaxYears} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Documents" className="mt-0">
-        <DocumentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <DocumentsTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Contacts" className="mt-0">
-        <ContactsTab parcelId={Number(parcel.id)} parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <ContactsTab parcelId={Number(parcel.id)} parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Case Stage History" className="mt-0">
@@ -265,15 +265,17 @@ function ParcelDetailContent({ parcel, isError, error, parcelNumber, activeTab, 
           stickyTop={stickyTop}
           initialEntries={parcel.caseStageHistory}
           initialCases={parcel.activeCaseMeta ? [parcel.activeCaseMeta] : undefined}
+          currentStatus={parcel.activeCase?.status}
+          currentStage={parcel.activeCase?.stage}
         />
       </TabsContent>
 
       <TabsContent value="Notes" className="mt-0">
-        <NotesTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <NotesTab parcelId={Number(parcel.id)} parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Expenses" className="mt-0">
-        <ExpensesTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} />
+        <ExpensesTab parcelNumber={parcel.parcelNumber} stickyTop={stickyTop} currentStatus={parcel.activeCase?.status} currentStage={parcel.activeCase?.stage} />
       </TabsContent>
 
       <TabsContent value="Legal Description" className="mt-0">
@@ -324,8 +326,8 @@ export function ParcelDetailPage() {
         </Button>
       }
       mainHeader={{
-        icon: <LandPlotIcon />,
-        title: parcelNumber ?? 'Parcel Detail',
+        icon: <img src="/images/icons/property-parcel.png" className="h-10 w-10 object-contain" />,
+        title: `Parcel: ${parcelNumber ?? 'Parcel Detail'}`,
         subtitle: taxYearsSubtitle,
         actions: (
           <>

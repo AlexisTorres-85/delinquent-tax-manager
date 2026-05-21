@@ -49,23 +49,23 @@ export function UpdateStatusForm({
     const isUnchanged = !isNewWorkflow && status === originalStatus && stage === originalStage;
     return (
         <>
-            <div className='border-b border-divider pl-4 pr-4 pt-4'>
-                <p className="text-sm font-semibold">
+            <div className='border-b-3 border-app-secondary bg-app-primary pl-4 pr-4 pt-4'>
+                <p className="text-sm text-white font-semibold">
                     {isNewWorkflow ? 'Start Delinquent Process' : 'Update Case Status'}
                 </p>
                 {isNewWorkflow && (
-                    <p className="text-xs text-muted-foreground mb-4">
-                        This will open a new workflow at the initial delinquency stage.
+                    <p className="text-xs text-white/50 mb-4">
+                        This will open a new case at the initial delinquency stage.
                     </p>
                 )}
                 {!isNewWorkflow && (
-                    <p className="text-xs text-muted-foreground mb-4">
-                        Change the current status or stage of this parcel's active workflow.
+                    <p className="text-xs text-white/50 mb-4">
+                        Change the current status or stage of this parcel's active case.
                     </p>
                 )}
 
             </div>
-            <div className="flex flex-col gap-3 p-4">
+            <div className="flex flex-col gap-3 p-4 bg-app-secondary/5">
                 {isNewWorkflow && (
                     <div className="flex flex-col gap-1.5">
                         <Label className="text-sm">
@@ -142,6 +142,8 @@ export function UpdateStatusForm({
                         onChange={(e) => onNoteChange(e.target.value)}
                     />
                 </div>
+
+                <div className='border-t border-divider' />
                 <div className="flex justify-end gap-2 pt-1">
                     <Button variant="ghost" size="sm" onClick={onCancel}>Cancel</Button>
                     <Button size="sm" onClick={onSave} disabled={workflowLoading || (isNewWorkflow && selectedYears.length === 0) || isUnchanged}>

@@ -1,11 +1,8 @@
-import { NOTES_DUMMY_DATA } from '../data/notes-dummy-data';
-import type { ParcelNote } from '../types';
-import { fakeDelay } from '@/lib/api';
+import { API_BASE, apiFetch } from '@/lib/api';
+import type { InternalNote } from '../types';
 
 export const notesService = {
-  async getByParcelNumber(parcelNumber: string): Promise<ParcelNote[]> {
-    await fakeDelay();
-    const entry = NOTES_DUMMY_DATA.find((p) => p.parcelNumber === parcelNumber);
-    return entry?.notes ?? [];
+  async getByParcelId(parcelId: number): Promise<InternalNote[]> {
+    return apiFetch<InternalNote[]>(`${API_BASE}/api/InternalNotes/parcel/${parcelId}`);
   },
 };

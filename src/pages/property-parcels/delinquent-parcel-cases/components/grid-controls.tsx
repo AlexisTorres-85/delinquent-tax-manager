@@ -58,7 +58,7 @@ export function GridControls({
     ];
 
     return (
-        <div className="flex flex-col gap-0 border-b border-divider bg-muted">
+        <div className="flex flex-col gap-0 border-b bg-muted">
             {/* ── Row 1: main filter controls ── */}
             <div className="flex flex-wrap items-end gap-3 px-6 pt-4 pb-6">
                 {/* Search */}

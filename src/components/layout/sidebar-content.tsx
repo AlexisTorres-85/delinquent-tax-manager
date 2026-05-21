@@ -28,32 +28,40 @@ export function SidebarContent() {
 
   return (
 		<ScrollArea className="grow w-full h-[calc(100vh-10rem)] lg:h-[calc(100vh-5.5rem)]">
-			<div className="grow gap-2.5 shrink-0 flex items-center flex-col mt-2">
+			<div className="grow gap-2.5 shrink-0 flex items-center flex-col w-full mt-2">
 				{MENU_SIDEBAR_MAIN.map((item, index) => (
 					<Tooltip key={index}>
 						<TooltipTrigger asChild>
-							<Button
-								asChild
-								variant="ghost"
-								mode="icon"
-								{...(item === activeMenuItem
-									? { 'data-state': 'open' }
-									: {})}
-								className={cn(
-									'border border-transparent data-[state=open]:border-input shrink-0 text-white rounded-md size-9',
-									'hover:text-primary data-[state=open]:border-input',
+						<div className="relative flex w-full items-center justify-center">
+								<Button
+									asChild
+									variant="ghost"
+									mode="icon"
+									{...(item === activeMenuItem
+										? { 'data-state': 'open' }
+										: {})}
+									className={cn(
+										'border border-transparent shrink-0 text-white rounded-md size-9',
+									'hover:text-primary data-[state=open]:bg-(--color-sidebar-active-bg)',
+									)}
+								>
+									{item.path ? (
+										<Link to={item.path}>
+											{item.icon ? (
+												<item.icon className="size-5!" />
+											) : null}
+										</Link>
+									) : (
+										item.icon ? <item.icon className="size-5!" /> : null
+									)}
+								</Button>
+								{item === activeMenuItem && (
+									<div
+										className="absolute right-0 h-[33px] -top-[1px] bottom-0 rounded-l-lg"
+										style={{ width: 'var(--width-selected-menu-line)', background: 'var(--color-selected-menu-line)' }}
+									/>
 								)}
-							>
-								{item.path ? (
-									<Link to={item.path}>
-										{item.icon ? (
-											<item.icon className="size-5!" />
-										) : null}
-									</Link>
-								) : (
-									item.icon ? <item.icon className="size-5!" /> : null
-								)}
-							</Button>
+							</div>
 						</TooltipTrigger>
 						<TooltipContent side="right">{item.title}</TooltipContent>
 					</Tooltip>

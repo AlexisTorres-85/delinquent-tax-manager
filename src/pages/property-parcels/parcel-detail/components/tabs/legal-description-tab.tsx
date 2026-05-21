@@ -205,6 +205,8 @@ export function LegalDescriptionTab({ parcel, parcelNumber, isLoading, stickyTop
             isLoading={isLoading}
             headerActions={headerActions}
             banner={reviewBanner}
+            currentStatus={parcel?.activeCase?.status ?? undefined}
+            currentStage={parcel?.activeCase?.stage ?? undefined}
         >
             <div className="px-6 py-6 flex gap-8 h-[1000px]">
 

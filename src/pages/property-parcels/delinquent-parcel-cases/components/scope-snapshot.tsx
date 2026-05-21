@@ -9,7 +9,7 @@ interface ScopeSnapshotProps {
 
 export function ScopeSnapshot({ totalCount, delinquentInScope, inRemCount, bankruptcyCount }: ScopeSnapshotProps) {
     return (
-        <div className="flex items-center gap-px bg-neutral-100 flex-wrap">
+        <div className="flex items-center gap-px bg-muted flex-wrap border-t border-b border-divider">
             <div className="flex items-center gap-2 px-6 py-3 text-xs text-muted-foreground">
                 <Sparkles className="h-5 w-5" />
                 <span className="font-medium text-foreground">Live Scope Snapshot</span>

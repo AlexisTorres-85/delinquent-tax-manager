@@ -1,17 +1,17 @@
 import { useQuery } from '@tanstack/react-query';
 import { notesService } from '../services/notes.service';
-import type { ParcelNote } from '../types';
+import type { InternalNote } from '../types';
 
-export const NOTES_QUERY_KEY = (parcelNumber: string) =>
-  ['notes', 'by-parcel', parcelNumber] as const;
+export const NOTES_QUERY_KEY = (parcelId: number) =>
+  ['notes', 'by-parcel', parcelId] as const;
 
-const EMPTY_NOTES: ParcelNote[] = [];
+const EMPTY_NOTES: InternalNote[] = [];
 
-export function useNotes(parcelNumber: string) {
+export function useNotes(parcelId: number) {
   const query = useQuery({
-    queryKey: NOTES_QUERY_KEY(parcelNumber),
-    queryFn: () => notesService.getByParcelNumber(parcelNumber),
-    enabled: !!parcelNumber,
+    queryKey: NOTES_QUERY_KEY(parcelId),
+    queryFn: () => notesService.getByParcelId(parcelId),
+    enabled: !!parcelId,
     staleTime: 1000 * 60 * 5,
   });
 

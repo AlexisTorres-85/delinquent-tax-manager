@@ -140,9 +140,9 @@ export function ContentWrapper({
         {hasLeft ? (
           <aside
             className={cn(
-              'flex h-full min-h-0 flex-col border-l-2 border-r border-divider-dark bg-white transition-all duration-200',
+              'flex h-full min-h-0 flex-col border-l-[length:var(--border-divider-dark-width)] border-r border-divider-dark bg-white transition-all duration-200',
               leftCollapsed
-                ? 'overflow-hidden bg-section-header'
+                ? 'overflow-hidden'
                 : 'overflow-x-auto overflow-y-auto',
               leftClassName,
             )}
@@ -193,7 +193,7 @@ export function ContentWrapper({
             {!leftCollapsed && (
               <>
                 {leftHeader && (
-                  <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header py-4 pl-6 pr-4">
+                  <div className="flex shrink-0 items-center gap-2 border-b border-divider py-4 pl-6 pr-4" style={{ background: 'var(--color-section-header)' }}>
                     {leftHeader.icon && (
                       <div className="text-muted-foreground [&_svg]:size-8">
                         {leftHeader.icon}
@@ -234,7 +234,7 @@ export function ContentWrapper({
         <main
           className={cn(
             'relative flex h-full min-h-0 min-w-0 flex-col overflow-hidden bg-white',
-            !hasLeft && 'border-l-2 border-divider-dark',
+            !hasLeft && 'border-l-[length:var(--border-divider-dark-width)] border-divider-dark',
             mainClassName,
           )}
           style={
@@ -265,9 +265,9 @@ export function ContentWrapper({
               }}
             >
               {mainHeader && (
-                <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header px-6 py-6">
+                <div className="flex shrink-0 z-20 items-center gap-2 border-b border-divider px-6 h-24" style={{ background: 'var(--color-section-header)' }}>
                   {mainHeader.icon && (
-                    <div className="text-muted-foreground [&_svg]:size-8">
+                    <div className="text-muted-foreground [&_img]:size-10">
                       {mainHeader.icon}
                     </div>
                   )}
@@ -292,7 +292,9 @@ export function ContentWrapper({
                 </div>
               )}
 
-              <div className="min-h-0 flex-1 overflow-y-auto">{main}</div>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {main}
+              </div>
             </div>
           )}
         </main>
@@ -353,7 +355,7 @@ export function ContentWrapper({
             {!rightCollapsed && (
               <>
                 {rightHeader && (
-                  <div className="flex shrink-0 items-center gap-2 border-b border-divider bg-section-header py-4 pl-4 pr-6">
+                  <div className="flex shrink-0 items-center gap-2 border-b border-divider py-4 pl-4 pr-6" style={{ background: 'var(--color-section-header)' }}>
                     {allowCollapseRight && (
                       <button
                         onClick={() => setRightCollapsed(true)}

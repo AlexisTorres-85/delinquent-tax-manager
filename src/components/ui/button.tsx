@@ -13,8 +13,9 @@ const buttonVariants = cva(
         mono: 'bg-zinc-950 text-white hover:bg-zinc-950/90 data-[state=open]:bg-zinc-950/90',
         destructive:
           'bg-destructive text-destructive-foreground hover:bg-destructive/90 data-[state=open]:bg-destructive/90',
-        secondary: 'bg-gradient-to-b from-[var(--btn-secondary-from)] to-[var(--btn-secondary-to)] text-[var(--btn-secondary-fg)] hover:brightness-95 data-[state=open]:brightness-95',
+        secondary: 'bg-gradient-to-b from-[var(--btn-secondary-from)] border border-black/10 to-[var(--btn-secondary-to)] text-[var(--btn-secondary-fg)] hover:brightness-90 data-[state=open]:brightness-90',
         outline: 'bg-background text-accent-foreground border border-input hover:bg-accent data-[state=open]:bg-accent',
+        outline_secondary: 'bg-app-secondary/20 text-[var(--btn-secondary-fg)] border border-[var(--btn-secondary-border)]/40 hover:brightness-70 data-[state=open]:brightness-70',
         dashed:
           'text-accent-foreground border border-input border-dashed bg-background hover:bg-accent hover:text-accent-foreground data-[state=open]:text-accent-foreground',
         ghost:
@@ -153,6 +154,12 @@ const buttonVariants = cva(
         className: 'shadow-xs shadow-black/5',
       },
       {
+        variant: 'outline_secondary',
+        mode: 'default',
+        appearance: 'default',
+        className: 'shadow-xs shadow-black/5',
+      },
+      {
         variant: 'destructive',
         mode: 'default',
         appearance: 'default',
@@ -186,6 +193,12 @@ const buttonVariants = cva(
       },
       {
         variant: 'dashed',
+        mode: 'icon',
+        appearance: 'default',
+        className: 'shadow-xs shadow-black/5',
+      },
+      {
+        variant: 'outline_secondary',
         mode: 'icon',
         appearance: 'default',
         className: 'shadow-xs shadow-black/5',
